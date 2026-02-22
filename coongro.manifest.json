@@ -1,0 +1,150 @@
+{
+  "id": "consultations",
+  "version": "0.1.0",
+  "apiVersion": "2.0",
+  "entry": "./dist/entry.js",
+  "assets": {
+    "styles": [
+      "./dist/assets/tailwind.css"
+    ]
+  },
+  "contributes": {
+    "menus": [
+      {
+        "path": "Consultas",
+        "order": 2,
+        "icon": "assets/icons/stethoscope.svg",
+        "color": "#8B5CF6"
+      },
+      {
+        "path": "Consultas/Historial",
+        "order": 1,
+        "viewId": "consultations.list.open"
+      },
+      {
+        "path": "Consultas/Servicios y Precios",
+        "order": 2,
+        "viewId": "consultations.services.open"
+      }
+    ],
+    "views": [
+      {
+        "id": "consultations.list.open",
+        "title": "Historial de Consultas",
+        "component": "./dist/views/consultations-list/index.js",
+        "export": "ConsultationsListView"
+      },
+      {
+        "id": "consultations.detail.open",
+        "title": "Detalle Consulta",
+        "component": "./dist/views/consultation-detail/index.js",
+        "export": "ConsultationDetailView"
+      },
+      {
+        "id": "consultations.form.open",
+        "title": "Formulario Consulta",
+        "component": "./dist/views/consultation-form/index.js",
+        "export": "ConsultationFormView"
+      },
+      {
+        "id": "consultations.services.open",
+        "title": "Servicios y Precios",
+        "component": "./dist/views/services/index.js",
+        "export": "ServicesView"
+      }
+    ],
+    "repositories": [
+      {
+        "module": "./dist/repositories/consultation.repository.js",
+        "export": "ConsultationRepository",
+        "prefix": "consultations.records"
+      },
+      {
+        "module": "./dist/repositories/consultation-medication.repository.js",
+        "export": "ConsultationMedicationRepository",
+        "prefix": "consultations.medications"
+      },
+      {
+        "module": "./dist/repositories/consultation-service.repository.js",
+        "export": "ConsultationServiceRepository",
+        "prefix": "consultations.services"
+      }
+    ],
+    "viewOverrides": [
+      {
+        "targetViewId": "patients.detail.open",
+        "component": "./dist/views/detail-override/index.js",
+        "export": "DetailOverrideView",
+        "priority": 10,
+        "title": "Ficha Paciente"
+      }
+    ],
+    "settings": {
+      "groups": [
+        {
+          "id": "consultations",
+          "label": "Consultas",
+          "order": 50
+        }
+      ],
+      "pages": [
+        {
+          "id": "consultations.general",
+          "group": "consultations",
+          "label": "General",
+          "icon": "assets/icons/general.svg",
+          "order": 10
+        }
+      ],
+      "sections": [
+        {
+          "id": "consultations.general.main",
+          "page": "consultations.general",
+          "label": "General",
+          "order": 10,
+          "items": [
+            {
+              "key": "consultations.reasonCategories",
+              "type": "boolean",
+              "label": "Categorías de motivo",
+              "description": "Habilitar botones de categoría rápida (rutina, vacunación, enfermedad, etc.)",
+              "default": true,
+              "tags": [
+                "consultations",
+                "reasoncategories",
+                "categorías",
+                "motivo"
+              ]
+            },
+            {
+              "key": "consultations.defaultVet",
+              "type": "string",
+              "label": "Veterinario predeterminado",
+              "description": "Nombre del veterinario que se preselecciona al crear consultas",
+              "default": "",
+              "tags": [
+                "consultations",
+                "defaultvet",
+                "veterinario",
+                "predeterminado"
+              ]
+            },
+            {
+              "key": "consultations.showPrices",
+              "type": "boolean",
+              "label": "Servicios y precios en consultas",
+              "description": "Mostrar la sección de servicios prestados y precios en el formulario de consulta",
+              "default": true,
+              "tags": [
+                "consultations",
+                "showprices",
+                "servicios",
+                "precios"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,100 @@
+/**
+ * Props para todos los componentes reutilizables de consultations.
+ */
+import type {
+  Consultation,
+  ConsultationCreateData,
+  ConsultationMedication,
+  MedicationInput,
+} from './consultation.js';
+
+// Tipos de extension (misma firma que @coongro/contacts)
+export interface SectionDef {
+  title: string;
+  render: () => unknown;
+  order?: number;
+}
+
+export interface ActionDef<T = unknown> {
+  label: string;
+  onClick: (item: T) => void;
+}
+
+export interface ColumnDef<T = unknown> {
+  key: string;
+  label: string;
+  render?: (item: T) => unknown;
+}
+
+// ---------------------------------------------------------------------------
+// ConsultationTimeline
+// ---------------------------------------------------------------------------
+
+export interface ConsultationTimelineProps {
+  petId: string;
+  limit?: number;
+  onConsultationClick?: (consultation: Consultation) => void;
+  showCreateButton?: boolean;
+  onCreateClick?: () => void;
+  className?: string;
+}
+
+// ---------------------------------------------------------------------------
+// ConsultationCard
+// ---------------------------------------------------------------------------
+
+export interface ConsultationCardProps {
+  consultation: Consultation;
+  showPetName?: boolean;
+  amount?: number | null;
+  onClick?: (consultation: Consultation) => void;
+  actions?: ActionDef<Consultation>[];
+  className?: string;
+}
+
+// ---------------------------------------------------------------------------
+// ConsultationForm
+// ---------------------------------------------------------------------------
+
+export interface ConsultationFormProps {
+  consultationId?: string;
+  petId?: string;
+  defaults?: Partial<ConsultationCreateData>;
+  onSuccess?: (consultation: Consultation) => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+// ---------------------------------------------------------------------------
+// ConsultationDetail
+// ---------------------------------------------------------------------------
+
+export interface ConsultationDetailProps {
+  consultationId: string;
+  extraSections?: SectionDef[];
+  extraActions?: ActionDef<Consultation>[];
+  onEdit?: (consultation: Consultation) => void;
+  onDelete?: (consultation: Consultation) => void;
+  onBack?: () => void;
+  onNavigate?: (viewId: string, params?: Record<string, unknown>) => void;
+  className?: string;
+}
+
+// ---------------------------------------------------------------------------
+// MedicationList
+// ---------------------------------------------------------------------------
+
+export interface MedicationListProps {
+  medications: ConsultationMedication[];
+  className?: string;
+}
+
+// ---------------------------------------------------------------------------
+// MedicationFormList (editable)
+// ---------------------------------------------------------------------------
+
+export interface MedicationFormListProps {
+  medications: MedicationInput[];
+  onChange: (medications: MedicationInput[]) => void;
+  className?: string;
+}
