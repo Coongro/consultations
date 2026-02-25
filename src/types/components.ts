@@ -81,6 +81,22 @@ export interface ConsultationDetailProps {
 }
 
 // ---------------------------------------------------------------------------
+// CreateConsultationButton
+// ---------------------------------------------------------------------------
+
+export interface CreateConsultationButtonProps {
+  /** ID del paciente. Si se omite, muestra PetPicker para seleccionarlo. */
+  petId?: string;
+  label?: string;
+  onSuccess?: (consultation: Consultation) => void;
+  onCancel?: () => void;
+  variant?: 'primary' | 'outline';
+  /** Modo controlado: si se provee, no renderiza el botón y el caller maneja la apertura */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+// ---------------------------------------------------------------------------
 // MedicationList
 // ---------------------------------------------------------------------------
 
