@@ -6,7 +6,7 @@ import { PetDetail, PetForm } from '@coongro/patients';
 import type { Pet } from '@coongro/patients';
 import { getHostReact, getHostUI, usePlugin } from '@coongro/plugin-sdk';
 
-import { ConsultationForm } from '../../components/ConsultationForm.js';
+import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import { ConsultationTimeline } from '../../components/ConsultationTimeline.js';
 import type { Consultation } from '../../types/consultation.js';
 
@@ -36,13 +36,8 @@ export function DetailOverrideView(props: { petId?: string }) {
     toast.success('Paciente actualizado', 'Los datos se guardaron correctamente');
   }, [toast]);
 
-  const handleNewConsultation = useCallback(() => {
-    setShowConsultationModal(true);
-  }, []);
-
   const handleConsultationSuccess = useCallback(
     (c: Consultation) => {
-      setShowConsultationModal(false);
       setRefreshKey((k: number) => k + 1);
       views.open('consultations.detail.open', { consultationId: c.id });
     },
@@ -89,7 +84,7 @@ export function DetailOverrideView(props: { petId?: string }) {
   const extraActions = [
     {
       label: 'Nueva Consulta',
-      onClick: handleNewConsultation,
+      onClick: () => setShowConsultationModal(true),
     },
   ];
 
@@ -128,21 +123,11 @@ export function DetailOverrideView(props: { petId?: string }) {
         }),
       ),
 
-    // Modal de nueva consulta
-    showConsultationModal &&
-      React.createElement(
-        UI.FormDialog,
-        {
-          open: showConsultationModal,
-          onOpenChange: (open: boolean) => { if (!open) setShowConsultationModal(false); },
-          title: 'Nueva consulta',
-          size: 'lg',
-        },
-        React.createElement(ConsultationForm, {
-          petId,
-          onSuccess: handleConsultationSuccess,
-          onCancel: () => setShowConsultationModal(false),
-        }),
-      ),
+    React.createElement(CreateConsultationButton, {
+      petId,
+      open: showConsultationModal,
+      onOpenChange: setShowConsultationModal,
+      onSuccess: handleConsultationSuccess,
+    }),
   );
 }

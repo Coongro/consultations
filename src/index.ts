@@ -8,6 +8,7 @@
 
 // Componentes
 export { ConsultationCard } from './components/ConsultationCard.js';
+export { CreateConsultationButton } from './components/CreateConsultationButton.js';
 export { ConsultationTimeline } from './components/ConsultationTimeline.js';
 export { ConsultationDetail } from './components/ConsultationDetail.js';
 export { ConsultationForm } from './components/ConsultationForm.js';
@@ -39,6 +40,7 @@ export type {
   ConsultationDetailProps,
   MedicationListProps,
   MedicationFormListProps,
+  CreateConsultationButtonProps,
 } from './types/components.js';
 
 // Utils

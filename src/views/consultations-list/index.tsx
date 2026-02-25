@@ -1,11 +1,9 @@
 /**
  * Vista principal: historial de consultas con stats, filtros inline y tabla.
  */
-import { PetPicker } from '@coongro/patients';
-import type { Pet } from '@coongro/patients';
 import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
-import { ConsultationForm } from '../../components/ConsultationForm.js';
+import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import { ConsultationStats } from '../../components/ConsultationStats.js';
 import { useConsultations } from '../../hooks/useConsultations.js';
 import { useConsultationsSettings } from '../../hooks/useConsultationsSettings.js';
@@ -55,8 +53,6 @@ export function ConsultationsListView() {
   const { settings: consultSettings } = useConsultationsSettings();
 
   const [localSearch, setLocalSearch] = useState('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedPetId, setSelectedPetId] = useState<string | undefined>(undefined);
   const [sortKey, setSortKey] = useState<string>('date');
   const [sortDir, setSortDir] = useState<SortDirection>('desc');
 
@@ -132,24 +128,12 @@ export function ConsultationsListView() {
     [views]
   );
 
-  const handleCreate = useCallback(() => {
-    setSelectedPetId(undefined);
-    setShowCreateModal(true);
-  }, []);
-
   const handleCreateSuccess = useCallback(
     (c: Consultation) => {
-      setShowCreateModal(false);
-      setSelectedPetId(undefined);
       views.open('consultations.detail.open', { consultationId: c.id });
     },
     [views]
   );
-
-  const handleCreateCancel = useCallback(() => {
-    setShowCreateModal(false);
-    setSelectedPetId(undefined);
-  }, []);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,12 +344,9 @@ export function ConsultationsListView() {
             'Historial de consultas veterinarias'
           )
         ),
-        React.createElement(
-          UI.Button,
-          { onClick: handleCreate },
-          React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 16 }),
-          'Nueva Consulta'
-        )
+        React.createElement(CreateConsultationButton, {
+          onSuccess: handleCreateSuccess,
+        })
       ),
 
       // ── Stats ──
@@ -575,47 +556,6 @@ export function ConsultationsListView() {
             )
         )
       )
-    ),
-
-    // ── Modal nueva consulta ──
-    showCreateModal &&
-      React.createElement(
-        UI.FormDialog,
-        {
-          open: showCreateModal,
-          onOpenChange: (open: boolean) => {
-            if (!open) handleCreateCancel();
-          },
-          title: 'Nueva consulta',
-          size: 'lg',
-        },
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-4' },
-
-          // Selector de mascota
-          React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Paciente *'),
-            React.createElement(PetPicker, {
-              value: selectedPetId,
-              onChange: (pet: Pet | null) => setSelectedPetId(pet?.id),
-              placeholder: 'Seleccionar mascota...',
-            })
-          ),
-
-          // Formulario de consulta (solo si hay mascota seleccionada)
-          selectedPetId
-            ? React.createElement(ConsultationForm, {
-                petId: selectedPetId,
-                onSuccess: handleCreateSuccess,
-                onCancel: handleCreateCancel,
-              })
-            : React.createElement(UI.EmptyState, {
-                title: 'Seleccioná un paciente para continuar',
-              })
-        )
-      )
+    )
   );
 }
