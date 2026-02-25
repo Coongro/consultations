@@ -1,6 +1,6 @@
 {
   "name": "@coongro/consultations",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
   "description": "Bloque de historia clinica: consultas veterinarias, diagnosticos y tratamientos",
   "main": "dist/index.js",
@@ -24,7 +24,6 @@
   "scripts": {
     "build": "npm run build:css && tsc",
     "build:css": "tailwindcss -c tailwind.config.cjs -i ./src/styles/tailwind.css -o ./dist/assets/tailwind.css --minify",
-
     "dev": "npm run build:css && tsc --watch",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
@@ -39,7 +38,7 @@
     "prepublishOnly": "npm run quality && npm run build"
   },
   "publishConfig": {
-    "registry": "http://localhost:4873/"
+    "registry": "https://registry.coongro.com/"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -49,7 +48,7 @@
     "@coongro/products": ">=0.1.0"
   },
   "peerDependencies": {
-    "@coongro/plugin-sdk": ">=0.1.0"
+    "@coongro/plugin-sdk": ">=0.13.0"
   },
   "devDependencies": {
     "@coongro/plugin-sdk": "workspace:*",
