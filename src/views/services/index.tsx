@@ -6,11 +6,7 @@
  * creada por el auto-seed.
  */
 import { getHostReact, getHostUI, usePlugin } from '@coongro/plugin-sdk';
-import type {
-  Product,
-  Category,
-  ProductCreateData,
-} from '@coongro/products';
+import type { Product, Category, ProductCreateData } from '@coongro/products';
 import { useProducts, useCategories, useProductMutations } from '@coongro/products';
 
 import { ROOT_SERVICE_CATEGORY_SLUG } from '../../constants/services.js';
@@ -51,7 +47,7 @@ export function ServicesView() {
   // Encontrar la categoría raíz de servicios y sus hijas
   const rootCategory = useMemo(
     () => categories.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG) ?? null,
-    [categories],
+    [categories]
   );
 
   const serviceCategories = useMemo(() => {
@@ -63,7 +59,7 @@ export function ServicesView() {
 
   const serviceCategoryIds = useMemo(
     () => new Set(serviceCategories.map((c: Category) => c.id)),
-    [serviceCategories],
+    [serviceCategories]
   );
 
   // --- Filtro de subcategoría ---
@@ -93,7 +89,7 @@ export function ServicesView() {
     if (!rootCategory) return [];
     return products.filter(
       (p: Product) =>
-        p.category_id === rootCategory.id || serviceCategoryIds.has(p.category_id ?? ''),
+        p.category_id === rootCategory.id || serviceCategoryIds.has(p.category_id ?? '')
     );
   }, [products, rootCategory, serviceCategoryIds]);
 
@@ -113,7 +109,7 @@ export function ServicesView() {
         setSortDir(false);
       }
     },
-    [sortField, sortDir],
+    [sortField, sortDir]
   );
 
   const services = useMemo(() => {
@@ -151,16 +147,13 @@ export function ServicesView() {
       setLocalSearch(val);
       search(val);
     },
-    [search],
+    [search]
   );
 
   // --- Filtro por categoría ---
-  const handleCategoryFilter = useCallback(
-    (catId: string) => {
-      setActiveCatId((prev: string | undefined) => (prev === catId ? undefined : catId));
-    },
-    [],
-  );
+  const handleCategoryFilter = useCallback((catId: string) => {
+    setActiveCatId((prev: string | undefined) => (prev === catId ? undefined : catId));
+  }, []);
 
   // --- Abrir modal para crear ---
   const handleCreate = useCallback(() => {
@@ -173,19 +166,16 @@ export function ServicesView() {
   }, [serviceCategories]);
 
   // --- Abrir modal para editar ---
-  const handleEdit = useCallback(
-    (service: Product) => {
-      setEditingService(service);
-      setForm({
-        name: service.name,
-        description: service.description ?? '',
-        categoryId: service.category_id ?? '',
-        price: service.sale_price ?? '0',
-      });
-      setShowModal(true);
-    },
-    [],
-  );
+  const handleEdit = useCallback((service: Product) => {
+    setEditingService(service);
+    setForm({
+      name: service.name,
+      description: service.description ?? '',
+      categoryId: service.category_id ?? '',
+      price: service.sale_price ?? '0',
+    });
+    setShowModal(true);
+  }, []);
 
   // --- Cerrar modal ---
   const handleCloseModal = useCallback(() => {
@@ -239,7 +229,7 @@ export function ServicesView() {
         await refetchProducts();
       }
     },
-    [remove, refetchProducts],
+    [remove, refetchProducts]
   );
 
   const categoryMap = useMemo(() => {
@@ -281,9 +271,10 @@ export function ServicesView() {
     }
     if (services.length === 0) {
       return React.createElement(UI.EmptyState, {
-        title: localSearch || activeCatId
-          ? 'No se encontraron servicios con esos filtros'
-          : 'Sin servicios registrados',
+        title:
+          localSearch || activeCatId
+            ? 'No se encontraron servicios con esos filtros'
+            : 'Sin servicios registrados',
         className: 'py-12',
       });
     }
@@ -297,18 +288,26 @@ export function ServicesView() {
         React.createElement(
           UI.TableRow,
           null,
-          React.createElement(UI.TableHead, {
-            sortDirection: sortField === 'name' ? sortDir : undefined,
-            onSort: () => handleSort('name'),
-          }, 'Servicio'),
+          React.createElement(
+            UI.TableHead,
+            {
+              sortDirection: sortField === 'name' ? sortDir : undefined,
+              onSort: () => handleSort('name'),
+            },
+            'Servicio'
+          ),
           React.createElement(UI.TableHead, null, 'Categoría'),
-          React.createElement(UI.TableHead, {
-            className: 'text-right',
-            sortDirection: sortField === 'price' ? sortDir : undefined,
-            onSort: () => handleSort('price'),
-          }, 'Precio'),
-          React.createElement(UI.TableHead, { className: 'w-24' }, ''),
-        ),
+          React.createElement(
+            UI.TableHead,
+            {
+              className: 'text-right',
+              sortDirection: sortField === 'price' ? sortDir : undefined,
+              onSort: () => handleSort('price'),
+            },
+            'Precio'
+          ),
+          React.createElement(UI.TableHead, { className: 'w-24' }, '')
+        )
       ),
       React.createElement(
         UI.TableBody,
@@ -325,31 +324,30 @@ export function ServicesView() {
               React.createElement(
                 'div',
                 { className: 'font-medium text-[var(--cg-text)]' },
-                svc.name,
+                svc.name
               ),
               svc.description &&
                 React.createElement(
                   'div',
                   {
-                    className:
-                      'text-xs text-[var(--cg-text-muted)] mt-0.5 line-clamp-1',
+                    className: 'text-xs text-[var(--cg-text-muted)] mt-0.5 line-clamp-1',
                   },
-                  svc.description,
-                ),
+                  svc.description
+                )
             ),
 
             // Categoría
             React.createElement(
               UI.TableCell,
               { className: 'text-[var(--cg-text-muted)]' },
-              categoryMap.get(svc.category_id ?? '') ?? '-',
+              categoryMap.get(svc.category_id ?? '') ?? '-'
             ),
 
             // Precio
             React.createElement(
               UI.TableCell,
               { className: 'text-right font-medium' },
-              formatPrice(svc.sale_price),
+              formatPrice(svc.sale_price)
             ),
 
             // Acciones
@@ -375,8 +373,8 @@ export function ServicesView() {
                           size: 'xs',
                           onClick: () => handleEdit(svc),
                         },
-                        React.createElement(UI.DynamicIcon, { icon: 'SquarePen', size: 16 }),
-                      ),
+                        React.createElement(UI.DynamicIcon, { icon: 'SquarePen', size: 16 })
+                      )
                     ),
                     React.createElement(
                       UI.Tooltip,
@@ -388,14 +386,14 @@ export function ServicesView() {
                           size: 'xs',
                           onClick: () => setConfirmingDeleteId(svc.id),
                         },
-                        React.createElement(UI.DynamicIcon, { icon: 'Trash2', size: 16 }),
-                      ),
-                    ),
-                  ),
-            ),
-          ),
-        ),
-      ),
+                        React.createElement(UI.DynamicIcon, { icon: 'Trash2', size: 16 })
+                      )
+                    )
+                  )
+            )
+          )
+        )
+      )
     );
   }
 
@@ -419,20 +417,20 @@ export function ServicesView() {
             React.createElement(
               'h1',
               { className: 'text-2xl font-bold text-[var(--cg-text)]' },
-              'Servicios y Precios',
+              'Servicios y Precios'
             ),
             React.createElement(
               'p',
               { className: 'text-sm text-[var(--cg-text-muted)] mt-1' },
-              'Gestionar servicios veterinarios y sus precios',
-            ),
+              'Gestionar servicios veterinarios y sus precios'
+            )
           ),
           React.createElement(
             UI.Button,
             { onClick: handleCreate },
             React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 16 }),
-            'Nuevo servicio',
-          ),
+            'Nuevo servicio'
+          )
         ),
 
         // Filtros
@@ -465,19 +463,15 @@ export function ServicesView() {
                       onClick: () => handleCategoryFilter(cat.id),
                       className: 'cursor-pointer',
                     },
-                    cat.name,
-                  ),
-                ),
-              ),
-          ),
+                    cat.name
+                  )
+                )
+              )
+          )
         ),
 
         // Resultados
-        React.createElement(
-          UI.Card,
-          { className: 'overflow-hidden' },
-          renderTableContent(),
-        ),
+        React.createElement(UI.Card, { className: 'overflow-hidden' }, renderTableContent()),
 
         // Contador
         !loading &&
@@ -485,8 +479,8 @@ export function ServicesView() {
           React.createElement(
             'span',
             { className: 'text-xs text-[var(--cg-text-muted)]' },
-            `${services.length} servicio${services.length === 1 ? '' : 's'}`,
-          ),
+            `${services.length} servicio${services.length === 1 ? '' : 's'}`
+          )
       ),
 
       // Modal crear/editar servicio
@@ -495,7 +489,9 @@ export function ServicesView() {
           UI.FormDialog,
           {
             open: showModal,
-            onOpenChange: (open: boolean) => { if (!open) handleCloseModal(); },
+            onOpenChange: (open: boolean) => {
+              if (!open) handleCloseModal();
+            },
             title: editingService ? 'Editar servicio' : 'Nuevo servicio',
             size: 'sm',
             footer: React.createElement(
@@ -504,13 +500,13 @@ export function ServicesView() {
               React.createElement(
                 UI.Button,
                 { type: 'button', variant: 'outline', onClick: handleCloseModal },
-                'Cancelar',
+                'Cancelar'
               ),
               React.createElement(
                 UI.Button,
                 { type: 'button', onClick: handleSubmit, disabled: isSaving },
-                submitLabel,
-              ),
+                submitLabel
+              )
             ),
           },
 
@@ -525,7 +521,7 @@ export function ServicesView() {
               onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                 setForm((prev: ServiceFormData) => ({ ...prev, name: e.target.value })),
               placeholder: 'Ej: Consulta general',
-            }),
+            })
           ),
 
           // Descripción
@@ -542,7 +538,7 @@ export function ServicesView() {
                 })),
               rows: 2,
               placeholder: 'Descripción opcional del servicio',
-            }),
+            })
           ),
 
           // Categoría
@@ -561,9 +557,9 @@ export function ServicesView() {
                   })),
               },
               serviceCategories.map((cat: Category) =>
-                React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name),
-              ),
-            ),
+                React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
+              )
+            )
           ),
 
           // Precio
@@ -580,7 +576,7 @@ export function ServicesView() {
                   className:
                     'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
                 },
-                '$',
+                '$'
               ),
               React.createElement(UI.Input, {
                 type: 'number',
@@ -591,10 +587,10 @@ export function ServicesView() {
                 step: '0.01',
                 placeholder: '0.00',
                 className: 'pl-7',
-              }),
-            ),
-          ),
-        ),
-    ),
+              })
+            )
+          )
+        )
+    )
   );
 }

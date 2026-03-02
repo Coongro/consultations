@@ -6,8 +6,8 @@ import { PetDetail, PetForm } from '@coongro/patients';
 import type { Pet } from '@coongro/patients';
 import { getHostReact, getHostUI, usePlugin } from '@coongro/plugin-sdk';
 
-import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import { ConsultationTimeline } from '../../components/ConsultationTimeline.js';
+import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import type { Consultation } from '../../types/consultation.js';
 
 const React = getHostReact();
@@ -41,21 +41,21 @@ export function DetailOverrideView(props: { petId?: string }) {
       setRefreshKey((k: number) => k + 1);
       views.open('consultations.detail.open', { consultationId: c.id });
     },
-    [views],
+    [views]
   );
 
   const handleDelete = useCallback(
     (pet: Pet) => {
       toast.warning('Confirmar', `¿Eliminar a ${pet.name}?`);
     },
-    [toast],
+    [toast]
   );
 
   const handleNavigate = useCallback(
     (viewId: string, params?: Record<string, unknown>) => {
       views.open(viewId, params);
     },
-    [views],
+    [views]
   );
 
   if (!petId) {
@@ -103,7 +103,7 @@ export function DetailOverrideView(props: { petId?: string }) {
         onEdit: handleEdit,
         onDelete: handleDelete,
         onNavigate: handleNavigate,
-      }),
+      })
     ),
 
     // Modal de edicion de paciente
@@ -112,7 +112,9 @@ export function DetailOverrideView(props: { petId?: string }) {
         UI.FormDialog,
         {
           open: showEditModal,
-          onOpenChange: (open: boolean) => { if (!open) setShowEditModal(false); },
+          onOpenChange: (open: boolean) => {
+            if (!open) setShowEditModal(false);
+          },
           title: 'Editar paciente',
           size: 'lg',
         },
@@ -120,7 +122,7 @@ export function DetailOverrideView(props: { petId?: string }) {
           petId,
           onSuccess: handleEditSuccess,
           onCancel: () => setShowEditModal(false),
-        }),
+        })
       ),
 
     React.createElement(CreateConsultationButton, {
@@ -128,6 +130,6 @@ export function DetailOverrideView(props: { petId?: string }) {
       open: showConsultationModal,
       onOpenChange: setShowConsultationModal,
       onSuccess: handleConsultationSuccess,
-    }),
+    })
   );
 }

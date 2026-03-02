@@ -73,7 +73,7 @@ function CreateServiceModal({
         },
       });
       const created = Array.isArray(result) ? result[0] : result;
-      if (created) onCreated(created as Product);
+      if (created) onCreated(created);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo crear el servicio');
     } finally {
@@ -85,7 +85,9 @@ function CreateServiceModal({
     UI.FormDialog,
     {
       open: true,
-      onOpenChange: (open: boolean) => { if (!open) onClose(); },
+      onOpenChange: (open: boolean) => {
+        if (!open) onClose();
+      },
       title: 'Nuevo servicio',
       size: 'sm',
       footer: React.createElement(
@@ -94,22 +96,17 @@ function CreateServiceModal({
         React.createElement(
           UI.Button,
           { type: 'button', variant: 'outline', onClick: onClose },
-          'Cancelar',
+          'Cancelar'
         ),
         React.createElement(
           UI.Button,
           { type: 'button', onClick: handleSubmit, disabled: saving },
-          saving ? 'Guardando...' : 'Crear servicio',
-        ),
+          saving ? 'Guardando...' : 'Crear servicio'
+        )
       ),
     },
 
-    error &&
-      React.createElement(
-        'p',
-        { className: 'text-sm text-[var(--cg-danger)]' },
-        error,
-      ),
+    error && React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error),
 
     // Nombre
     React.createElement(
@@ -122,7 +119,7 @@ function CreateServiceModal({
         autoFocus: true,
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value),
         placeholder: 'Ej: Consulta general',
-      }),
+      })
     ),
 
     // Categoría
@@ -139,9 +136,9 @@ function CreateServiceModal({
           },
           React.createElement(UI.SelectItem, { value: '' }, '— Sin categoría —'),
           serviceCategories.map((cat: Category) =>
-            React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name),
-          ),
-        ),
+            React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
+          )
+        )
       ),
 
     // Precio
@@ -158,7 +155,7 @@ function CreateServiceModal({
             className:
               'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
           },
-          '$',
+          '$'
         ),
         React.createElement(UI.Input, {
           type: 'number',
@@ -168,9 +165,9 @@ function CreateServiceModal({
           step: '0.01',
           placeholder: '0.00',
           className: 'pl-7',
-        }),
-      ),
-    ),
+        })
+      )
+    )
   );
 }
 
@@ -193,8 +190,7 @@ function ServiceSearchContent({
     return catalog
       .filter(
         (p: Product) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.description?.toLowerCase().includes(q) ?? false),
+          p.name.toLowerCase().includes(q) || (p.description?.toLowerCase().includes(q) ?? false)
       )
       .slice(0, 20);
   }, [catalog, search]);
@@ -210,7 +206,7 @@ function ServiceSearchContent({
       setOpen(false);
       onCreateRequest(searchVal);
     },
-    [setOpen, onCreateRequest],
+    [setOpen, onCreateRequest]
   );
 
   return React.createElement(
@@ -225,20 +221,17 @@ function ServiceSearchContent({
             {
               key: p.id,
               value: p.id,
-              subtitle: [
-                categoryMap.get(p.category_id ?? '') ?? '',
-                formatPrice(p.sale_price),
-              ]
+              subtitle: [categoryMap.get(p.category_id ?? '') ?? '', formatPrice(p.sale_price)]
                 .filter(Boolean)
                 .join(' · '),
             },
-            p.name,
-          ),
+            p.name
+          )
         )
       : React.createElement(
           UI.ComboboxEmpty,
           null,
-          search.trim() ? 'Sin resultados' : 'Escribe para buscar en el catálogo',
+          search.trim() ? 'Sin resultados' : 'Escribe para buscar en el catálogo'
         ),
 
     // Opción "Crear" (solo si el nombre no existe ya)
@@ -246,7 +239,7 @@ function ServiceSearchContent({
       React.createElement(UI.ComboboxCreate, {
         onCreate: handleCreate,
         label: 'Crear "{search}"',
-      }),
+      })
   );
 }
 
@@ -279,9 +272,7 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
         }
         const serviceIds = new Set<string>([
           root.id,
-          ...cats
-            .filter((c: Category) => c.parent_id === root.id)
-            .map((c: Category) => c.id),
+          ...cats.filter((c: Category) => c.parent_id === root.id).map((c: Category) => c.id),
         ]);
 
         const all = await actions.execute<Product[]>('products.items.search', {
@@ -318,7 +309,7 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
       if (!product) return;
       onChange([...services, buildServiceLine(product)]);
     },
-    [catalog, services, onChange],
+    [catalog, services, onChange]
   );
 
   const handleServiceCreated = useCallback(
@@ -327,14 +318,14 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
       onChange([...services, buildServiceLine(product)]);
       setCreateName(null);
     },
-    [services, onChange],
+    [services, onChange]
   );
 
   const handleRemove = useCallback(
     (index: number) => {
       onChange(services.filter((_: ServiceLineInput, i: number) => i !== index));
     },
-    [services, onChange],
+    [services, onChange]
   );
 
   const handleChange = useCallback(
@@ -351,16 +342,13 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
       });
       onChange(updated);
     },
-    [services, onChange],
+    [services, onChange]
   );
 
   const total = useMemo(
     () =>
-      services.reduce(
-        (acc: number, s: ServiceLineInput) => acc + (parseFloat(s.subtotal) || 0),
-        0,
-      ),
-    [services],
+      services.reduce((acc: number, s: ServiceLineInput) => acc + (parseFloat(s.subtotal) || 0), 0),
+    [services]
   );
 
   return React.createElement(
@@ -388,15 +376,13 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
           debounceMs: 0,
         },
         React.createElement(UI.ComboboxChipTrigger, {
-          placeholder: catalogLoading
-            ? 'Cargando catálogo...'
-            : 'Buscar servicio para agregar...',
+          placeholder: catalogLoading ? 'Cargando catálogo...' : 'Buscar servicio para agregar...',
         }),
         React.createElement(ServiceSearchContent, {
           catalog,
           categoryMap,
           onCreateRequest: (name: string) => setCreateName(name),
-        }),
+        })
       ),
 
       // Encabezados (solo si hay líneas)
@@ -411,7 +397,7 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
           React.createElement('span', { className: 'text-center' }, 'Cant.'),
           React.createElement('span', { className: 'text-right' }, 'Precio'),
           React.createElement('span', { className: 'text-right' }, 'Subtotal'),
-          React.createElement('span', null, ''),
+          React.createElement('span', null, '')
         ),
 
       // Líneas de servicios
@@ -468,7 +454,7 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
                 {
                   className: 'text-sm text-right font-medium text-[var(--cg-text)]',
                 },
-                `$${(parseFloat(svc.subtotal) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
+                `$${(parseFloat(svc.subtotal) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
               ),
 
               // Eliminar
@@ -482,11 +468,11 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
                     size: 'xs',
                     onClick: () => handleRemove(index),
                   },
-                  React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 }),
-                ),
-              ),
-            ),
-          ),
+                  React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
+                )
+              )
+            )
+          )
         ),
 
       // Total
@@ -500,14 +486,14 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
           React.createElement(
             'span',
             { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
-            'Total:',
+            'Total:'
           ),
           React.createElement(
             'span',
             { className: 'text-base font-bold text-[var(--cg-text)]' },
-            `$${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
-          ),
-        ),
-    ),
+            `$${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+          )
+        )
+    )
   );
 }

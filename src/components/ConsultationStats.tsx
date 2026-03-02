@@ -51,8 +51,7 @@ export function ConsultationStats(props: ConsultationStatsProps) {
       ]
     : [];
 
-  const gridClass =
-    layout === 'grid' ? 'grid grid-cols-2 gap-4' : 'flex gap-4 overflow-x-auto';
+  const gridClass = layout === 'grid' ? 'grid grid-cols-2 gap-4' : 'flex gap-4 overflow-x-auto';
 
   if (loading) {
     return React.createElement(
