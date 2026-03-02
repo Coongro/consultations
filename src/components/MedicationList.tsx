@@ -37,8 +37,8 @@ export function MedicationList(props: MedicationListProps) {
           React.createElement(
             'span',
             { className: 'text-sm font-medium text-[var(--cg-text)]' },
-            med.name,
-          ),
+            med.name
+          )
         ),
         // Detalles como chips
         (med.dosage || med.frequency || med.duration) &&
@@ -46,20 +46,32 @@ export function MedicationList(props: MedicationListProps) {
             'div',
             { className: 'flex flex-wrap gap-1.5 pl-[22px] mt-2' },
             med.dosage &&
-              React.createElement(UI.Badge, { variant: 'secondary', size: 'sm' }, `Dosis: ${med.dosage}`),
+              React.createElement(
+                UI.Badge,
+                { variant: 'secondary', size: 'sm' },
+                `Dosis: ${med.dosage}`
+              ),
             med.frequency &&
-              React.createElement(UI.Badge, { variant: 'secondary', size: 'sm' }, `Frecuencia: ${med.frequency}`),
+              React.createElement(
+                UI.Badge,
+                { variant: 'secondary', size: 'sm' },
+                `Frecuencia: ${med.frequency}`
+              ),
             med.duration &&
-              React.createElement(UI.Badge, { variant: 'secondary', size: 'sm' }, `Duración: ${med.duration}`),
+              React.createElement(
+                UI.Badge,
+                { variant: 'secondary', size: 'sm' },
+                `Duración: ${med.duration}`
+              )
           ),
         // Notas
         med.notes &&
           React.createElement(
             'p',
             { className: 'text-xs text-[var(--cg-text-muted)] italic pl-[22px] mt-1' },
-            med.notes,
-          ),
-      ),
-    ),
+            med.notes
+          )
+      )
+    )
   );
 }

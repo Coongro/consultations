@@ -23,7 +23,11 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const { toast } = usePlugin();
   const { settings: consultSettings } = useConsultationsSettings();
   const { create, update, creating, updating } = useConsultationMutations();
-  const { consultation: existing, medications: existingMeds, services: existingServices } = useConsultation(consultationId);
+  const {
+    consultation: existing,
+    medications: existingMeds,
+    services: existingServices,
+  } = useConsultation(consultationId);
 
   const isEditing = !!consultationId;
   const saving = creating || updating;
@@ -342,7 +346,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
           React.createElement(UI.Label, null, 'Examen físico'),
           React.createElement(UI.Textarea, {
             value: physicalExam,
-            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setPhysicalExam(e.target.value),
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setPhysicalExam(e.target.value),
             placeholder: 'Hallazgos del examen...',
             rows: 2,
           })
@@ -413,14 +418,19 @@ export function ConsultationForm(props: ConsultationFormProps) {
         // Si hay contribuciones de otros plugins, usarlas; si no, fallback al formulario nativo
         ...(contributedSections.length > 0
           ? contributedSections.map((s, i) =>
-              React.createElement(React.Fragment, { key: `contrib-${String(i)}` }, s.render() as React.ReactNode)
+              React.createElement(
+                React.Fragment,
+                { key: `contrib-${String(i)}` },
+                s.render() as React.ReactNode
+              )
             )
-          : [React.createElement(MedicationFormList, {
-              key: 'native-meds',
-              medications,
-              onChange: setMedications,
-            })]
-        )
+          : [
+              React.createElement(MedicationFormList, {
+                key: 'native-meds',
+                medications,
+                onChange: setMedications,
+              }),
+            ])
       )
     ),
 
@@ -456,7 +466,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
             React.createElement(UI.Input, {
               type: 'text',
               value: followUpNotes,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setFollowUpNotes(e.target.value),
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                setFollowUpNotes(e.target.value),
               placeholder: 'Indicaciones para el próximo control...',
             })
           )

@@ -81,7 +81,9 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
         UI.FormDialog,
         {
           open: showEditModal,
-          onOpenChange: (open: boolean) => { if (!open) setShowEditModal(false); },
+          onOpenChange: (open: boolean) => {
+            if (!open) setShowEditModal(false);
+          },
           title: 'Editar consulta',
           size: 'lg',
         },

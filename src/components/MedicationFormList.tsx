@@ -31,17 +31,17 @@ export function MedicationFormList({
     (index: number) => {
       onChange(medications.filter((_: MedicationInput, i: number) => i !== index));
     },
-    [medications, onChange],
+    [medications, onChange]
   );
 
   const updateField = useCallback(
     (index: number, field: keyof MedicationInput, value: string) => {
       const updated = medications.map((med: MedicationInput, i: number) =>
-        i === index ? { ...med, [field]: value || null } : med,
+        i === index ? { ...med, [field]: value || null } : med
       );
       onChange(updated);
     },
-    [medications, onChange],
+    [medications, onChange]
   );
 
   return React.createElement(
@@ -114,10 +114,10 @@ export function MedicationFormList({
                 size: 'xs',
                 onClick: () => remove(index),
               },
-              React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 }),
-            ),
-          ),
-        ),
+              React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
+            )
+          )
+        )
       ),
 
       // Botón agregar
@@ -131,8 +131,8 @@ export function MedicationFormList({
           className: 'border-dashed',
         },
         React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 14 }),
-        'Agregar medicamento',
-      ),
-    ),
+        'Agregar medicamento'
+      )
+    )
   );
 }

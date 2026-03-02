@@ -37,7 +37,9 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
       try {
         const result = await actions.execute<Record<string, number>>(
           'consultations.services.totalsByConsultations',
-          { consultationIds: ids },
+          { consultationIds: ids }
         );
         if (mountedRef.current) setTotalsMap(result ?? {});
       } catch {

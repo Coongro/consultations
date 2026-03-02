@@ -64,7 +64,10 @@ const SERVICE_CATEGORIES: CategorySeed[] = [
     order: 3,
     services: [
       { name: 'Antirrábica', description: 'Vacuna contra la rabia' },
-      { name: 'Séxtuple canina', description: 'Moquillo, parvovirus, hepatitis, parainfluenza, leptospira' },
+      {
+        name: 'Séxtuple canina',
+        description: 'Moquillo, parvovirus, hepatitis, parainfluenza, leptospira',
+      },
       { name: 'Triple felina', description: 'Rinotraqueitis, calicivirus, panleucopenia' },
     ],
   },

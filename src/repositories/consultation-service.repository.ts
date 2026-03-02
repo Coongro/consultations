@@ -20,11 +20,7 @@ export class ConsultationServiceRepository {
 
   async getById({ id }: { id: string }): Promise<ConsultationServiceRow | undefined> {
     const rows = await this.db.ormQuery((tx) =>
-      tx
-        .select()
-        .from(consultationServiceTable)
-        .where(eq(consultationServiceTable.id, id))
-        .limit(1)
+      tx.select().from(consultationServiceTable).where(eq(consultationServiceTable.id, id)).limit(1)
     );
     return rows[0];
   }
@@ -34,9 +30,7 @@ export class ConsultationServiceRepository {
       ...data,
       id: data.id ?? crypto.randomUUID(),
     };
-    return this.db.ormQuery((tx) =>
-      tx.insert(consultationServiceTable).values(row).returning()
-    );
+    return this.db.ormQuery((tx) => tx.insert(consultationServiceTable).values(row).returning());
   }
 
   async update({
@@ -113,9 +107,7 @@ export class ConsultationServiceRepository {
           total: sql<string>`SUM(subtotal::numeric)::text`,
         })
         .from(consultationServiceTable)
-        .where(
-          sql`${consultationServiceTable.consultation_id} = ANY(${consultationIds})`
-        )
+        .where(sql`${consultationServiceTable.consultation_id} = ANY(${consultationIds})`)
         .groupBy(consultationServiceTable.consultation_id)
     );
     const map: Record<string, number> = {};

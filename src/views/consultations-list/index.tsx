@@ -3,8 +3,8 @@
  */
 import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
-import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import { ConsultationStats } from '../../components/ConsultationStats.js';
+import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import { useConsultations } from '../../hooks/useConsultations.js';
 import { useConsultationsSettings } from '../../hooks/useConsultationsSettings.js';
 import type { Consultation } from '../../types/consultation.js';
@@ -80,11 +80,7 @@ export function ConsultationsListView() {
     if (!consultations.length) return;
 
     const unknownIds = [
-      ...new Set(
-        consultations
-          .map((c) => c.pet_id)
-          .filter((id) => !petCacheRef.current.has(id))
-      ),
+      ...new Set(consultations.map((c) => c.pet_id).filter((id) => !petCacheRef.current.has(id))),
     ];
 
     if (unknownIds.length === 0) {
@@ -223,11 +219,7 @@ export function ConsultationsListView() {
         )
       ),
       React.createElement(UI.TableCell, null, c.vet_name),
-      React.createElement(
-        UI.TableCell,
-        { className: 'max-w-[200px] truncate' },
-        c.reason
-      ),
+      React.createElement(UI.TableCell, { className: 'max-w-[200px] truncate' }, c.reason),
       React.createElement(
         UI.TableCell,
         null,
@@ -333,11 +325,7 @@ export function ConsultationsListView() {
         React.createElement(
           'div',
           null,
-          React.createElement(
-            'h1',
-            { className: 'text-2xl font-bold text-cg-text' },
-            'Consultas'
-          ),
+          React.createElement('h1', { className: 'text-2xl font-bold text-cg-text' }, 'Consultas'),
           React.createElement(
             'p',
             { className: 'text-sm text-cg-text-muted mt-1' },
@@ -385,33 +373,28 @@ export function ConsultationsListView() {
 
             // Categorías rápidas
             consultSettings.reasonCategoriesEnabled &&
-              React.createElement(
-                UI.ButtonGroup,
-                null,
-                [
+              React.createElement(UI.ButtonGroup, null, [
+                React.createElement(
+                  UI.ButtonGroupItem,
+                  {
+                    key: '__all',
+                    active: !filters.reasonCategory,
+                    onClick: () => setFilters({ ...filters, reasonCategory: undefined }),
+                  },
+                  'Todas'
+                ),
+                ...ALL_REASON_CATEGORIES.map((cat) =>
                   React.createElement(
                     UI.ButtonGroupItem,
                     {
-                      key: '__all',
-                      active: !filters.reasonCategory,
-                      onClick: () =>
-                        setFilters({ ...filters, reasonCategory: undefined }),
+                      key: cat,
+                      active: filters.reasonCategory === cat,
+                      onClick: () => handleCategoryFilter(cat),
                     },
-                    'Todas'
-                  ),
-                  ...ALL_REASON_CATEGORIES.map((cat) =>
-                    React.createElement(
-                      UI.ButtonGroupItem,
-                      {
-                        key: cat,
-                        active: filters.reasonCategory === cat,
-                        onClick: () => handleCategoryFilter(cat),
-                      },
-                      REASON_CATEGORY_LABELS[cat] ?? cat
-                    )
-                  ),
-                ]
-              ),
+                    REASON_CATEGORY_LABELS[cat] ?? cat
+                  )
+                ),
+              ]),
 
             // Fechas
             React.createElement(
@@ -424,11 +407,7 @@ export function ConsultationsListView() {
                 title: 'Desde',
                 className: 'w-36',
               }),
-              React.createElement(
-                'span',
-                { className: 'text-cg-text-muted text-sm' },
-                '—'
-              ),
+              React.createElement('span', { className: 'text-cg-text-muted text-sm' }, '—'),
               React.createElement(UI.Input, {
                 type: 'date',
                 value: filters.dateTo ?? '',
@@ -486,11 +465,7 @@ export function ConsultationsListView() {
                   'Categoría'
                 ),
                 React.createElement(UI.TableHead, null, 'Diagnóstico'),
-                React.createElement(
-                  UI.TableHead,
-                  { className: 'w-20 text-right' },
-                  'Acciones'
-                )
+                React.createElement(UI.TableHead, { className: 'w-20 text-right' }, 'Acciones')
               )
             ),
 
@@ -504,8 +479,7 @@ export function ConsultationsListView() {
             React.createElement(
               'div',
               {
-                className:
-                  'flex items-center justify-between text-sm text-cg-text-muted pt-2',
+                className: 'flex items-center justify-between text-sm text-cg-text-muted pt-2',
               },
               React.createElement(
                 'span',
@@ -526,22 +500,21 @@ export function ConsultationsListView() {
                       disabled: pagination.page <= 1,
                     })
                   ),
-                  ...buildPageNumbers(pagination.page, pagination.totalPages).map(
-                    (item, i) =>
-                      React.createElement(
-                        UI.PaginationItem,
-                        { key: i },
-                        item === '...'
-                          ? React.createElement(UI.PaginationEllipsis)
-                          : React.createElement(
-                              UI.PaginationLink,
-                              {
-                                isActive: item === pagination.page,
-                                onClick: () => goToPage(item as number),
-                              },
-                              item
-                            )
-                      )
+                  ...buildPageNumbers(pagination.page, pagination.totalPages).map((item, i) =>
+                    React.createElement(
+                      UI.PaginationItem,
+                      { key: i },
+                      item === '...'
+                        ? React.createElement(UI.PaginationEllipsis)
+                        : React.createElement(
+                            UI.PaginationLink,
+                            {
+                              isActive: item === pagination.page,
+                              onClick: () => goToPage(item),
+                            },
+                            item
+                          )
+                    )
                   ),
                   React.createElement(
                     UI.PaginationItem,

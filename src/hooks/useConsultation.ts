@@ -3,7 +3,11 @@
  */
 import { getHostReact, actions } from '@coongro/plugin-sdk';
 
-import type { Consultation, ConsultationMedication, ConsultationService } from '../types/consultation.js';
+import type {
+  Consultation,
+  ConsultationMedication,
+  ConsultationService,
+} from '../types/consultation.js';
 
 const React = getHostReact();
 const { useState, useEffect, useCallback, useRef } = React;
