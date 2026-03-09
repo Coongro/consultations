@@ -104,9 +104,11 @@ function CreateServiceModal({
           saving ? 'Guardando...' : 'Crear servicio'
         )
       ),
-    },
+      children: React.createElement(
+        React.Fragment,
+        null,
 
-    error && React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error),
+        error && React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error),
 
     // Nombre
     React.createElement(
@@ -168,6 +170,8 @@ function CreateServiceModal({
         })
       )
     )
+      ),
+    }
   );
 }
 
@@ -460,16 +464,18 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
               // Eliminar
               React.createElement(
                 UI.Tooltip,
-                { content: 'Eliminar' },
-                React.createElement(
-                  UI.IconButton,
-                  {
-                    variant: 'danger',
-                    size: 'xs',
-                    onClick: () => handleRemove(index),
-                  },
-                  React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
-                )
+                {
+                  content: 'Eliminar',
+                  children: React.createElement(
+                    UI.IconButton,
+                    {
+                      variant: 'danger',
+                      size: 'xs',
+                      onClick: () => handleRemove(index),
+                    },
+                    React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
+                  ),
+                }
               )
             )
           )

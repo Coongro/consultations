@@ -365,29 +365,33 @@ export function ServicesView() {
                     { className: 'flex items-center justify-end gap-1' },
                     React.createElement(
                       UI.Tooltip,
-                      { content: 'Editar' },
-                      React.createElement(
-                        UI.IconButton,
-                        {
-                          variant: 'ghost',
-                          size: 'xs',
-                          onClick: () => handleEdit(svc),
-                        },
-                        React.createElement(UI.DynamicIcon, { icon: 'SquarePen', size: 16 })
-                      )
+                      {
+                        content: 'Editar',
+                        children: React.createElement(
+                          UI.IconButton,
+                          {
+                            variant: 'ghost',
+                            size: 'xs',
+                            onClick: () => handleEdit(svc),
+                          },
+                          React.createElement(UI.DynamicIcon, { icon: 'SquarePen', size: 16 })
+                        ),
+                      }
                     ),
                     React.createElement(
                       UI.Tooltip,
-                      { content: 'Eliminar' },
-                      React.createElement(
-                        UI.IconButton,
-                        {
-                          variant: 'danger',
-                          size: 'xs',
-                          onClick: () => setConfirmingDeleteId(svc.id),
-                        },
-                        React.createElement(UI.DynamicIcon, { icon: 'Trash2', size: 16 })
-                      )
+                      {
+                        content: 'Eliminar',
+                        children: React.createElement(
+                          UI.IconButton,
+                          {
+                            variant: 'danger',
+                            size: 'xs',
+                            onClick: () => setConfirmingDeleteId(svc.id),
+                          },
+                          React.createElement(UI.DynamicIcon, { icon: 'Trash2', size: 16 })
+                        ),
+                      }
                     )
                   )
             )
@@ -508,10 +512,12 @@ export function ServicesView() {
                 submitLabel
               )
             ),
-          },
+            children: React.createElement(
+              React.Fragment,
+              null,
 
-          // Nombre
-          React.createElement(
+              // Nombre
+              React.createElement(
             'div',
             { className: 'flex flex-col gap-1' },
             React.createElement(UI.Label, null, 'Nombre *'),
@@ -590,6 +596,8 @@ export function ServicesView() {
               })
             )
           )
+            ),
+          }
         )
     )
   );

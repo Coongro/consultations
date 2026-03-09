@@ -86,12 +86,12 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
           },
           title: 'Editar consulta',
           size: 'lg',
-        },
-        React.createElement(ConsultationForm, {
-          consultationId,
-          onSuccess: handleEditSuccess,
-          onCancel: () => setShowEditModal(false),
-        })
+          children: React.createElement(ConsultationForm, {
+            consultationId,
+            onSuccess: handleEditSuccess,
+            onCancel: () => setShowEditModal(false),
+          }),
+        }
       )
   );
 }
