@@ -117,12 +117,12 @@ export function DetailOverrideView(props: { petId?: string }) {
           },
           title: 'Editar paciente',
           size: 'lg',
-        },
-        React.createElement(PetForm, {
-          petId,
-          onSuccess: handleEditSuccess,
-          onCancel: () => setShowEditModal(false),
-        })
+          children: React.createElement(PetForm, {
+            petId,
+            onSuccess: handleEditSuccess,
+            onCancel: () => setShowEditModal(false),
+          }),
+        }
       ),
 
     React.createElement(CreateConsultationButton, {
