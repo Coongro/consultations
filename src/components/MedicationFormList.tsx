@@ -106,16 +106,18 @@ export function MedicationFormList({
           // Botón eliminar
           React.createElement(
             UI.Tooltip,
-            { content: 'Eliminar medicamento' },
-            React.createElement(
-              UI.IconButton,
-              {
-                variant: 'danger',
-                size: 'xs',
-                onClick: () => remove(index),
-              },
-              React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
-            )
+            {
+              content: 'Eliminar medicamento',
+              children: React.createElement(
+                UI.IconButton,
+                {
+                  variant: 'danger',
+                  size: 'xs',
+                  onClick: () => remove(index),
+                },
+                React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
+              ),
+            }
           )
         )
       ),
