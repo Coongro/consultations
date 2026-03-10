@@ -77,21 +77,18 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
 
     // Modal de edicion
     showEditModal &&
-      React.createElement(
-        UI.FormDialog,
-        {
-          open: showEditModal,
-          onOpenChange: (open: boolean) => {
-            if (!open) setShowEditModal(false);
-          },
-          title: 'Editar consulta',
-          size: 'lg',
-          children: React.createElement(ConsultationForm, {
-            consultationId,
-            onSuccess: handleEditSuccess,
-            onCancel: () => setShowEditModal(false),
-          }),
-        }
-      )
+      React.createElement(UI.FormDialog, {
+        open: showEditModal,
+        onOpenChange: (open: boolean) => {
+          if (!open) setShowEditModal(false);
+        },
+        title: 'Editar consulta',
+        size: 'lg',
+        children: React.createElement(ConsultationForm, {
+          consultationId,
+          onSuccess: handleEditSuccess,
+          onCancel: () => setShowEditModal(false),
+        }),
+      })
   );
 }
