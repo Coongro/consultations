@@ -144,7 +144,9 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
         ? React.createElement(UI.ErrorDisplay, {
             title: 'Error al cargar',
             message: error,
-            onRetry: refetch,
+            onRetry: () => {
+              void refetch();
+            },
           })
         : React.createElement(UI.EmptyState, {
             title: 'Consulta no encontrada',

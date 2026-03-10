@@ -98,7 +98,13 @@ function CreateServiceModal({
       ),
       React.createElement(
         UI.Button,
-        { type: 'button', onClick: handleSubmit, disabled: saving },
+        {
+          type: 'button',
+          onClick: () => {
+            void handleSubmit();
+          },
+          disabled: saving,
+        },
         saving ? 'Guardando...' : 'Crear servicio'
       )
     ),

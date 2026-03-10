@@ -286,7 +286,9 @@ export function ConsultationsListView() {
           React.createElement(UI.ErrorDisplay, {
             title: 'Error al cargar',
             message: error,
-            onRetry: refetch,
+            onRetry: () => {
+              void refetch();
+            },
           })
         )
       );

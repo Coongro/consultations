@@ -258,7 +258,9 @@ export function ServicesView() {
       return React.createElement(UI.ErrorDisplay, {
         title: 'Error al cargar',
         message: prodsError,
-        onRetry: refetchProducts,
+        onRetry: () => {
+          void refetchProducts();
+        },
         className: 'py-12',
       });
     }
@@ -357,7 +359,9 @@ export function ServicesView() {
               confirmingDeleteId === svc.id
                 ? React.createElement(UI.InlineConfirm, {
                     message: '¿Eliminar servicio?',
-                    onConfirm: () => handleDelete(svc.id),
+                    onConfirm: () => {
+                      void handleDelete(svc.id);
+                    },
                     onCancel: () => setConfirmingDeleteId(null),
                   })
                 : React.createElement(
@@ -500,7 +504,13 @@ export function ServicesView() {
             ),
             React.createElement(
               UI.Button,
-              { type: 'button', onClick: handleSubmit, disabled: isSaving },
+              {
+                type: 'button',
+                onClick: () => {
+                  void handleSubmit();
+                },
+                disabled: isSaving,
+              },
               submitLabel
             )
           ),
