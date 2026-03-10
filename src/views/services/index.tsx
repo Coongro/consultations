@@ -363,36 +363,30 @@ export function ServicesView() {
                 : React.createElement(
                     'div',
                     { className: 'flex items-center justify-end gap-1' },
-                    React.createElement(
-                      UI.Tooltip,
-                      {
-                        content: 'Editar',
-                        children: React.createElement(
-                          UI.IconButton,
-                          {
-                            variant: 'ghost',
-                            size: 'xs',
-                            onClick: () => handleEdit(svc),
-                          },
-                          React.createElement(UI.DynamicIcon, { icon: 'SquarePen', size: 16 })
-                        ),
-                      }
-                    ),
-                    React.createElement(
-                      UI.Tooltip,
-                      {
-                        content: 'Eliminar',
-                        children: React.createElement(
-                          UI.IconButton,
-                          {
-                            variant: 'danger',
-                            size: 'xs',
-                            onClick: () => setConfirmingDeleteId(svc.id),
-                          },
-                          React.createElement(UI.DynamicIcon, { icon: 'Trash2', size: 16 })
-                        ),
-                      }
-                    )
+                    React.createElement(UI.Tooltip, {
+                      content: 'Editar',
+                      children: React.createElement(
+                        UI.IconButton,
+                        {
+                          variant: 'ghost',
+                          size: 'xs',
+                          onClick: () => handleEdit(svc),
+                        },
+                        React.createElement(UI.DynamicIcon, { icon: 'SquarePen', size: 16 })
+                      ),
+                    }),
+                    React.createElement(UI.Tooltip, {
+                      content: 'Eliminar',
+                      children: React.createElement(
+                        UI.IconButton,
+                        {
+                          variant: 'danger',
+                          size: 'xs',
+                          onClick: () => setConfirmingDeleteId(svc.id),
+                        },
+                        React.createElement(UI.DynamicIcon, { icon: 'Trash2', size: 16 })
+                      ),
+                    })
                   )
             )
           )
@@ -489,116 +483,113 @@ export function ServicesView() {
 
       // Modal crear/editar servicio
       showModal &&
-        React.createElement(
-          UI.FormDialog,
-          {
-            open: showModal,
-            onOpenChange: (open: boolean) => {
-              if (!open) handleCloseModal();
-            },
-            title: editingService ? 'Editar servicio' : 'Nuevo servicio',
-            size: 'sm',
-            footer: React.createElement(
-              React.Fragment,
-              null,
-              React.createElement(
-                UI.Button,
-                { type: 'button', variant: 'outline', onClick: handleCloseModal },
-                'Cancelar'
-              ),
-              React.createElement(
-                UI.Button,
-                { type: 'button', onClick: handleSubmit, disabled: isSaving },
-                submitLabel
-              )
-            ),
-            children: React.createElement(
-              React.Fragment,
-              null,
-
-              // Nombre
-              React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Nombre *'),
-            React.createElement(UI.Input, {
-              type: 'text',
-              value: form.name,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                setForm((prev: ServiceFormData) => ({ ...prev, name: e.target.value })),
-              placeholder: 'Ej: Consulta general',
-            })
-          ),
-
-          // Descripción
-          React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Descripción'),
-            React.createElement(UI.Textarea, {
-              value: form.description,
-              onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setForm((prev: ServiceFormData) => ({
-                  ...prev,
-                  description: e.target.value,
-                })),
-              rows: 2,
-              placeholder: 'Descripción opcional del servicio',
-            })
-          ),
-
-          // Categoría
-          React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Categoría'),
+        React.createElement(UI.FormDialog, {
+          open: showModal,
+          onOpenChange: (open: boolean) => {
+            if (!open) handleCloseModal();
+          },
+          title: editingService ? 'Editar servicio' : 'Nuevo servicio',
+          size: 'sm',
+          footer: React.createElement(
+            React.Fragment,
+            null,
             React.createElement(
-              UI.Select,
-              {
-                value: form.categoryId,
-                onValueChange: (v: string) =>
-                  setForm((prev: ServiceFormData) => ({
-                    ...prev,
-                    categoryId: v,
-                  })),
-              },
-              serviceCategories.map((cat: Category) =>
-                React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
-              )
+              UI.Button,
+              { type: 'button', variant: 'outline', onClick: handleCloseModal },
+              'Cancelar'
+            ),
+            React.createElement(
+              UI.Button,
+              { type: 'button', onClick: handleSubmit, disabled: isSaving },
+              submitLabel
             )
           ),
+          children: React.createElement(
+            React.Fragment,
+            null,
 
-          // Precio
-          React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Precio'),
+            // Nombre
             React.createElement(
               'div',
-              { className: 'relative' },
-              React.createElement(
-                'span',
-                {
-                  className:
-                    'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
-                },
-                '$'
-              ),
+              { className: 'flex flex-col gap-1' },
+              React.createElement(UI.Label, null, 'Nombre *'),
               React.createElement(UI.Input, {
-                type: 'number',
-                value: form.price,
+                type: 'text',
+                value: form.name,
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                  setForm((prev: ServiceFormData) => ({ ...prev, price: e.target.value })),
-                min: '0',
-                step: '0.01',
-                placeholder: '0.00',
-                className: 'pl-7',
+                  setForm((prev: ServiceFormData) => ({ ...prev, name: e.target.value })),
+                placeholder: 'Ej: Consulta general',
               })
-            )
-          )
             ),
-          }
-        )
+
+            // Descripción
+            React.createElement(
+              'div',
+              { className: 'flex flex-col gap-1' },
+              React.createElement(UI.Label, null, 'Descripción'),
+              React.createElement(UI.Textarea, {
+                value: form.description,
+                onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setForm((prev: ServiceFormData) => ({
+                    ...prev,
+                    description: e.target.value,
+                  })),
+                rows: 2,
+                placeholder: 'Descripción opcional del servicio',
+              })
+            ),
+
+            // Categoría
+            React.createElement(
+              'div',
+              { className: 'flex flex-col gap-1' },
+              React.createElement(UI.Label, null, 'Categoría'),
+              React.createElement(
+                UI.Select,
+                {
+                  value: form.categoryId,
+                  onValueChange: (v: string) =>
+                    setForm((prev: ServiceFormData) => ({
+                      ...prev,
+                      categoryId: v,
+                    })),
+                },
+                serviceCategories.map((cat: Category) =>
+                  React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
+                )
+              )
+            ),
+
+            // Precio
+            React.createElement(
+              'div',
+              { className: 'flex flex-col gap-1' },
+              React.createElement(UI.Label, null, 'Precio'),
+              React.createElement(
+                'div',
+                { className: 'relative' },
+                React.createElement(
+                  'span',
+                  {
+                    className:
+                      'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
+                  },
+                  '$'
+                ),
+                React.createElement(UI.Input, {
+                  type: 'number',
+                  value: form.price,
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                    setForm((prev: ServiceFormData) => ({ ...prev, price: e.target.value })),
+                  min: '0',
+                  step: '0.01',
+                  placeholder: '0.00',
+                  className: 'pl-7',
+                })
+              )
+            )
+          ),
+        })
     )
   );
 }
