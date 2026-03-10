@@ -83,47 +83,44 @@ export function CreateConsultationButton(props: CreateConsultationButtonProps) {
       ),
 
     // Modal
-    React.createElement(
-      UI.FormDialog,
-      {
-        open,
-        onOpenChange: (val: boolean) => {
-          if (!val) handleClose();
-        },
-        title: label,
-        size: 'lg',
-        children: petIdProp
-          ? // Con petId: formulario directo
-            React.createElement(ConsultationForm, {
-              petId: petIdProp,
-              onSuccess: handleSuccess,
-              onCancel: handleClose,
-            })
-          : // Sin petId: PetPicker primero, luego formulario
+    React.createElement(UI.FormDialog, {
+      open,
+      onOpenChange: (val: boolean) => {
+        if (!val) handleClose();
+      },
+      title: label,
+      size: 'lg',
+      children: petIdProp
+        ? // Con petId: formulario directo
+          React.createElement(ConsultationForm, {
+            petId: petIdProp,
+            onSuccess: handleSuccess,
+            onCancel: handleClose,
+          })
+        : // Sin petId: PetPicker primero, luego formulario
+          React.createElement(
+            'div',
+            { className: 'flex flex-col gap-4' },
             React.createElement(
               'div',
-              { className: 'flex flex-col gap-4' },
-              React.createElement(
-                'div',
-                { className: 'flex flex-col gap-1' },
-                React.createElement(UI.Label, null, 'Paciente *'),
-                React.createElement(PetPicker, {
-                  value: selectedPetId,
-                  onChange: (pet: Pet | null) => setSelectedPetId(pet?.id),
-                  placeholder: 'Seleccionar mascota...',
-                })
-              ),
-              selectedPetId
-                ? React.createElement(ConsultationForm, {
-                    petId: selectedPetId,
-                    onSuccess: handleSuccess,
-                    onCancel: handleClose,
-                  })
-                : React.createElement(UI.EmptyState, {
-                    title: 'Seleccioná un paciente para continuar',
-                  })
+              { className: 'flex flex-col gap-1' },
+              React.createElement(UI.Label, null, 'Paciente *'),
+              React.createElement(PetPicker, {
+                value: selectedPetId,
+                onChange: (pet: Pet | null) => setSelectedPetId(pet?.id),
+                placeholder: 'Seleccionar mascota...',
+              })
             ),
-      }
-    )
+            selectedPetId
+              ? React.createElement(ConsultationForm, {
+                  petId: selectedPetId,
+                  onSuccess: handleSuccess,
+                  onCancel: handleClose,
+                })
+              : React.createElement(UI.EmptyState, {
+                  title: 'Seleccioná un paciente para continuar',
+                })
+          ),
+    })
   );
 }
