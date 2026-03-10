@@ -81,98 +81,95 @@ function CreateServiceModal({
     }
   }, [name, categoryId, price, onCreated]);
 
-  return React.createElement(
-    UI.FormDialog,
-    {
-      open: true,
-      onOpenChange: (open: boolean) => {
-        if (!open) onClose();
-      },
-      title: 'Nuevo servicio',
-      size: 'sm',
-      footer: React.createElement(
-        React.Fragment,
-        null,
-        React.createElement(
-          UI.Button,
-          { type: 'button', variant: 'outline', onClick: onClose },
-          'Cancelar'
-        ),
-        React.createElement(
-          UI.Button,
-          { type: 'button', onClick: handleSubmit, disabled: saving },
-          saving ? 'Guardando...' : 'Crear servicio'
-        )
+  return React.createElement(UI.FormDialog, {
+    open: true,
+    onOpenChange: (open: boolean) => {
+      if (!open) onClose();
+    },
+    title: 'Nuevo servicio',
+    size: 'sm',
+    footer: React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(
+        UI.Button,
+        { type: 'button', variant: 'outline', onClick: onClose },
+        'Cancelar'
       ),
-      children: React.createElement(
-        React.Fragment,
-        null,
-
-        error && React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error),
-
-    // Nombre
-    React.createElement(
-      'div',
-      { className: 'flex flex-col gap-1' },
-      React.createElement(UI.Label, null, 'Nombre *'),
-      React.createElement(UI.Input, {
-        type: 'text',
-        value: name,
-        autoFocus: true,
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value),
-        placeholder: 'Ej: Consulta general',
-      })
+      React.createElement(
+        UI.Button,
+        { type: 'button', onClick: handleSubmit, disabled: saving },
+        saving ? 'Guardando...' : 'Crear servicio'
+      )
     ),
+    children: React.createElement(
+      React.Fragment,
+      null,
 
-    // Categoría
-    serviceCategories.length > 0 &&
+      error && React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error),
+
+      // Nombre
       React.createElement(
         'div',
         { className: 'flex flex-col gap-1' },
-        React.createElement(UI.Label, null, 'Categoría'),
-        React.createElement(
-          UI.Select,
-          {
-            value: categoryId,
-            onValueChange: (v: string) => setCategoryId(v),
-          },
-          React.createElement(UI.SelectItem, { value: '' }, '— Sin categoría —'),
-          serviceCategories.map((cat: Category) =>
-            React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
-          )
-        )
+        React.createElement(UI.Label, null, 'Nombre *'),
+        React.createElement(UI.Input, {
+          type: 'text',
+          value: name,
+          autoFocus: true,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value),
+          placeholder: 'Ej: Consulta general',
+        })
       ),
 
-    // Precio
-    React.createElement(
-      'div',
-      { className: 'flex flex-col gap-1' },
-      React.createElement(UI.Label, null, 'Precio'),
+      // Categoría
+      serviceCategories.length > 0 &&
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-1' },
+          React.createElement(UI.Label, null, 'Categoría'),
+          React.createElement(
+            UI.Select,
+            {
+              value: categoryId,
+              onValueChange: (v: string) => setCategoryId(v),
+            },
+            React.createElement(UI.SelectItem, { value: '' }, '— Sin categoría —'),
+            serviceCategories.map((cat: Category) =>
+              React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
+            )
+          )
+        ),
+
+      // Precio
       React.createElement(
         'div',
-        { className: 'relative' },
+        { className: 'flex flex-col gap-1' },
+        React.createElement(UI.Label, null, 'Precio'),
         React.createElement(
-          'span',
-          {
-            className:
-              'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
-          },
-          '$'
-        ),
-        React.createElement(UI.Input, {
-          type: 'number',
-          value: price,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setPrice(e.target.value),
-          min: '0',
-          step: '0.01',
-          placeholder: '0.00',
-          className: 'pl-7',
-        })
+          'div',
+          { className: 'relative' },
+          React.createElement(
+            'span',
+            {
+              className:
+                'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
+            },
+            '$'
+          ),
+          React.createElement(UI.Input, {
+            type: 'number',
+            value: price,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setPrice(e.target.value),
+            min: '0',
+            step: '0.01',
+            placeholder: '0.00',
+            className: 'pl-7',
+          })
+        )
       )
-    )
-      ),
-    }
-  );
+    ),
+  });
 }
 
 interface ServiceSearchContentProps {
@@ -462,21 +459,18 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
               ),
 
               // Eliminar
-              React.createElement(
-                UI.Tooltip,
-                {
-                  content: 'Eliminar',
-                  children: React.createElement(
-                    UI.IconButton,
-                    {
-                      variant: 'danger',
-                      size: 'xs',
-                      onClick: () => handleRemove(index),
-                    },
-                    React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
-                  ),
-                }
-              )
+              React.createElement(UI.Tooltip, {
+                content: 'Eliminar',
+                children: React.createElement(
+                  UI.IconButton,
+                  {
+                    variant: 'danger',
+                    size: 'xs',
+                    onClick: () => handleRemove(index),
+                  },
+                  React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
+                ),
+              })
             )
           )
         ),
