@@ -108,22 +108,19 @@ export function DetailOverrideView(props: { petId?: string }) {
 
     // Modal de edicion de paciente
     showEditModal &&
-      React.createElement(
-        UI.FormDialog,
-        {
-          open: showEditModal,
-          onOpenChange: (open: boolean) => {
-            if (!open) setShowEditModal(false);
-          },
-          title: 'Editar paciente',
-          size: 'lg',
-          children: React.createElement(PetForm, {
-            petId,
-            onSuccess: handleEditSuccess,
-            onCancel: () => setShowEditModal(false),
-          }),
-        }
-      ),
+      React.createElement(UI.FormDialog, {
+        open: showEditModal,
+        onOpenChange: (open: boolean) => {
+          if (!open) setShowEditModal(false);
+        },
+        title: 'Editar paciente',
+        size: 'lg',
+        children: React.createElement(PetForm, {
+          petId,
+          onSuccess: handleEditSuccess,
+          onCancel: () => setShowEditModal(false),
+        }),
+      }),
 
     React.createElement(CreateConsultationButton, {
       petId,
