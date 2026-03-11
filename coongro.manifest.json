@@ -1,6 +1,6 @@
 {
   "id": "consultations",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "apiVersion": "2.0",
   "entry": "dist/entry.js",
   "assets": {
