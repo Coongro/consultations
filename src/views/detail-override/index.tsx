@@ -90,10 +90,10 @@ export function DetailOverrideView(props: { petId?: string }) {
 
   return React.createElement(
     'div',
-    { className: 'font-inter min-h-screen bg-[var(--cg-bg-secondary)] p-6' },
+    { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
     React.createElement(
       'div',
-      { className: 'max-w-3xl mx-auto' },
+      { className: 'max-w-6xl mx-auto' },
       React.createElement(PetDetail, {
         key: refreshKey,
         petId,

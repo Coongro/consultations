@@ -33,9 +33,9 @@ type SortField = 'name' | 'price';
 type SortDir = 'asc' | 'desc' | false;
 
 function formatPrice(value: string | null): string {
-  if (!value || value === '0') return '-';
+  if (!value || value === '0') return '';
   const num = parseFloat(value);
-  return isNaN(num) ? '-' : `$${num.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
+  return isNaN(num) ? '' : `$${num.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
 }
 
 export function ServicesView() {
@@ -44,7 +44,6 @@ export function ServicesView() {
   // --- Categorías ---
   const { categories, loading: catsLoading } = useCategories();
 
-  // Encontrar la categoría raíz de servicios y sus hijas
   const rootCategory = useMemo(
     () => categories.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG) ?? null,
     [categories]
@@ -78,13 +77,11 @@ export function ServicesView() {
     pageSize: 50,
   });
 
-  // Refiltrar por subcategoría cuando cambia el chip activo o la categoría raíz carga
   useEffect(() => {
     if (!rootCategory) return;
     setFilters({ categoryId: activeCatId });
   }, [rootCategory, activeCatId, setFilters]);
 
-  // Filtrar solo servicios de las subcategorías conocidas (o la raíz)
   const filteredServices = useMemo(() => {
     if (!rootCategory) return [];
     return products.filter(
@@ -150,9 +147,9 @@ export function ServicesView() {
     [search]
   );
 
-  // --- Filtro por categoría ---
-  const handleCategoryFilter = useCallback((catId: string) => {
-    setActiveCatId((prev: string | undefined) => (prev === catId ? undefined : catId));
+  // --- Filtro por categoría via tabs ---
+  const handleTabChange = useCallback((val: string) => {
+    setActiveCatId(val === 'all' ? undefined : val);
   }, []);
 
   // --- Abrir modal para crear ---
@@ -245,7 +242,7 @@ export function ServicesView() {
   if (isSaving) submitLabel = 'Guardando...';
   else if (editingService) submitLabel = 'Guardar cambios';
 
-  // Contenido de la card de resultados (loading / error / vacío / tabla)
+  // Contenido de la tabla (loading / error / vacío / filas)
   function renderTableContent(): ReturnType<typeof React.createElement> {
     if (loading) {
       return React.createElement(UI.LoadingOverlay, {
@@ -268,15 +265,56 @@ export function ServicesView() {
       return React.createElement(UI.EmptyState, {
         title: 'Sin categorías de servicios',
         description: 'Reinicie la aplicación para ejecutar el auto-seed.',
+        icon: React.createElement(UI.DynamicIcon, {
+          icon: 'FolderX',
+          size: 24,
+          className: 'text-cg-text-muted',
+        }),
         className: 'py-12',
       });
     }
     if (services.length === 0) {
+      // Estado vacío con filtros activos
+      if (localSearch || activeCatId) {
+        return React.createElement(UI.EmptyState, {
+          title: 'Sin resultados',
+          description: 'No se encontraron servicios con esos filtros.',
+          icon: React.createElement(UI.DynamicIcon, {
+            icon: 'SearchX',
+            size: 24,
+            className: 'text-cg-text-muted',
+          }),
+          action: React.createElement(
+            UI.Button,
+            {
+              variant: 'outline',
+              size: 'sm',
+              onClick: () => {
+                setLocalSearch('');
+                search('');
+                setActiveCatId(undefined);
+              },
+            },
+            'Limpiar filtros'
+          ),
+          className: 'py-12',
+        });
+      }
+      // Estado vacío sin filtros
       return React.createElement(UI.EmptyState, {
-        title:
-          localSearch || activeCatId
-            ? 'No se encontraron servicios con esos filtros'
-            : 'Sin servicios registrados',
+        title: 'Sin servicios registrados',
+        description: 'Agregá tu primer servicio para comenzar a gestionarlos.',
+        icon: React.createElement(UI.DynamicIcon, {
+          icon: 'Stethoscope',
+          size: 24,
+          className: 'text-cg-text-muted',
+        }),
+        action: React.createElement(
+          UI.Button,
+          { size: 'sm', onClick: handleCreate },
+          React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 14 }),
+          'Nuevo servicio'
+        ),
         className: 'py-12',
       });
     }
@@ -314,26 +352,22 @@ export function ServicesView() {
       React.createElement(
         UI.TableBody,
         null,
-        services.map((svc: Product) =>
-          React.createElement(
+        services.map((svc: Product) => {
+          const priceFormatted = formatPrice(svc.sale_price);
+
+          return React.createElement(
             UI.TableRow,
-            { key: svc.id },
+            { key: svc.id, className: 'group' },
 
             // Nombre + descripción
             React.createElement(
               UI.TableCell,
               null,
-              React.createElement(
-                'div',
-                { className: 'font-medium text-[var(--cg-text)]' },
-                svc.name
-              ),
+              React.createElement('div', { className: 'font-medium text-cg-text' }, svc.name),
               svc.description &&
                 React.createElement(
                   'div',
-                  {
-                    className: 'text-xs text-[var(--cg-text-muted)] mt-0.5 line-clamp-1',
-                  },
+                  { className: 'text-xs text-cg-text-muted mt-0.5 line-clamp-1' },
                   svc.description
                 )
             ),
@@ -341,15 +375,21 @@ export function ServicesView() {
             // Categoría
             React.createElement(
               UI.TableCell,
-              { className: 'text-[var(--cg-text-muted)]' },
+              { className: 'text-cg-text-muted' },
               categoryMap.get(svc.category_id ?? '') ?? '-'
             ),
 
             // Precio
             React.createElement(
               UI.TableCell,
-              { className: 'text-right font-medium' },
-              formatPrice(svc.sale_price)
+              { className: 'text-right' },
+              priceFormatted
+                ? React.createElement(
+                    UI.Badge,
+                    { variant: 'brand-soft', size: 'sm' },
+                    priceFormatted
+                  )
+                : React.createElement('span', { className: 'text-sm text-cg-text-muted' }, '—')
             ),
 
             // Acciones
@@ -366,7 +406,10 @@ export function ServicesView() {
                   })
                 : React.createElement(
                     'div',
-                    { className: 'flex items-center justify-end gap-1' },
+                    {
+                      className:
+                        'flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity',
+                    },
                     React.createElement(UI.Tooltip, {
                       content: 'Editar',
                       children: React.createElement(
@@ -393,8 +436,8 @@ export function ServicesView() {
                     })
                   )
             )
-          )
-        )
+          );
+        })
       )
     );
   }
@@ -404,85 +447,90 @@ export function ServicesView() {
     null,
     React.createElement(
       'div',
-      { className: 'font-inter min-h-screen bg-[var(--cg-bg-secondary)] p-6' },
+      { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
       React.createElement(
         'div',
-        { className: 'max-w-4xl mx-auto flex flex-col gap-6' },
+        { className: 'max-w-6xl mx-auto flex flex-col gap-6' },
 
-        // Header
+        // Header de página
         React.createElement(
           'div',
-          { className: 'flex items-center justify-between' },
+          null,
           React.createElement(
-            'div',
-            null,
-            React.createElement(
-              'h1',
-              { className: 'text-2xl font-bold text-[var(--cg-text)]' },
-              'Servicios y Precios'
-            ),
-            React.createElement(
-              'p',
-              { className: 'text-sm text-[var(--cg-text-muted)] mt-1' },
-              'Gestionar servicios veterinarios y sus precios'
-            )
+            'h1',
+            { className: 'text-2xl font-bold text-cg-text' },
+            'Servicios y Precios'
           ),
           React.createElement(
-            UI.Button,
-            { onClick: handleCreate },
-            React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 16 }),
-            'Nuevo servicio'
+            'p',
+            { className: 'text-sm text-cg-text-muted mt-1' },
+            'Gestionar servicios veterinarios y sus precios'
           )
         ),
 
-        // Filtros
+        // Card unificada: toolbar + tabla
         React.createElement(
           UI.Card,
-          { className: 'p-4' },
+          { className: 'overflow-hidden' },
+
+          // Toolbar: búsqueda + acción
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-3' },
-
-            // Barra de búsqueda
+            { className: 'flex items-center gap-3 p-4' },
             React.createElement(UI.Input, {
               type: 'text',
               placeholder: 'Buscar servicio...',
               value: localSearch,
               onChange: handleSearchChange,
+              className: 'flex-1',
             }),
+            React.createElement(
+              UI.Button,
+              { onClick: handleCreate },
+              React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 16 }),
+              'Nuevo servicio'
+            )
+          ),
 
-            // Chips de categorías
-            serviceCategories.length > 0 &&
+          // Tabs de categorías
+          serviceCategories.length > 0 &&
+            React.createElement(
+              'div',
+              { className: 'px-4 pb-4' },
               React.createElement(
-                'div',
-                { className: 'flex flex-wrap gap-2' },
-                serviceCategories.map((cat: Category) =>
-                  React.createElement(
-                    UI.Chip,
-                    {
-                      key: cat.id,
-                      variant: activeCatId === cat.id ? 'brand' : 'default',
-                      onClick: () => handleCategoryFilter(cat.id),
-                      className: 'cursor-pointer',
-                    },
-                    cat.name
+                UI.Tabs,
+                {
+                  value: activeCatId ?? 'all',
+                  onValueChange: handleTabChange,
+                },
+                React.createElement(
+                  UI.TabsList,
+                  { className: 'bg-transparent p-0' },
+                  React.createElement(UI.TabsTrigger, { value: 'all' }, 'Todos'),
+                  ...serviceCategories.map((cat: Category) =>
+                    React.createElement(UI.TabsTrigger, { key: cat.id, value: cat.id }, cat.name)
                   )
                 )
               )
-          )
-        ),
+            ),
 
-        // Resultados
-        React.createElement(UI.Card, { className: 'overflow-hidden' }, renderTableContent()),
+          React.createElement(UI.Separator, null),
 
-        // Contador
-        !loading &&
-          services.length > 0 &&
-          React.createElement(
-            'span',
-            { className: 'text-xs text-[var(--cg-text-muted)]' },
-            `${services.length} servicio${services.length === 1 ? '' : 's'}`
-          )
+          // Contador de resultados
+          !loading &&
+            React.createElement(
+              'div',
+              { className: 'flex justify-end px-4 py-2' },
+              React.createElement(
+                'span',
+                { className: 'text-xs text-cg-text-muted' },
+                `${services.length} servicio${services.length === 1 ? '' : 's'}`
+              )
+            ),
+
+          // Contenido de la tabla
+          renderTableContent()
+        )
       ),
 
       // Modal crear/editar servicio
@@ -536,7 +584,7 @@ export function ServicesView() {
             React.createElement(
               'div',
               { className: 'flex flex-col gap-1' },
-              React.createElement(UI.Label, null, 'Descripción'),
+              React.createElement(UI.Label, null, 'Descripción (opcional)'),
               React.createElement(UI.Textarea, {
                 value: form.description,
                 onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
@@ -582,12 +630,13 @@ export function ServicesView() {
                   'span',
                   {
                     className:
-                      'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
+                      'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-cg-text-muted',
                   },
                   '$'
                 ),
                 React.createElement(UI.Input, {
-                  type: 'number',
+                  type: 'text',
+                  inputMode: 'decimal',
                   value: form.price,
                   onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                     setForm((prev: ServiceFormData) => ({ ...prev, price: e.target.value })),
