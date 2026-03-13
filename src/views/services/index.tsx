@@ -90,6 +90,16 @@ export function ServicesView() {
     );
   }, [products, rootCategory, serviceCategoryIds]);
 
+  // Conteo por categoría (para mostrar en tabs)
+  const countByCat = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const svc of filteredServices) {
+      const k = svc.category_id ?? '';
+      map.set(k, (map.get(k) ?? 0) + 1);
+    }
+    return map;
+  }, [filteredServices]);
+
   // --- Sorting local ---
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(false);
@@ -242,7 +252,7 @@ export function ServicesView() {
   if (isSaving) submitLabel = 'Guardando...';
   else if (editingService) submitLabel = 'Guardar cambios';
 
-  // Contenido de la tabla (loading / error / vacío / filas)
+  // --- Contenido de la tabla ---
   function renderTableContent(): ReturnType<typeof React.createElement> {
     if (loading) {
       return React.createElement(UI.LoadingOverlay, {
@@ -274,7 +284,6 @@ export function ServicesView() {
       });
     }
     if (services.length === 0) {
-      // Estado vacío con filtros activos
       if (localSearch || activeCatId) {
         return React.createElement(UI.EmptyState, {
           title: 'Sin resultados',
@@ -300,7 +309,6 @@ export function ServicesView() {
           className: 'py-12',
         });
       }
-      // Estado vacío sin filtros
       return React.createElement(UI.EmptyState, {
         title: 'Sin servicios registrados',
         description: 'Agregá tu primer servicio para comenzar a gestionarlos.',
@@ -354,6 +362,7 @@ export function ServicesView() {
         null,
         services.map((svc: Product) => {
           const priceFormatted = formatPrice(svc.sale_price);
+          const catName = categoryMap.get(svc.category_id ?? '');
 
           return React.createElement(
             UI.TableRow,
@@ -363,20 +372,22 @@ export function ServicesView() {
             React.createElement(
               UI.TableCell,
               null,
-              React.createElement('div', { className: 'font-medium text-cg-text' }, svc.name),
+              React.createElement('span', { className: 'font-semibold text-cg-text' }, svc.name),
               svc.description &&
                 React.createElement(
-                  'div',
+                  'p',
                   { className: 'text-xs text-cg-text-muted mt-0.5 line-clamp-1' },
                   svc.description
                 )
             ),
 
-            // Categoría
+            // Categoría como badge
             React.createElement(
               UI.TableCell,
-              { className: 'text-cg-text-muted' },
-              categoryMap.get(svc.category_id ?? '') ?? '-'
+              null,
+              catName
+                ? React.createElement(UI.Badge, { variant: 'secondary', size: 'sm' }, catName)
+                : React.createElement('span', { className: 'text-cg-text-muted text-sm' }, '—')
             ),
 
             // Precio
@@ -450,90 +461,98 @@ export function ServicesView() {
       { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
       React.createElement(
         'div',
-        { className: 'max-w-6xl mx-auto flex flex-col gap-6' },
+        { className: 'w-full flex flex-col gap-6' },
 
-        // Header de página
+        // === Header: título a la izquierda, acción a la derecha ===
         React.createElement(
           'div',
-          null,
+          { className: 'flex items-start justify-between gap-4' },
           React.createElement(
-            'h1',
-            { className: 'text-2xl font-bold text-cg-text' },
-            'Servicios y Precios'
+            'div',
+            null,
+            React.createElement(
+              'h1',
+              { className: 'text-2xl font-bold text-cg-text' },
+              'Servicios y Precios'
+            ),
+            React.createElement(
+              'div',
+              { className: 'flex items-center gap-2 mt-1' },
+              React.createElement(
+                'p',
+                { className: 'text-sm text-cg-text-muted' },
+                'Catálogo de servicios veterinarios'
+              ),
+              !loading &&
+                services.length > 0 &&
+                React.createElement(
+                  UI.Badge,
+                  { variant: 'secondary', size: 'sm' },
+                  `${filteredServices.length} servicio${filteredServices.length === 1 ? '' : 's'}`
+                )
+            )
           ),
           React.createElement(
-            'p',
-            { className: 'text-sm text-cg-text-muted mt-1' },
-            'Gestionar servicios veterinarios y sus precios'
+            UI.Button,
+            { onClick: handleCreate },
+            React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 16 }),
+            'Nuevo servicio'
           )
         ),
 
-        // Card unificada: toolbar + tabla
+        // === Búsqueda + categorías ===
         React.createElement(
-          UI.Card,
-          { className: 'overflow-hidden' },
+          'div',
+          { className: 'flex flex-col gap-3' },
 
-          // Toolbar: búsqueda + acción
+          // Búsqueda con ícono
           React.createElement(
             'div',
-            { className: 'flex items-center gap-3 p-4' },
+            { className: 'relative' },
+            React.createElement(UI.DynamicIcon, {
+              icon: 'Search',
+              size: 16,
+              className: 'absolute left-3 top-1/2 -translate-y-1/2 text-cg-text-muted',
+            }),
             React.createElement(UI.Input, {
               type: 'text',
               placeholder: 'Buscar servicio...',
               value: localSearch,
               onChange: handleSearchChange,
-              className: 'flex-1',
-            }),
-            React.createElement(
-              UI.Button,
-              { onClick: handleCreate },
-              React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 16 }),
-              'Nuevo servicio'
-            )
+              className: 'pl-10',
+            })
           ),
 
-          // Tabs de categorías
+          // Tabs de categorías con conteo
           serviceCategories.length > 0 &&
             React.createElement(
-              'div',
-              { className: 'px-4 pb-4' },
+              UI.Tabs,
+              { value: activeCatId ?? 'all', onValueChange: handleTabChange },
               React.createElement(
-                UI.Tabs,
-                {
-                  value: activeCatId ?? 'all',
-                  onValueChange: handleTabChange,
-                },
+                UI.TabsList,
+                { className: 'bg-transparent p-0' },
                 React.createElement(
-                  UI.TabsList,
-                  { className: 'bg-transparent p-0' },
-                  React.createElement(UI.TabsTrigger, { value: 'all' }, 'Todos'),
-                  ...serviceCategories.map((cat: Category) =>
-                    React.createElement(UI.TabsTrigger, { key: cat.id, value: cat.id }, cat.name)
-                  )
-                )
+                  UI.TabsTrigger,
+                  { value: 'all' },
+                  !loading ? `Todos (${filteredServices.length})` : 'Todos'
+                ),
+                ...serviceCategories.map((cat: Category) => {
+                  const count = countByCat.get(cat.id) ?? 0;
+                  return React.createElement(
+                    UI.TabsTrigger,
+                    { key: cat.id, value: cat.id },
+                    !loading ? `${cat.name} (${count})` : cat.name
+                  );
+                })
               )
-            ),
+            )
+        ),
 
-          React.createElement(UI.Separator, null),
-
-          // Contador de resultados
-          !loading &&
-            React.createElement(
-              'div',
-              { className: 'flex justify-end px-4 py-2' },
-              React.createElement(
-                'span',
-                { className: 'text-xs text-cg-text-muted' },
-                `${services.length} servicio${services.length === 1 ? '' : 's'}`
-              )
-            ),
-
-          // Contenido de la tabla
-          renderTableContent()
-        )
+        // === Tabla ===
+        React.createElement(UI.Card, { className: 'overflow-hidden' }, renderTableContent())
       ),
 
-      // Modal crear/editar servicio
+      // === Modal crear/editar ===
       showModal &&
         React.createElement(UI.FormDialog, {
           open: showModal,

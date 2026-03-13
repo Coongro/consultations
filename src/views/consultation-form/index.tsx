@@ -40,7 +40,7 @@ export function ConsultationFormView(props: { petId?: string; consultationId?: s
     { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
     React.createElement(
       'div',
-      { className: 'max-w-6xl mx-auto' },
+      { className: 'w-full' },
       React.createElement(
         'div',
         { className: 'mb-6' },

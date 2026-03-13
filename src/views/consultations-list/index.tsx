@@ -318,7 +318,7 @@ export function ConsultationsListView() {
     { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
     React.createElement(
       'div',
-      { className: 'max-w-6xl mx-auto flex flex-col gap-6' },
+      { className: 'w-full flex flex-col gap-6' },
 
       // ── Header ──
       React.createElement(
