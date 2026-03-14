@@ -1,8 +1,16 @@
 /**
  * Formulario para crear/editar consultas. 6 secciones segun spec.
  */
-import { getHostReact, getHostUI, usePlugin, useViewContributions } from '@coongro/plugin-sdk';
+import {
+  getHostReact,
+  getHostUI,
+  usePlugin,
+  useViewContributions,
+  actions,
+} from '@coongro/plugin-sdk';
+import type { Product, Category } from '@coongro/products';
 
+import { ROOT_SERVICE_CATEGORY_SLUG } from '../constants/services.js';
 import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationMutations } from '../hooks/useConsultationMutations.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
@@ -15,7 +23,7 @@ import { ServiceLineForm } from './ServiceLineForm.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useCallback, useEffect } = React;
+const { useState, useCallback, useEffect, useRef, useMemo } = React;
 
 export function ConsultationForm(props: ConsultationFormProps) {
   const { consultationId, petId, defaults, onSuccess, onCancel, className = '' } = props;
@@ -48,6 +56,65 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [notes, setNotes] = useState(defaults?.notes ?? '');
   const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
   const [serviceLines, setServiceLines] = useState<ServiceLineInput[]>(defaults?.services ?? []);
+
+  // Catálogo de servicios para ServiceLineForm
+  const [serviceCatalog, setServiceCatalog] = useState<Product[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<Category[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const catalogMountedRef = useRef(true);
+
+  useEffect(() => {
+    catalogMountedRef.current = true;
+    return () => {
+      catalogMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!consultSettings.showPrices) {
+      setCatalogLoading(false);
+      return;
+    }
+    void (async () => {
+      try {
+        const cats = await actions.execute<Category[]>('products.categories.listTree');
+        if (!catalogMountedRef.current) return;
+        setServiceCategories(cats);
+
+        const root = cats.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
+        if (!root) {
+          setCatalogLoading(false);
+          return;
+        }
+        const serviceIds = new Set<string>([
+          root.id,
+          ...cats.filter((c: Category) => c.parent_id === root.id).map((c: Category) => c.id),
+        ]);
+
+        const all = await actions.execute<Product[]>('products.items.search', {
+          limit: 300,
+          isActive: true,
+        });
+        if (!catalogMountedRef.current) return;
+        setServiceCatalog(all.filter((p: Product) => serviceIds.has(p.category_id ?? '')));
+      } catch {
+        // Sin catálogo
+      } finally {
+        if (catalogMountedRef.current) setCatalogLoading(false);
+      }
+    })();
+  }, [consultSettings.showPrices]);
+
+  // Subcategorías de servicios para el modal de creación
+  const serviceSubcategories = useMemo(() => {
+    const root = serviceCategories.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
+    if (!root) return [];
+    return serviceCategories.filter((c: Category) => c.parent_id === root.id);
+  }, [serviceCategories]);
+
+  const handleProductCreated = useCallback((product: Product) => {
+    setServiceCatalog((prev) => [...prev, product]);
+  }, []);
 
   // Contribuciones de otros plugins (ej: vet-pharmacy inyecta selector de medicamentos)
   const { sections: contributedSections } = useViewContributions('consultations.form.open', {
@@ -392,6 +459,10 @@ export function ConsultationForm(props: ConsultationFormProps) {
           React.createElement(ServiceLineForm, {
             services: serviceLines,
             onChange: setServiceLines,
+            catalog: serviceCatalog,
+            categories: serviceSubcategories,
+            catalogLoading,
+            onProductCreated: handleProductCreated,
           })
         )
       ),

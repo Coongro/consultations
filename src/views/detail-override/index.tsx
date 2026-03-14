@@ -4,15 +4,17 @@
 
 import { PetDetail, PetForm } from '@coongro/patients';
 import type { Pet } from '@coongro/patients';
-import { getHostReact, getHostUI, usePlugin } from '@coongro/plugin-sdk';
+import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
 import { ConsultationTimeline } from '../../components/ConsultationTimeline.js';
 import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
+import { useConsultationsByPet } from '../../hooks/useConsultationsByPet.js';
+import { useConsultationsSettings } from '../../hooks/useConsultationsSettings.js';
 import type { Consultation } from '../../types/consultation.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useCallback, useState } = React;
+const { useCallback, useState, useEffect, useRef } = React;
 
 export function DetailOverrideView(props: { petId?: string }) {
   const { views, toast } = usePlugin();
@@ -21,6 +23,35 @@ export function DetailOverrideView(props: { petId?: string }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConsultationModal, setShowConsultationModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Fetch de totales de servicios para pasar al timeline
+  const { settings: consultSettings } = useConsultationsSettings();
+  const { consultations: timelineConsultations } = useConsultationsByPet({ petId, limit: 5 });
+  const [totalsMap, setTotalsMap] = useState<Record<string, number>>({});
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!consultSettings.showPrices || timelineConsultations.length === 0) return;
+    const ids = timelineConsultations.map((c: Consultation) => c.id);
+    void (async () => {
+      try {
+        const result = await actions.execute<Record<string, number>>(
+          'consultations.services.totalsByConsultations',
+          { consultationIds: ids }
+        );
+        if (mountedRef.current) setTotalsMap(result ?? {});
+      } catch {
+        // Silencioso
+      }
+    })();
+  }, [timelineConsultations, consultSettings.showPrices]);
 
   const handleBack = useCallback(() => {
     views.open('patients.list.open');
@@ -74,6 +105,7 @@ export function DetailOverrideView(props: { petId?: string }) {
         React.createElement(ConsultationTimeline, {
           petId,
           limit: 5,
+          totalsMap,
           onConsultationClick: (c: Consultation) =>
             views.open('consultations.detail.open', { consultationId: c.id }),
         }),

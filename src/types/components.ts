@@ -33,6 +33,8 @@ export interface ColumnDef<T = unknown> {
 export interface ConsultationTimelineProps {
   petId: string;
   limit?: number;
+  /** Mapa consultationId -> monto total de servicios. Si se omite no muestra montos. */
+  totalsMap?: Record<string, number>;
   onConsultationClick?: (consultation: Consultation) => void;
   showCreateButton?: boolean;
   onCreateClick?: () => void;
@@ -69,8 +71,18 @@ export interface ConsultationFormProps {
 // ConsultationDetail
 // ---------------------------------------------------------------------------
 
+export interface PetInfo {
+  name: string;
+  species: string;
+  breed: string | null;
+  birth_date: string | null;
+  sex: string | null;
+}
+
 export interface ConsultationDetailProps {
   consultationId: string;
+  /** Datos de la mascota. Si se omite, el componente no muestra info de mascota. */
+  pet?: PetInfo | null;
   extraSections?: SectionDef[];
   extraActions?: ActionDef<Consultation>[];
   onEdit?: (consultation: Consultation) => void;

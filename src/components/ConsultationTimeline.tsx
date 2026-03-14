@@ -2,10 +2,9 @@
  * Timeline cronologico de consultas de una mascota.
  * Componente principal para integracion en la ficha de paciente.
  */
-import { getHostReact, getHostUI, actions } from '@coongro/plugin-sdk';
+import { getHostReact, getHostUI } from '@coongro/plugin-sdk';
 
 import { useConsultationsByPet } from '../hooks/useConsultationsByPet.js';
-import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationTimelineProps } from '../types/components.js';
 import type { Consultation } from '../types/consultation.js';
 
@@ -13,12 +12,12 @@ import { ConsultationCard } from './ConsultationCard.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useEffect, useRef } = React;
 
 export function ConsultationTimeline(props: ConsultationTimelineProps) {
   const {
     petId,
     limit = 5,
+    totalsMap = {},
     onConsultationClick,
     showCreateButton = false,
     onCreateClick,
@@ -29,34 +28,6 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
     petId,
     limit,
   });
-  const { settings: consultSettings } = useConsultationsSettings();
-
-  // Cargar totales de servicios para cada consulta
-  const [totalsMap, setTotalsMap] = useState<Record<string, number>>({});
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!consultSettings.showPrices || consultations.length === 0) return;
-    const ids = consultations.map((c: Consultation) => c.id);
-    void (async () => {
-      try {
-        const result = await actions.execute<Record<string, number>>(
-          'consultations.services.totalsByConsultations',
-          { consultationIds: ids }
-        );
-        if (mountedRef.current) setTotalsMap(result ?? {});
-      } catch {
-        // Silenciar - si falla, simplemente no muestra montos
-      }
-    })();
-  }, [consultations, consultSettings.showPrices]);
 
   if (loading) {
     return React.createElement(UI.LoadingOverlay, {
@@ -105,7 +76,7 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
           React.createElement(ConsultationCard, {
             key: c.id,
             consultation: c,
-            amount: consultSettings.showPrices ? (totalsMap[c.id] ?? null) : null,
+            amount: totalsMap[c.id] ?? null,
             onClick: onConsultationClick,
           })
         ),
