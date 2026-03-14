@@ -2,26 +2,23 @@
  * Componente para gestionar líneas de servicios prestados en una consulta.
  *
  * Usa el Combobox de ui-components para buscar en el catálogo de servicios.
- * Si el texto no existe, "Crear '...'" abre un mini-modal que crea el servicio
- * en products y lo agrega a la línea de la consulta.
+ * Si el texto no existe, "Crear '...'" abre un ServiceFormDialog para crear
+ * el servicio y agregarlo a la línea de la consulta.
  */
 import { getHostReact, getHostUI, actions } from '@coongro/plugin-sdk';
 import type { Product, Category } from '@coongro/products';
 
-import { ROOT_SERVICE_CATEGORY_SLUG } from '../constants/services.js';
 import type { ServiceLineInput } from '../types/consultation.js';
+import { createCategoryMap } from '../utils/categories.js';
+import { formatCurrency, formatPrice } from '../utils/price.js';
+
+import { ServiceFormDialog } from './ServiceFormDialog.js';
+import type { ServiceFormValues } from './ServiceFormDialog.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useCallback, useEffect, useMemo, useRef } = React;
+const { useState, useCallback, useMemo } = React;
 
-// Formato de precio para mostrar en catálogo y subtotales
-function formatPrice(price: string | null): string {
-  if (!price || price === '0') return 'Sin precio';
-  return `$${parseFloat(price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
-}
-
-// Construye una línea de servicio a partir de un producto del catálogo
 function buildServiceLine(product: Product): ServiceLineInput {
   return {
     product_id: product.id,
@@ -35,147 +32,14 @@ function buildServiceLine(product: Product): ServiceLineInput {
 export interface ServiceLineFormProps {
   services: ServiceLineInput[];
   onChange: (services: ServiceLineInput[]) => void;
-}
-
-interface CreateServiceModalProps {
-  initialName: string;
-  serviceCategories: Category[];
-  onClose: () => void;
-  onCreated: (product: Product) => void;
-}
-
-function CreateServiceModal({
-  initialName,
-  serviceCategories,
-  onClose,
-  onCreated,
-}: CreateServiceModalProps) {
-  const [name, setName] = useState(initialName);
-  const [categoryId, setCategoryId] = useState(serviceCategories[0]?.id ?? '');
-  const [price, setPrice] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = useCallback(async () => {
-    if (!name.trim()) {
-      setError('El nombre es obligatorio');
-      return;
-    }
-    setSaving(true);
-    setError('');
-    try {
-      const result = await actions.execute<Product[]>('products.items.create', {
-        data: {
-          name: name.trim(),
-          category_id: categoryId || null,
-          sale_price: price || '0',
-          metadata: { type: 'service' },
-        },
-      });
-      const created = Array.isArray(result) ? result[0] : result;
-      if (created) onCreated(created);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo crear el servicio');
-    } finally {
-      setSaving(false);
-    }
-  }, [name, categoryId, price, onCreated]);
-
-  return React.createElement(UI.FormDialog, {
-    open: true,
-    onOpenChange: (open: boolean) => {
-      if (!open) onClose();
-    },
-    title: 'Nuevo servicio',
-    size: 'sm',
-    footer: React.createElement(
-      React.Fragment,
-      null,
-      React.createElement(
-        UI.Button,
-        { type: 'button', variant: 'outline', onClick: onClose },
-        'Cancelar'
-      ),
-      React.createElement(
-        UI.Button,
-        {
-          type: 'button',
-          onClick: () => {
-            void handleSubmit();
-          },
-          disabled: saving,
-        },
-        saving ? 'Guardando...' : 'Crear servicio'
-      )
-    ),
-    children: React.createElement(
-      React.Fragment,
-      null,
-
-      error && React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error),
-
-      // Nombre
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-1' },
-        React.createElement(UI.Label, null, 'Nombre *'),
-        React.createElement(UI.Input, {
-          type: 'text',
-          value: name,
-          autoFocus: true,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value),
-          placeholder: 'Ej: Consulta general',
-        })
-      ),
-
-      // Categoría
-      serviceCategories.length > 0 &&
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-1' },
-          React.createElement(UI.Label, null, 'Categoría'),
-          React.createElement(
-            UI.Select,
-            {
-              value: categoryId,
-              onValueChange: (v: string) => setCategoryId(v),
-            },
-            React.createElement(UI.SelectItem, { value: '' }, '— Sin categoría —'),
-            serviceCategories.map((cat: Category) =>
-              React.createElement(UI.SelectItem, { key: cat.id, value: cat.id }, cat.name)
-            )
-          )
-        ),
-
-      // Precio
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-1' },
-        React.createElement(UI.Label, null, 'Precio'),
-        React.createElement(
-          'div',
-          { className: 'relative' },
-          React.createElement(
-            'span',
-            {
-              className:
-                'absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--cg-text-muted)]',
-            },
-            '$'
-          ),
-          React.createElement(UI.Input, {
-            type: 'number',
-            value: price,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setPrice(e.target.value),
-            min: '0',
-            step: '0.01',
-            placeholder: '0.00',
-            className: 'pl-7',
-          })
-        )
-      )
-    ),
-  });
+  /** Catálogo de productos/servicios disponibles */
+  catalog: Product[];
+  /** Categorías para el modal de creación de servicio */
+  categories: Category[];
+  /** Indica si el catálogo está cargando */
+  catalogLoading?: boolean;
+  /** Callback cuando se crea un producto nuevo (para que el caller actualice su catálogo) */
+  onProductCreated?: (product: Product) => void;
 }
 
 interface ServiceSearchContentProps {
@@ -202,7 +66,6 @@ function ServiceSearchContent({
       .slice(0, 20);
   }, [catalog, search]);
 
-  // No mostrar "Crear" si el nombre exacto ya existe
   const queryExistsInCatalog = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length > 0 && catalog.some((p: Product) => p.name.toLowerCase() === q);
@@ -220,7 +83,6 @@ function ServiceSearchContent({
     UI.ComboboxContent,
     null,
 
-    // Items del catálogo
     filtered.length > 0
       ? filtered.map((p: Product) =>
           React.createElement(
@@ -228,7 +90,10 @@ function ServiceSearchContent({
             {
               key: p.id,
               value: p.id,
-              subtitle: [categoryMap.get(p.category_id ?? '') ?? '', formatPrice(p.sale_price)]
+              subtitle: [
+                categoryMap.get(p.category_id ?? '') ?? '',
+                formatPrice(p.sale_price, 'Sin precio'),
+              ]
                 .filter(Boolean)
                 .join(' · '),
             },
@@ -241,7 +106,6 @@ function ServiceSearchContent({
           search.trim() ? 'Sin resultados' : 'Escribe para buscar en el catálogo'
         ),
 
-    // Opción "Crear" (solo si el nombre no existe ya)
     !queryExistsInCatalog &&
       React.createElement(UI.ComboboxCreate, {
         onCreate: handleCreate,
@@ -250,65 +114,18 @@ function ServiceSearchContent({
   );
 }
 
-export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
-  const [catalog, setCatalog] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [catalogLoading, setCatalogLoading] = useState(true);
+export function ServiceLineForm({
+  services,
+  onChange,
+  catalog,
+  categories,
+  catalogLoading = false,
+  onProductCreated,
+}: ServiceLineFormProps) {
   const [createName, setCreateName] = useState<string | null>(null);
-  const mountedRef = useRef(true);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  // Cargar catálogo de servicios (todas las subcategorías de la raíz)
-  useEffect(() => {
-    void (async () => {
-      try {
-        const cats = await actions.execute<Category[]>('products.categories.listTree');
-        if (!mountedRef.current) return;
-        setCategories(cats);
-
-        const root = cats.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
-        if (!root) {
-          setCatalogLoading(false);
-          return;
-        }
-        const serviceIds = new Set<string>([
-          root.id,
-          ...cats.filter((c: Category) => c.parent_id === root.id).map((c: Category) => c.id),
-        ]);
-
-        const all = await actions.execute<Product[]>('products.items.search', {
-          limit: 300,
-          isActive: true,
-        });
-        if (!mountedRef.current) return;
-        setCatalog(all.filter((p: Product) => serviceIds.has(p.category_id ?? '')));
-      } catch {
-        // Sin catálogo
-      } finally {
-        if (mountedRef.current) setCatalogLoading(false);
-      }
-    })();
-  }, []);
-
-  // Subcategorías de servicios para el modal de creación
-  const serviceCategories = useMemo(() => {
-    const root = categories.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
-    if (!root) return [];
-    return categories.filter((c: Category) => c.parent_id === root.id);
-  }, [categories]);
-
-  // Mapa categoría id -> nombre
-  const categoryMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const c of categories) map.set(c.id, c.name);
-    return map;
-  }, [categories]);
+  const categoryMap = useMemo(() => createCategoryMap(categories), [categories]);
 
   const handleSelectProduct = useCallback(
     (productId: string) => {
@@ -319,13 +136,32 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
     [catalog, services, onChange]
   );
 
-  const handleServiceCreated = useCallback(
-    (product: Product) => {
-      setCatalog((prev) => [...prev, product]);
-      onChange([...services, buildServiceLine(product)]);
-      setCreateName(null);
+  const handleSaveNewService = useCallback(
+    async (values: ServiceFormValues): Promise<boolean> => {
+      setSaving(true);
+      try {
+        const result = await actions.execute<Product[]>('products.items.create', {
+          data: {
+            name: values.name.trim(),
+            category_id: values.categoryId || null,
+            sale_price: values.price || '0',
+            metadata: { type: 'service' },
+          },
+        });
+        const created = Array.isArray(result) ? result[0] : result;
+        if (created) {
+          onProductCreated?.(created);
+          onChange([...services, buildServiceLine(created)]);
+          return true;
+        }
+      } catch {
+        // El ServiceFormDialog no muestra toast; lo manejamos silenciosamente
+      } finally {
+        setSaving(false);
+      }
+      return false;
     },
-    [services, onChange]
+    [services, onChange, onProductCreated]
   );
 
   const handleRemove = useCallback(
@@ -363,16 +199,18 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
     null,
     React.createElement(
       'div',
-      { className: 'flex flex-col gap-3' },
+      { className: 'flex flex-col gap-4' },
 
-      // Modal de creación (cuando se clickea "Crear '...'")
-      createName !== null &&
-        React.createElement(CreateServiceModal, {
-          initialName: createName,
-          serviceCategories,
-          onClose: () => setCreateName(null),
-          onCreated: handleServiceCreated,
-        }),
+      // Modal de creación via ServiceFormDialog reutilizable
+      React.createElement(ServiceFormDialog, {
+        open: createName !== null,
+        onClose: () => setCreateName(null),
+        onSave: handleSaveNewService,
+        initialValues: createName !== null ? { name: createName } : null,
+        categories,
+        saving,
+        showDescription: false,
+      }),
 
       // Combobox buscador
       React.createElement(
@@ -392,112 +230,112 @@ export function ServiceLineForm({ services, onChange }: ServiceLineFormProps) {
         })
       ),
 
-      // Encabezados (solo si hay líneas)
-      services.length > 0 &&
-        React.createElement(
-          'div',
-          {
-            className:
-              'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center text-xs text-[var(--cg-text-muted)]',
-          },
-          React.createElement('span', null, 'Servicio'),
-          React.createElement('span', { className: 'text-center' }, 'Cant.'),
-          React.createElement('span', { className: 'text-right' }, 'Precio'),
-          React.createElement('span', { className: 'text-right' }, 'Subtotal'),
-          React.createElement('span', null, '')
-        ),
-
       // Líneas de servicios
       services.length > 0 &&
         React.createElement(
           'div',
-          { className: 'flex flex-col gap-2' },
-          services.map((svc: ServiceLineInput, index: number) =>
-            React.createElement(
-              'div',
-              {
-                key: index,
-                className: 'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center',
-              },
-
-              // Nombre
-              React.createElement(UI.Input, {
-                type: 'text',
-                value: svc.product_name,
-                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange(index, 'product_name', e.target.value),
-                placeholder: 'Nombre del servicio',
-                readOnly: !!svc.product_id,
-                size: 'sm',
-              }),
-
-              // Cantidad
-              React.createElement(UI.Input, {
-                type: 'number',
-                value: svc.quantity,
-                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange(index, 'quantity', e.target.value),
-                min: '1',
-                step: '1',
-                className: 'text-center',
-                size: 'sm',
-              }),
-
-              // Precio unitario
-              React.createElement(UI.Input, {
-                type: 'number',
-                value: svc.unit_price,
-                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange(index, 'unit_price', e.target.value),
-                min: '0',
-                step: '0.01',
-                className: 'text-right',
-                size: 'sm',
-              }),
-
-              // Subtotal
-              React.createElement(
-                'span',
-                {
-                  className: 'text-sm text-right font-medium text-[var(--cg-text)]',
-                },
-                `$${(parseFloat(svc.subtotal) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
-              ),
-
-              // Eliminar
-              React.createElement(UI.Tooltip, {
-                content: 'Eliminar',
-                children: React.createElement(
-                  UI.IconButton,
-                  {
-                    variant: 'danger',
-                    size: 'xs',
-                    onClick: () => handleRemove(index),
-                  },
-                  React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
-                ),
-              })
-            )
-          )
-        ),
-
-      // Total
-      services.length > 0 &&
-        React.createElement(
-          'div',
           {
-            className:
-              'flex items-center justify-end gap-3 pt-2 border-t border-[var(--cg-border)]',
+            className: 'rounded-md border border-[var(--cg-border)] overflow-hidden',
           },
+
+          // Encabezados
           React.createElement(
-            'span',
-            { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
-            'Total:'
+            'div',
+            {
+              className:
+                'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center px-3 py-2 bg-[var(--cg-surface-raised)] text-xs font-medium text-[var(--cg-text-muted)] border-b border-[var(--cg-border)]',
+            },
+            React.createElement('span', null, 'Servicio'),
+            React.createElement('span', { className: 'text-center' }, 'Cant.'),
+            React.createElement('span', { className: 'text-right' }, 'Precio unit.'),
+            React.createElement('span', { className: 'text-right' }, 'Subtotal'),
+            React.createElement('span', null, '')
           ),
+
+          // Filas
           React.createElement(
-            'span',
-            { className: 'text-base font-bold text-[var(--cg-text)]' },
-            `$${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+            'div',
+            { className: 'divide-y divide-[var(--cg-border)]' },
+            services.map((svc: ServiceLineInput, index: number) =>
+              React.createElement(
+                'div',
+                {
+                  key: index,
+                  className:
+                    'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center px-3 py-2',
+                },
+
+                React.createElement(UI.Input, {
+                  type: 'text',
+                  value: svc.product_name,
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChange(index, 'product_name', e.target.value),
+                  placeholder: 'Nombre del servicio',
+                  readOnly: !!svc.product_id,
+                  size: 'sm',
+                }),
+
+                React.createElement(UI.Input, {
+                  type: 'number',
+                  value: svc.quantity,
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChange(index, 'quantity', e.target.value),
+                  min: '1',
+                  step: '1',
+                  className: 'text-center',
+                  size: 'sm',
+                }),
+
+                React.createElement(UI.Input, {
+                  type: 'number',
+                  value: svc.unit_price,
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChange(index, 'unit_price', e.target.value),
+                  min: '0',
+                  step: '0.01',
+                  className: 'text-right',
+                  size: 'sm',
+                }),
+
+                React.createElement(
+                  'span',
+                  { className: 'text-sm text-right font-medium text-[var(--cg-text)]' },
+                  formatCurrency(parseFloat(svc.subtotal) || 0)
+                ),
+
+                React.createElement(UI.Tooltip, {
+                  content: 'Eliminar',
+                  children: React.createElement(
+                    UI.IconButton,
+                    {
+                      variant: 'danger',
+                      size: 'xs',
+                      onClick: () => handleRemove(index),
+                    },
+                    React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
+                  ),
+                })
+              )
+            )
+          ),
+
+          // Total
+          React.createElement(
+            'div',
+            {
+              className:
+                'flex items-center justify-end gap-3 px-3 py-2.5 border-t border-[var(--cg-border)] bg-[var(--cg-surface-raised)]',
+            },
+            React.createElement(
+              'span',
+              { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+              'Total:'
+            ),
+            React.createElement(
+              'span',
+              { className: 'text-base font-bold text-[var(--cg-text)]' },
+              formatCurrency(total)
+            )
           )
         )
     )

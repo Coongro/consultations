@@ -10,6 +10,7 @@ import {
   getReasonCategoryBadgeVariant,
   getReasonCategoryEmoji,
 } from '../utils/labels.js';
+import { formatCurrency } from '../utils/price.js';
 
 const React = getHostReact();
 const UI = getHostUI();
@@ -112,7 +113,7 @@ export function ConsultationCard(props: ConsultationCardProps) {
             React.createElement(
               'span',
               { className: 'text-xs font-medium text-[var(--cg-accent)]' },
-              `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+              formatCurrency(amount)
             )
         )
       ),

@@ -1,16 +1,18 @@
 /**
  * Vista de detalle de una consulta.
  */
-import { getHostReact, getHostUI, usePlugin } from '@coongro/plugin-sdk';
+import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
 import { ConsultationDetail } from '../../components/ConsultationDetail.js';
 import { ConsultationForm } from '../../components/ConsultationForm.js';
+import { useConsultation } from '../../hooks/useConsultation.js';
 import { useConsultationMutations } from '../../hooks/useConsultationMutations.js';
+import type { PetInfo } from '../../types/components.js';
 import type { Consultation } from '../../types/consultation.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useCallback } = React;
+const { useState, useCallback, useEffect, useRef } = React;
 
 export function ConsultationDetailView(props: { consultationId?: string }) {
   const { views, toast } = usePlugin();
@@ -20,6 +22,30 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { softDelete } = useConsultationMutations();
+
+  // Fetch de datos de mascota para pasar al detail
+  const { consultation } = useConsultation(consultationId ?? '');
+  const [pet, setPet] = useState<PetInfo | null>(null);
+  const petFetchedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!consultation?.pet_id || petFetchedRef.current === consultation.pet_id) return;
+    petFetchedRef.current = consultation.pet_id;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const result = await actions.execute<PetInfo>('patients.pets.getById', {
+          id: consultation.pet_id,
+        });
+        if (!cancelled && result) setPet(result);
+      } catch {
+        // Silencioso
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [consultation?.pet_id]);
 
   const handleBack = useCallback(() => {
     views.open('consultations.list.open');
@@ -68,6 +94,7 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
       React.createElement(ConsultationDetail, {
         key: refreshKey,
         consultationId,
+        pet,
         onBack: handleBack,
         onEdit: handleEdit,
         onDelete: handleDelete,
