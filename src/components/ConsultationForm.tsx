@@ -1,8 +1,16 @@
 /**
- * Formulario para crear/editar consultas. 6 secciones segun spec.
+ * Formulario para crear/editar consultas con secciones colapsables de datos clínicos.
  */
-import { getHostReact, getHostUI, usePlugin, useViewContributions } from '@coongro/plugin-sdk';
+import {
+  getHostReact,
+  getHostUI,
+  usePlugin,
+  useViewContributions,
+  actions,
+} from '@coongro/plugin-sdk';
+import type { Product, Category } from '@coongro/products';
 
+import { ROOT_SERVICE_CATEGORY_SLUG } from '../constants/services.js';
 import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationMutations } from '../hooks/useConsultationMutations.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
@@ -15,7 +23,7 @@ import { ServiceLineForm } from './ServiceLineForm.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useCallback, useEffect } = React;
+const { useState, useCallback, useEffect, useRef, useMemo } = React;
 
 export function ConsultationForm(props: ConsultationFormProps) {
   const { consultationId, petId, defaults, onSuccess, onCancel, className = '' } = props;
@@ -48,6 +56,65 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [notes, setNotes] = useState(defaults?.notes ?? '');
   const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
   const [serviceLines, setServiceLines] = useState<ServiceLineInput[]>(defaults?.services ?? []);
+
+  // Catálogo de servicios para ServiceLineForm
+  const [serviceCatalog, setServiceCatalog] = useState<Product[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<Category[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const catalogMountedRef = useRef(true);
+
+  useEffect(() => {
+    catalogMountedRef.current = true;
+    return () => {
+      catalogMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!consultSettings.showPrices) {
+      setCatalogLoading(false);
+      return;
+    }
+    void (async () => {
+      try {
+        const cats = await actions.execute<Category[]>('products.categories.listTree');
+        if (!catalogMountedRef.current) return;
+        setServiceCategories(cats);
+
+        const root = cats.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
+        if (!root) {
+          setCatalogLoading(false);
+          return;
+        }
+        const serviceIds = new Set<string>([
+          root.id,
+          ...cats.filter((c: Category) => c.parent_id === root.id).map((c: Category) => c.id),
+        ]);
+
+        const all = await actions.execute<Product[]>('products.items.search', {
+          limit: 300,
+          isActive: true,
+        });
+        if (!catalogMountedRef.current) return;
+        setServiceCatalog(all.filter((p: Product) => serviceIds.has(p.category_id ?? '')));
+      } catch {
+        // Sin catálogo
+      } finally {
+        if (catalogMountedRef.current) setCatalogLoading(false);
+      }
+    })();
+  }, [consultSettings.showPrices]);
+
+  // Subcategorías de servicios para el modal de creación
+  const serviceSubcategories = useMemo(() => {
+    const root = serviceCategories.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
+    if (!root) return [];
+    return serviceCategories.filter((c: Category) => c.parent_id === root.id);
+  }, [serviceCategories]);
+
+  const handleProductCreated = useCallback((product: Product) => {
+    setServiceCatalog((prev) => [...prev, product]);
+  }, []);
 
   // Contribuciones de otros plugins (ej: vet-pharmacy inyecta selector de medicamentos)
   const { sections: contributedSections } = useViewContributions('consultations.form.open', {
@@ -214,7 +281,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Datos básicos'
         ),
         React.createElement(
@@ -287,7 +354,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Motivo de consulta'
         ),
         consultSettings.reasonCategoriesEnabled &&
@@ -326,7 +393,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Examen clínico'
         ),
         React.createElement(
@@ -364,7 +431,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Diagnóstico'
         ),
         React.createElement(UI.Textarea, {
@@ -386,12 +453,16 @@ export function ConsultationForm(props: ConsultationFormProps) {
           { className: 'flex flex-col gap-3' },
           React.createElement(
             'h3',
-            { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+            { className: 'text-sm font-medium text-cg-text-muted' },
             'Servicios prestados'
           ),
           React.createElement(ServiceLineForm, {
             services: serviceLines,
             onChange: setServiceLines,
+            catalog: serviceCatalog,
+            categories: serviceSubcategories,
+            catalogLoading,
+            onProductCreated: handleProductCreated,
           })
         )
       ),
@@ -405,7 +476,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Tratamiento'
         ),
         React.createElement(UI.Textarea, {
@@ -443,7 +514,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Seguimiento'
         ),
         React.createElement(
