@@ -108,6 +108,7 @@ export function DetailOverrideView(props: { petId?: string }) {
           totalsMap,
           onConsultationClick: (c: Consultation) =>
             views.open('consultations.detail.open', { consultationId: c.id }),
+          onViewAll: () => views.open('consultations.list.open'),
         }),
     },
   ];

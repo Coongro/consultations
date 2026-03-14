@@ -19,7 +19,12 @@ export function ConsultationStats(props: ConsultationStatsProps) {
 
   const { stats, loading, error } = useConsultationStats();
 
-  if (error) return null;
+  if (error) {
+    return React.createElement(UI.ErrorDisplay, {
+      title: 'Error al cargar estadísticas',
+      message: error,
+    });
+  }
 
   const containerClass =
     layout === 'grid' ? `grid grid-cols-2 gap-4 ${className}` : `flex gap-4 ${className}`;

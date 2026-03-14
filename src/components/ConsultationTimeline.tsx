@@ -19,6 +19,7 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
     limit = 5,
     totalsMap = {},
     onConsultationClick,
+    onViewAll,
     showCreateButton = false,
     onCreateClick,
     className = '',
@@ -81,12 +82,13 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
           })
         ),
 
-    // "Ver mas" si hay mas consultas
+    // "Ver más" si hay más consultas y se provee callback
     total > limit &&
       consultations.length > 0 &&
+      onViewAll &&
       React.createElement(
         UI.Button,
-        { variant: 'link', size: 'sm', className: 'self-center' },
+        { variant: 'link', size: 'sm', className: 'self-center', onClick: onViewAll },
         `Ver las ${total} consultas \u2192`
       )
   );

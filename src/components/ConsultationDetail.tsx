@@ -3,11 +3,11 @@
  * Encabezado con info de mascota, panel lateral sticky (vet, vitales, seguimiento),
  * y contenido clínico principal.
  */
-import { getHostReact, getHostUI, useViewContributions } from '@coongro/plugin-sdk';
+import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
 
 import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
-import type { ConsultationDetailProps } from '../types/components.js';
+import type { ConsultationDetailProps, PetInfo } from '../types/components.js';
 import type { ConsultationService } from '../types/consultation.js';
 import {
   formatConsultationDateTime,
@@ -20,7 +20,8 @@ import { MedicationList } from './MedicationList.js';
 
 const React = getHostReact();
 const UI = getHostUI();
-// Mapa de secciones clínicas -> iconos lucide
+const { useState, useEffect, useRef } = React;
+// Mapa de secciones clínicas a nombres de iconos Lucide
 const SECTION_ICONS: Record<string, string> = {
   'Motivo de consulta': 'ClipboardList',
   Anamnesis: 'MessageSquare',
@@ -57,7 +58,7 @@ function calculateAge(birthDate: string | null): string {
 export function ConsultationDetail(props: ConsultationDetailProps) {
   const {
     consultationId,
-    pet = null,
+    pet: petProp = null,
     extraSections = [],
     extraActions = [],
     onEdit,
@@ -69,6 +70,31 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   const { consultation, medications, services, loading, error, refetch } =
     useConsultation(consultationId);
   const { settings: consultSettings } = useConsultationsSettings();
+
+  // Fetch de datos de la mascota (solo si no se pasan por prop)
+  const [fetchedPet, setFetchedPet] = useState<PetInfo | null>(null);
+  const petFetchedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (petProp || !consultation?.pet_id || petFetchedRef.current === consultation.pet_id) return;
+    petFetchedRef.current = consultation.pet_id;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const result = await actions.execute<PetInfo>('patients.pets.getById', {
+          id: consultation.pet_id,
+        });
+        if (!cancelled && result) setFetchedPet(result);
+      } catch {
+        // Silencioso — el header muestra fallback sin datos de mascota
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [consultation?.pet_id, petProp]);
+
+  const pet = petProp ?? fetchedPet;
 
   // Contribuciones de otros plugins para la zona de medicamentos
   const { sections: medContributions } = useViewContributions('consultations.detail.open', {
@@ -614,12 +640,12 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
                       React.createElement(
                         UI.TableCell,
                         { className: 'text-right' },
-                        formatCurrency(parseFloat(svc.unit_price))
+                        formatCurrency(parseFloat(svc.unit_price) || 0)
                       ),
                       React.createElement(
                         UI.TableCell,
                         { className: 'text-right font-medium' },
-                        formatCurrency(parseFloat(svc.subtotal))
+                        formatCurrency(parseFloat(svc.subtotal) || 0)
                       )
                     )
                   )

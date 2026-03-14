@@ -108,6 +108,7 @@ export function ServicesView() {
     loading: prodsLoading,
     error: prodsError,
     search,
+    setFilters: setProductFilters,
     pagination,
     refetch: refetchProducts,
   } = useProducts({ autoLoad: true, pageSize: 25 });
@@ -133,19 +134,14 @@ export function ServicesView() {
     );
   }, [products, rootCategory, serviceCategoryIds]);
 
-  const countByCat = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const svc of allServices) {
-      const k = svc.category_id ?? '';
-      map.set(k, (map.get(k) ?? 0) + 1);
-    }
-    return map;
-  }, [allServices]);
-
-  const filteredServices = useMemo(() => {
-    if (!activeCatId) return allServices;
-    return allServices.filter((p: Product) => p.category_id === activeCatId);
-  }, [allServices, activeCatId]);
+  // Filtro de categoría server-side via setFilters
+  const handleCategoryChange = useCallback(
+    (catId: string) => {
+      setActiveCatId(catId);
+      setProductFilters({ categoryId: catId || undefined });
+    },
+    [setProductFilters]
+  );
 
   // Sorting
   const [sortField, setSortField] = useState<SortField | null>(null);
@@ -167,8 +163,8 @@ export function ServicesView() {
   );
 
   const services = useMemo(() => {
-    if (!sortField || !sortDir) return filteredServices;
-    const sorted = [...filteredServices];
+    if (!sortField || !sortDir) return allServices;
+    const sorted = [...allServices];
     sorted.sort((a: Product, b: Product) => {
       let cmp = 0;
       if (sortField === 'name') cmp = a.name.localeCompare(b.name);
@@ -176,7 +172,7 @@ export function ServicesView() {
       return sortDir === 'desc' ? -cmp : cmp;
     });
     return sorted;
-  }, [filteredServices, sortField, sortDir]);
+  }, [allServices, sortField, sortDir]);
 
   // Mutaciones
   const { create, update, remove, creating, updating } = useProductMutations();
@@ -198,8 +194,8 @@ export function ServicesView() {
   const handleClearFilters = useCallback(() => {
     setLocalSearch('');
     search('');
-    setActiveCatId('');
-  }, [search]);
+    handleCategoryChange('');
+  }, [search, handleCategoryChange]);
 
   const handleCreate = useCallback(() => {
     setEditingService(null);
@@ -591,8 +587,8 @@ export function ServicesView() {
           React.createElement(UI.PageHeader, {
             title: 'Servicios',
             subtitle:
-              !loading && allServices.length > 0
-                ? `${allServices.length} servicio${allServices.length === 1 ? '' : 's'} en catálogo`
+              !loading && pagination.total > 0
+                ? `${pagination.total} servicio${pagination.total === 1 ? '' : 's'} en catálogo`
                 : 'Catálogo de servicios veterinarios',
             action: React.createElement(
               UI.Button,
@@ -642,9 +638,9 @@ export function ServicesView() {
                         {
                           key: '__all',
                           active: !activeCatId,
-                          onClick: () => setActiveCatId(''),
+                          onClick: () => handleCategoryChange(''),
                         },
-                        loading ? 'Todos' : `Todos (${allServices.length})`
+                        'Todos'
                       ),
                       ...serviceCategories.map((cat: Category) =>
                         React.createElement(
@@ -652,9 +648,10 @@ export function ServicesView() {
                           {
                             key: cat.id,
                             active: activeCatId === cat.id,
-                            onClick: () => setActiveCatId(activeCatId === cat.id ? '' : cat.id),
+                            onClick: () =>
+                              handleCategoryChange(activeCatId === cat.id ? '' : cat.id),
                           },
-                          loading ? cat.name : `${cat.name} (${countByCat.get(cat.id) ?? 0})`
+                          cat.name
                         )
                       )
                     ),

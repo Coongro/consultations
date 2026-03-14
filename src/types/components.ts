@@ -36,6 +36,8 @@ export interface ConsultationTimelineProps {
   /** Mapa consultationId -> monto total de servicios. Si se omite no muestra montos. */
   totalsMap?: Record<string, number>;
   onConsultationClick?: (consultation: Consultation) => void;
+  /** Callback al presionar "Ver todas". Si se omite, el botón no se muestra. */
+  onViewAll?: () => void;
   showCreateButton?: boolean;
   onCreateClick?: () => void;
   className?: string;
@@ -47,7 +49,6 @@ export interface ConsultationTimelineProps {
 
 export interface ConsultationCardProps {
   consultation: Consultation;
-  showPetName?: boolean;
   amount?: number | null;
   onClick?: (consultation: Consultation) => void;
   actions?: ActionDef<Consultation>[];
@@ -88,7 +89,6 @@ export interface ConsultationDetailProps {
   onEdit?: (consultation: Consultation) => void;
   onDelete?: (consultation: Consultation) => void;
   onBack?: () => void;
-  onNavigate?: (viewId: string, params?: Record<string, unknown>) => void;
   className?: string;
 }
 
