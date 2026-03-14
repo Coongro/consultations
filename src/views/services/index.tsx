@@ -281,11 +281,57 @@ export function ServicesView() {
 
   function renderTableContent(): ReturnType<typeof React.createElement> {
     if (loading) {
-      return React.createElement(UI.LoadingOverlay, {
-        variant: 'skeleton',
-        rows: 5,
-        className: 'p-6',
-      });
+      return React.createElement(
+        UI.Table,
+        { className: 'table-fixed w-full' },
+        React.createElement(
+          UI.TableHeader,
+          null,
+          React.createElement(
+            UI.TableRow,
+            null,
+            React.createElement(UI.TableHead, { className: 'w-auto' }, 'Servicio'),
+            React.createElement(
+              UI.TableHead,
+              { className: 'w-36 hidden sm:table-cell' },
+              'Categoría'
+            ),
+            React.createElement(UI.TableHead, { className: 'w-28 text-right' }, 'Precio'),
+            React.createElement(UI.TableHead, { className: 'w-20' }, '')
+          )
+        ),
+        React.createElement(
+          UI.TableBody,
+          null,
+          Array.from({ length: 5 }).map((_, i) =>
+            React.createElement(
+              UI.TableRow,
+              { key: i },
+              React.createElement(
+                UI.TableCell,
+                null,
+                React.createElement(
+                  'div',
+                  { className: 'flex flex-col gap-1' },
+                  React.createElement(UI.Skeleton, { className: 'h-4 w-40 rounded' }),
+                  React.createElement(UI.Skeleton, { className: 'h-3 w-24 rounded' })
+                )
+              ),
+              React.createElement(
+                UI.TableCell,
+                { className: 'hidden sm:table-cell' },
+                React.createElement(UI.Skeleton, { className: 'h-5 w-20 rounded-full' })
+              ),
+              React.createElement(
+                UI.TableCell,
+                { className: 'text-right' },
+                React.createElement(UI.Skeleton, { className: 'h-4 w-16 rounded ml-auto' })
+              ),
+              React.createElement(UI.TableCell, null)
+            )
+          )
+        )
+      );
     }
     if (prodsError) {
       return React.createElement(UI.ErrorDisplay, {
