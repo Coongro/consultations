@@ -1,5 +1,5 @@
 /**
- * Formulario para crear/editar consultas. 6 secciones segun spec.
+ * Formulario para crear/editar consultas con secciones colapsables de datos clínicos.
  */
 import {
   getHostReact,
@@ -281,7 +281,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Datos básicos'
         ),
         React.createElement(
@@ -354,7 +354,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Motivo de consulta'
         ),
         consultSettings.reasonCategoriesEnabled &&
@@ -393,7 +393,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Examen clínico'
         ),
         React.createElement(
@@ -431,7 +431,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Diagnóstico'
         ),
         React.createElement(UI.Textarea, {
@@ -453,7 +453,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
           { className: 'flex flex-col gap-3' },
           React.createElement(
             'h3',
-            { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+            { className: 'text-sm font-medium text-cg-text-muted' },
             'Servicios prestados'
           ),
           React.createElement(ServiceLineForm, {
@@ -476,7 +476,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Tratamiento'
         ),
         React.createElement(UI.Textarea, {
@@ -514,7 +514,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         { className: 'flex flex-col gap-3' },
         React.createElement(
           'h3',
-          { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+          { className: 'text-sm font-medium text-cg-text-muted' },
           'Seguimiento'
         ),
         React.createElement(

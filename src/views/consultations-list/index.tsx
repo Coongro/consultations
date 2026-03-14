@@ -344,11 +344,8 @@ export function ConsultationsListView() {
     return consultations.map(renderConsultationRow);
   }
 
-  // Ya no se usa el early return para empty state prístino.
-  // La estructura completa (stats, filtros, tabla) se muestra siempre,
-  // y el empty state mejorado vive dentro de la tabla.
-
-  // ── Vista normal: con datos o con filtros activos ──
+  // La estructura completa (stats, filtros, tabla) se muestra siempre;
+  // el empty state se renderiza dentro de la tabla.
   return React.createElement(
     'div',
     { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
@@ -469,7 +466,7 @@ export function ConsultationsListView() {
           React.createElement(
             UI.Table,
             { className: 'table-fixed w-full' },
-            // Header
+            // Encabezado
             React.createElement(
               UI.TableHeader,
               null,
@@ -508,7 +505,7 @@ export function ConsultationsListView() {
               )
             ),
 
-            // Body
+            // Cuerpo
             React.createElement(UI.TableBody, null, renderTableBodyContent())
           ),
 

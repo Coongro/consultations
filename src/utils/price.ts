@@ -17,7 +17,7 @@ export function formatCurrency(amount: number): string {
   return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
 }
 
-/** Filtra caracteres no numéricos de un input de precio (solo dígitos y un punto). */
+/** Filtra caracteres no numéricos de un input de precio. Permite solo dígitos y un único punto decimal. */
 export function sanitizePrice(value: string): string {
   return value.replace(/[^\d.]/g, '').replace(/(\..*?)\..*/g, '$1');
 }

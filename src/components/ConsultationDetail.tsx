@@ -1,6 +1,6 @@
 /**
  * Vista detallada de una consulta con layout de dos columnas.
- * Header con info de mascota, sidebar sticky (vet, vitales, seguimiento),
+ * Encabezado con info de mascota, panel lateral sticky (vet, vitales, seguimiento),
  * y contenido clínico principal.
  */
 import { getHostReact, getHostUI, useViewContributions } from '@coongro/plugin-sdk';
@@ -63,7 +63,6 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
     onEdit,
     onDelete,
     onBack,
-    onNavigate: _onNavigate,
     className = '',
   } = props;
 
@@ -77,7 +76,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
     medications,
   });
 
-  // --- Loading ---
+  // --- Cargando ---
   if (loading) {
     return React.createElement(
       'div',
@@ -140,6 +139,10 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   ].filter((s) => s.value);
 
   const hasVitals = c.weight_kg || c.temperature;
+  const servicesTotal = services.reduce(
+    (acc: number, s: ConsultationService) => acc + (parseFloat(s.subtotal) || 0),
+    0
+  );
 
   // Info de mascota para el header
   const petEmoji = pet ? (SPECIES_EMOJI[pet.species] ?? '🐾') : '🐾';
@@ -251,12 +254,12 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
       )
     ),
 
-    // ── Two-column body ──
+    // ── Cuerpo en dos columnas ──
     React.createElement(
       'div',
       { className: 'flex flex-col lg:flex-row gap-6' },
 
-      // ── SIDEBAR ──
+      // ── PANEL LATERAL ──
       React.createElement(
         'div',
         {
@@ -407,7 +410,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
         )
       ),
 
-      // ── MAIN CONTENT ──
+      // ── CONTENIDO PRINCIPAL ──
       React.createElement(
         'div',
         {
@@ -499,142 +502,131 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
         // Servicios prestados
         consultSettings.showPrices &&
           services.length > 0 &&
-          (() => {
-            const servicesTotal = services.reduce(
-              (acc: number, s: ConsultationService) => acc + parseFloat(s.subtotal),
-              0
-            );
-            return React.createElement(
-              UI.Card,
-              { className: 'overflow-hidden' },
-              // Header
+          React.createElement(
+            UI.Card,
+            { className: 'overflow-hidden' },
+            React.createElement(
+              'div',
+              {
+                className:
+                  'px-5 py-3 border-b border-cg-border bg-cg-bg-secondary flex items-center gap-2',
+              },
+              React.createElement(UI.DynamicIcon, {
+                icon: 'ClipboardList',
+                size: 15,
+                className: 'text-cg-text-muted',
+              }),
+              React.createElement(
+                'h2',
+                { className: 'text-sm font-semibold text-cg-text' },
+                'Servicios prestados'
+              )
+            ),
+            // Resumen: cantidad + total
+            React.createElement(
+              'div',
+              { className: 'px-5 py-4 flex items-center gap-4' },
               React.createElement(
                 'div',
-                {
-                  className:
-                    'px-5 py-3 border-b border-cg-border bg-cg-bg-secondary flex items-center gap-2',
-                },
+                { className: 'flex items-center gap-2 px-3 py-2 rounded-lg bg-cg-bg-secondary' },
                 React.createElement(UI.DynamicIcon, {
-                  icon: 'ClipboardList',
-                  size: 15,
+                  icon: 'Package',
+                  size: 16,
                   className: 'text-cg-text-muted',
                 }),
                 React.createElement(
-                  'h2',
-                  { className: 'text-sm font-semibold text-cg-text' },
-                  'Servicios prestados'
+                  'div',
+                  null,
+                  React.createElement(
+                    'span',
+                    { className: 'text-xs text-cg-text-muted block' },
+                    'Servicios'
+                  ),
+                  React.createElement(
+                    'span',
+                    { className: 'text-sm font-semibold text-cg-text' },
+                    String(services.length)
+                  )
                 )
               ),
-              // Resumen: cantidad + total
               React.createElement(
                 'div',
-                { className: 'px-5 py-4 flex items-center gap-4' },
+                { className: 'flex items-center gap-2 px-4 py-2 rounded-lg bg-cg-success-bg' },
+                React.createElement(UI.DynamicIcon, {
+                  icon: 'DollarSign',
+                  size: 16,
+                  className: 'text-cg-success-text',
+                }),
                 React.createElement(
                   'div',
-                  { className: 'flex items-center gap-2 px-3 py-2 rounded-lg bg-cg-bg-secondary' },
-                  React.createElement(UI.DynamicIcon, {
-                    icon: 'Package',
-                    size: 16,
-                    className: 'text-cg-text-muted',
-                  }),
+                  null,
                   React.createElement(
-                    'div',
+                    'span',
+                    { className: 'text-xs text-cg-text-muted block' },
+                    'Total'
+                  ),
+                  React.createElement(
+                    'span',
+                    { className: 'text-lg font-bold text-cg-success-text' },
+                    formatCurrency(servicesTotal)
+                  )
+                )
+              )
+            ),
+            // Tabla de detalle
+            React.createElement(
+              'div',
+              { className: 'overflow-x-auto' },
+              React.createElement(
+                UI.Table,
+                null,
+                React.createElement(
+                  UI.TableHeader,
+                  null,
+                  React.createElement(
+                    UI.TableRow,
                     null,
-                    React.createElement(
-                      'span',
-                      { className: 'text-xs text-cg-text-muted block' },
-                      'Servicios'
-                    ),
-                    React.createElement(
-                      'span',
-                      { className: 'text-sm font-semibold text-cg-text' },
-                      String(services.length)
-                    )
+                    React.createElement(UI.TableHead, null, 'Servicio'),
+                    React.createElement(UI.TableHead, { className: 'text-center' }, 'Cant.'),
+                    React.createElement(UI.TableHead, { className: 'text-right' }, 'Precio'),
+                    React.createElement(UI.TableHead, { className: 'text-right' }, 'Subtotal')
                   )
                 ),
                 React.createElement(
-                  'div',
-                  { className: 'flex items-center gap-2 px-4 py-2 rounded-lg bg-cg-success-bg' },
-                  React.createElement(UI.DynamicIcon, {
-                    icon: 'DollarSign',
-                    size: 16,
-                    className: 'text-cg-success-text',
-                  }),
-                  React.createElement(
-                    'div',
-                    null,
-                    React.createElement(
-                      'span',
-                      { className: 'text-xs text-cg-text-muted block' },
-                      'Total'
-                    ),
-                    React.createElement(
-                      'span',
-                      { className: 'text-lg font-bold text-cg-success-text' },
-                      formatCurrency(servicesTotal)
-                    )
-                  )
-                )
-              ),
-              // Tabla de detalle
-              React.createElement(
-                'div',
-                { className: 'overflow-x-auto' },
-                React.createElement(
-                  UI.Table,
+                  UI.TableBody,
                   null,
-                  React.createElement(
-                    UI.TableHeader,
-                    null,
+                  services.map((svc: ConsultationService) =>
                     React.createElement(
                       UI.TableRow,
-                      null,
-                      React.createElement(UI.TableHead, null, 'Servicio'),
-                      React.createElement(UI.TableHead, { className: 'text-center' }, 'Cant.'),
-                      React.createElement(UI.TableHead, { className: 'text-right' }, 'Precio'),
-                      React.createElement(UI.TableHead, { className: 'text-right' }, 'Subtotal')
-                    )
-                  ),
-                  React.createElement(
-                    UI.TableBody,
-                    null,
-                    services.map((svc: ConsultationService) =>
+                      { key: svc.id },
                       React.createElement(
-                        UI.TableRow,
-                        { key: svc.id },
-                        React.createElement(
-                          UI.TableCell,
-                          { className: 'font-medium' },
-                          svc.product_name,
-                          svc.notes &&
-                            React.createElement(
-                              'span',
-                              { className: 'text-xs text-cg-text-muted ml-2 font-normal' },
-                              `(${svc.notes})`
-                            )
-                        ),
-                        React.createElement(
-                          UI.TableCell,
-                          { className: 'text-center' },
-                          svc.quantity
-                        ),
-                        React.createElement(
-                          UI.TableCell,
-                          { className: 'text-right' },
-                          formatCurrency(parseFloat(svc.unit_price))
-                        ),
-                        React.createElement(
-                          UI.TableCell,
-                          { className: 'text-right font-medium' },
-                          formatCurrency(parseFloat(svc.subtotal))
-                        )
+                        UI.TableCell,
+                        { className: 'font-medium' },
+                        svc.product_name,
+                        svc.notes &&
+                          React.createElement(
+                            'span',
+                            { className: 'text-xs text-cg-text-muted ml-2 font-normal' },
+                            `(${svc.notes})`
+                          )
+                      ),
+                      React.createElement(UI.TableCell, { className: 'text-center' }, svc.quantity),
+                      React.createElement(
+                        UI.TableCell,
+                        { className: 'text-right' },
+                        formatCurrency(parseFloat(svc.unit_price))
+                      ),
+                      React.createElement(
+                        UI.TableCell,
+                        { className: 'text-right font-medium' },
+                        formatCurrency(parseFloat(svc.subtotal))
                       )
                     )
                   )
                 )
               )
-            );
-          })(),
+            )
+          ),
 
         // Secciones extra (plugins)
         ...sortedSections.map((section, i) =>

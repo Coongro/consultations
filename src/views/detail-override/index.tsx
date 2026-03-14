@@ -1,5 +1,5 @@
-// --- View Override ---
-// Overrides: patients.detail.open (from plugin: patients)
+// --- Override de Vista ---
+// Reemplaza: patients.detail.open (del plugin: patients)
 // Importa PetDetail de @coongro/patients y agrega extraSections/extraActions de consultas.
 
 import { PetDetail, PetForm } from '@coongro/patients';

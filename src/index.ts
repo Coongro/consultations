@@ -16,6 +16,12 @@ export { MedicationList } from './components/MedicationList.js';
 export { MedicationFormList } from './components/MedicationFormList.js';
 export { ConsultationStats } from './components/ConsultationStats.js';
 export { ServiceLineForm } from './components/ServiceLineForm.js';
+export { PriceInput, type PriceInputProps } from './components/PriceInput.js';
+export {
+  ServiceFormDialog,
+  type ServiceFormDialogProps,
+  type ServiceFormValues,
+} from './components/ServiceFormDialog.js';
 
 // Hooks
 export { useConsultation } from './hooks/useConsultation.js';
@@ -24,7 +30,7 @@ export { useConsultationsByPet } from './hooks/useConsultationsByPet.js';
 export { useConsultationMutations } from './hooks/useConsultationMutations.js';
 export { useConsultationsSettings } from './hooks/useConsultationsSettings.js';
 
-// Types
+// Tipos
 export type {
   Consultation,
   ConsultationMedication,
@@ -47,7 +53,9 @@ export type {
 } from './types/components.js';
 export type { ServiceLineFormProps } from './components/ServiceLineForm.js';
 
-// Utils
+// Utilidades
+export { formatPrice, formatCurrency, sanitizePrice, isValidPrice } from './utils/price.js';
+export { createCategoryMap } from './utils/categories.js';
 export {
   REASON_CATEGORY_LABELS,
   REASON_CATEGORY_EMOJI,

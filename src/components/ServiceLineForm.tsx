@@ -235,7 +235,7 @@ export function ServiceLineForm({
         React.createElement(
           'div',
           {
-            className: 'rounded-md border border-[var(--cg-border)] overflow-hidden',
+            className: 'rounded-md border border-cg-border overflow-hidden',
           },
 
           // Encabezados
@@ -243,7 +243,7 @@ export function ServiceLineForm({
             'div',
             {
               className:
-                'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center px-3 py-2 bg-[var(--cg-surface-raised)] text-xs font-medium text-[var(--cg-text-muted)] border-b border-[var(--cg-border)]',
+                'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center px-3 py-2 bg-cg-surface-raised text-xs font-medium text-cg-text-muted border-b border-cg-border',
             },
             React.createElement('span', null, 'Servicio'),
             React.createElement('span', { className: 'text-center' }, 'Cant.'),
@@ -255,7 +255,7 @@ export function ServiceLineForm({
           // Filas
           React.createElement(
             'div',
-            { className: 'divide-y divide-[var(--cg-border)]' },
+            { className: 'divide-y divide-cg-border' },
             services.map((svc: ServiceLineInput, index: number) =>
               React.createElement(
                 'div',
@@ -299,7 +299,7 @@ export function ServiceLineForm({
 
                 React.createElement(
                   'span',
-                  { className: 'text-sm text-right font-medium text-[var(--cg-text)]' },
+                  { className: 'text-sm text-right font-medium text-cg-text' },
                   formatCurrency(parseFloat(svc.subtotal) || 0)
                 ),
 
@@ -324,16 +324,16 @@ export function ServiceLineForm({
             'div',
             {
               className:
-                'flex items-center justify-end gap-3 px-3 py-2.5 border-t border-[var(--cg-border)] bg-[var(--cg-surface-raised)]',
+                'flex items-center justify-end gap-3 px-3 py-2.5 border-t border-cg-border bg-cg-surface-raised',
             },
             React.createElement(
               'span',
-              { className: 'text-sm font-medium text-[var(--cg-text-muted)]' },
+              { className: 'text-sm font-medium text-cg-text-muted' },
               'Total:'
             ),
             React.createElement(
               'span',
-              { className: 'text-base font-bold text-[var(--cg-text)]' },
+              { className: 'text-base font-bold text-cg-text' },
               formatCurrency(total)
             )
           )

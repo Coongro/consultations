@@ -38,20 +38,20 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
   }
 
   if (error) {
-    return React.createElement('p', { className: 'text-sm text-[var(--cg-danger)]' }, error);
+    return React.createElement('p', { className: 'text-sm text-cg-danger' }, error);
   }
 
   return React.createElement(
     'div',
     { className: `flex flex-col gap-3 ${className}` },
 
-    // Header
+    // Encabezado
     React.createElement(
       'div',
       { className: 'flex items-center justify-between' },
       React.createElement(
         'span',
-        { className: 'text-xs text-[var(--cg-text-muted)]' },
+        { className: 'text-xs text-cg-text-muted' },
         total > 0 ? `${total} consulta${total === 1 ? '' : 's'}` : ''
       ),
       showCreateButton &&
@@ -86,17 +86,8 @@ export function ConsultationTimeline(props: ConsultationTimelineProps) {
       consultations.length > 0 &&
       React.createElement(
         UI.Button,
-        {
-          variant: 'link',
-          size: 'sm',
-          onClick: onConsultationClick
-            ? () => {
-                /* Se podria navegar a la lista completa */
-              }
-            : undefined,
-          className: 'self-center',
-        },
-        `Ver las ${total} consultas →`
+        { variant: 'link', size: 'sm', className: 'self-center' },
+        `Ver las ${total} consultas \u2192`
       )
   );
 }
