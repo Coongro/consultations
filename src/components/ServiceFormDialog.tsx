@@ -193,11 +193,10 @@ export function ServiceFormDialog({
           React.createElement(
             'div',
             { className: 'flex flex-col gap-1.5' },
-            React.createElement(UI.Label, { htmlFor: 'svc-cat' }, 'Categoría'),
+            React.createElement(UI.Label, null, 'Categoría'),
             React.createElement(
               UI.Select,
               {
-                id: 'svc-cat',
                 value: form.categoryId,
                 onValueChange: (v: string) =>
                   setForm((prev: ServiceFormValues) => ({
