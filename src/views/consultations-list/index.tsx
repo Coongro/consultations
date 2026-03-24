@@ -374,12 +374,12 @@ export function ConsultationsListView() {
           // Filtros: búsqueda + categorías + fechas
           React.createElement(
             'div',
-            { className: 'flex flex-wrap items-end justify-between gap-4' },
+            { className: 'flex flex-wrap items-center justify-between gap-4' },
 
             // Izquierda: búsqueda + categorías
             React.createElement(
               'div',
-              { className: 'flex items-end gap-3 min-w-0 flex-1' },
+              { className: 'flex items-center gap-3 min-w-0 flex-1' },
 
               React.createElement(UI.SearchInput, {
                 placeholder: 'Buscar...',
@@ -426,7 +426,8 @@ export function ConsultationsListView() {
             React.createElement(
               'div',
               {
-                className: 'flex items-end gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
+                className:
+                  'flex items-center gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
               },
               React.createElement(
                 'div',
