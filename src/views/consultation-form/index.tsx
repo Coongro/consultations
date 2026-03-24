@@ -37,21 +37,21 @@ export function ConsultationFormView(props: { petId?: string; consultationId?: s
 
   return React.createElement(
     'div',
-    { className: 'font-inter min-h-screen bg-[var(--cg-bg-secondary)] p-6' },
+    { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
     React.createElement(
       'div',
-      { className: 'max-w-2xl mx-auto' },
+      { className: 'w-full' },
       React.createElement(
         'div',
         { className: 'mb-6' },
         React.createElement(
           'h1',
-          { className: 'text-2xl font-bold text-[var(--cg-text)]' },
+          { className: 'text-2xl font-bold text-cg-text' },
           isEditing ? 'Editar consulta' : 'Nueva consulta'
         ),
         React.createElement(
           'p',
-          { className: 'text-sm text-[var(--cg-text-muted)] mt-1' },
+          { className: 'text-sm text-cg-text-muted mt-1' },
           isEditing ? 'Modificar datos de la consulta' : 'Registrar una nueva consulta veterinaria'
         )
       ),

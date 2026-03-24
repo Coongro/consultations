@@ -45,13 +45,6 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
     [softDelete, views]
   );
 
-  const handleNavigate = useCallback(
-    (viewId: string, params?: Record<string, unknown>) => {
-      views.open(viewId, params);
-    },
-    [views]
-  );
-
   if (!consultationId) {
     return React.createElement(UI.EmptyState, {
       title: 'No se especificó una consulta',
@@ -64,14 +57,13 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
     { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
     React.createElement(
       'div',
-      { className: 'max-w-6xl mx-auto' },
+      { className: 'w-full' },
       React.createElement(ConsultationDetail, {
         key: refreshKey,
         consultationId,
         onBack: handleBack,
         onEdit: handleEdit,
         onDelete: handleDelete,
-        onNavigate: handleNavigate,
       })
     ),
 

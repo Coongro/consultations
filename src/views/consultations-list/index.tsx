@@ -188,7 +188,10 @@ export function ConsultationsListView() {
 
   const hasFilters = localSearch || filters.reasonCategory || filters.dateFrom || filters.dateTo;
 
-  const COL_COUNT = 7; // Fecha, Paciente, Veterinario, Motivo, Categoria, Diagnostico, Acciones
+  // Estado para abrir el formulario desde el empty state
+  const [emptyStateCreateOpen, setEmptyStateCreateOpen] = useState(false);
+
+  const COL_COUNT = 5; // Fecha, Paciente, Veterinario, Motivo+Diagnóstico, Categoría
 
   /** Renderiza una fila de consulta con datos de mascota resueltos */
   function renderConsultationRow(c: Consultation) {
@@ -219,7 +222,26 @@ export function ConsultationsListView() {
         )
       ),
       React.createElement(UI.TableCell, null, c.vet_name),
-      React.createElement(UI.TableCell, { className: 'max-w-[200px] truncate' }, c.reason),
+      // Motivo + Diagnóstico combinados
+      React.createElement(
+        UI.TableCell,
+        null,
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-0.5 min-w-0' },
+          React.createElement(
+            'span',
+            { className: 'text-sm font-medium text-cg-text truncate block' },
+            c.reason
+          ),
+          c.diagnosis &&
+            React.createElement(
+              'span',
+              { className: 'text-xs text-cg-text-muted truncate block' },
+              c.diagnosis
+            )
+        )
+      ),
       React.createElement(
         UI.TableCell,
         null,
@@ -233,27 +255,6 @@ export function ConsultationsListView() {
               formatReasonCategory(c.reason_category)
             )
           : '—'
-      ),
-      React.createElement(
-        UI.TableCell,
-        { className: 'max-w-[200px] truncate' },
-        c.diagnosis ?? '—'
-      ),
-      React.createElement(
-        UI.TableCell,
-        {
-          className: 'text-right',
-          onClick: (e: { stopPropagation: () => void }) => e.stopPropagation(),
-        },
-        React.createElement(
-          UI.Button,
-          {
-            variant: 'ghost',
-            size: 'xs',
-            onClick: () => handleConsultationClick(c),
-          },
-          'Ver'
-        )
       )
     );
   }
@@ -301,11 +302,41 @@ export function ConsultationsListView() {
         React.createElement(
           UI.TableCell,
           { colSpan: COL_COUNT, className: 'p-0' },
-          React.createElement(UI.EmptyState, {
-            title: hasFilters
-              ? 'No se encontraron consultas con esos filtros'
-              : 'Sin consultas registradas',
-          })
+          hasFilters
+            ? React.createElement(UI.EmptyState, {
+                icon: React.createElement(UI.DynamicIcon, {
+                  icon: 'SearchX',
+                  size: 24,
+                  className: 'text-cg-text-muted',
+                }),
+                title: 'No se encontraron consultas',
+                description: 'Probá ajustando los filtros o limpiando la búsqueda.',
+                action: React.createElement(
+                  UI.Button,
+                  { variant: 'outline', size: 'sm', onClick: handleClearFilters },
+                  'Limpiar filtros'
+                ),
+              })
+            : React.createElement(UI.EmptyState, {
+                icon: React.createElement(UI.DynamicIcon, {
+                  icon: 'ClipboardList',
+                  size: 24,
+                  className: 'text-cg-text-muted',
+                }),
+                title: 'Sin consultas registradas',
+                description:
+                  'Registrá la primera consulta de un paciente para comenzar a construir su historial clínico.',
+                action: React.createElement(
+                  UI.Button,
+                  {
+                    variant: 'brand',
+                    onClick: () => setEmptyStateCreateOpen(true),
+                    className: 'gap-2',
+                  },
+                  React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 18 }),
+                  'Nueva consulta'
+                ),
+              })
         )
       );
     }
@@ -313,31 +344,21 @@ export function ConsultationsListView() {
     return consultations.map(renderConsultationRow);
   }
 
+  // La estructura completa (stats, filtros, tabla) se muestra siempre;
+  // el empty state se renderiza dentro de la tabla.
   return React.createElement(
     'div',
     { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
     React.createElement(
       'div',
-      { className: 'max-w-6xl mx-auto flex flex-col gap-6' },
+      { className: 'w-full flex flex-col gap-6' },
 
-      // ── Header ──
-      React.createElement(
-        'div',
-        { className: 'flex items-center justify-between' },
-        React.createElement(
-          'div',
-          null,
-          React.createElement('h1', { className: 'text-2xl font-bold text-cg-text' }, 'Consultas'),
-          React.createElement(
-            'p',
-            { className: 'text-sm text-cg-text-muted mt-1' },
-            'Historial de consultas veterinarias'
-          )
-        ),
-        React.createElement(CreateConsultationButton, {
+      React.createElement(UI.PageHeader, {
+        title: 'Consultas',
+        action: React.createElement(CreateConsultationButton, {
           onSuccess: handleCreateSuccess,
-        })
-      ),
+        }),
+      }),
 
       // ── Stats ──
       React.createElement(ConsultationStats, { layout: 'row' }),
@@ -350,93 +371,103 @@ export function ConsultationsListView() {
           'div',
           { className: 'flex flex-col gap-4' },
 
-          // Búsqueda con icono
+          // Filtros: búsqueda + categorías + fechas
           React.createElement(
             'div',
-            { className: 'relative flex-1' },
-            React.createElement(UI.DynamicIcon, {
-              icon: 'Search',
-              size: 16,
-              className: 'absolute left-3 top-1/2 -translate-y-1/2 text-cg-text-muted',
-            }),
-            React.createElement(UI.Input, {
-              type: 'text',
-              placeholder: 'Buscar por motivo, veterinario, diagnóstico...',
-              value: localSearch,
-              onChange: handleSearchChange,
-              className: 'pl-10',
-            })
-          ),
+            { className: 'flex flex-wrap items-center justify-between gap-4' },
 
-          // Filtros: categorías + fechas
-          React.createElement(
-            'div',
-            { className: 'flex items-center gap-4 flex-wrap' },
+            // Izquierda: búsqueda + categorías
+            React.createElement(
+              'div',
+              { className: 'flex items-center gap-3 min-w-0 flex-1' },
 
-            // Categorías rápidas
-            consultSettings.reasonCategoriesEnabled &&
-              React.createElement(UI.ButtonGroup, null, [
-                React.createElement(
-                  UI.ButtonGroupItem,
-                  {
-                    key: '__all',
-                    active: !filters.reasonCategory,
-                    onClick: () => setFilters({ ...filters, reasonCategory: undefined }),
-                  },
-                  'Todas'
-                ),
-                ...ALL_REASON_CATEGORIES.map((cat) =>
+              React.createElement(UI.SearchInput, {
+                placeholder: 'Buscar...',
+                value: localSearch,
+                onChange: handleSearchChange,
+                className: 'w-56 shrink-0',
+              }),
+              consultSettings.reasonCategoriesEnabled &&
+                React.createElement(UI.ButtonGroup, null, [
                   React.createElement(
                     UI.ButtonGroupItem,
                     {
-                      key: cat,
-                      active: filters.reasonCategory === cat,
-                      onClick: () => handleCategoryFilter(cat),
+                      key: '__all',
+                      active: !filters.reasonCategory,
+                      onClick: () => setFilters({ ...filters, reasonCategory: undefined }),
                     },
-                    REASON_CATEGORY_LABELS[cat] ?? cat
-                  )
-                ),
-              ]),
-
-            // Fechas
-            React.createElement(
-              'div',
-              { className: 'flex items-center gap-2 ml-auto' },
-              React.createElement(UI.Input, {
-                type: 'date',
-                value: filters.dateFrom ?? '',
-                onChange: handleDateFrom,
-                title: 'Desde',
-                className: 'w-36',
-              }),
-              React.createElement('span', { className: 'text-cg-text-muted text-sm' }, '—'),
-              React.createElement(UI.Input, {
-                type: 'date',
-                value: filters.dateTo ?? '',
-                onChange: handleDateTo,
-                title: 'Hasta',
-                className: 'w-36',
-              })
+                    'Todas'
+                  ),
+                  ...ALL_REASON_CATEGORIES.map((cat) =>
+                    React.createElement(
+                      UI.ButtonGroupItem,
+                      {
+                        key: cat,
+                        active: filters.reasonCategory === cat,
+                        onClick: () => handleCategoryFilter(cat),
+                      },
+                      REASON_CATEGORY_LABELS[cat] ?? cat
+                    )
+                  ),
+                ]),
+              hasFilters &&
+                React.createElement(
+                  UI.Button,
+                  {
+                    variant: 'link',
+                    size: 'xs',
+                    onClick: handleClearFilters,
+                  },
+                  'Limpiar filtros'
+                )
             ),
 
-            // Limpiar filtros
-            hasFilters &&
+            // Fechas (derecha, agrupadas visualmente)
+            React.createElement(
+              'div',
+              {
+                className:
+                  'flex items-center gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
+              },
               React.createElement(
-                UI.Button,
-                {
-                  variant: 'link',
-                  size: 'xs',
-                  onClick: handleClearFilters,
-                },
-                'Limpiar filtros'
+                'div',
+                { className: 'flex flex-col gap-0.5' },
+                React.createElement(
+                  'span',
+                  { className: 'text-xs font-medium text-cg-text-muted' },
+                  'Desde'
+                ),
+                React.createElement(UI.Input, {
+                  type: 'date',
+                  value: filters.dateFrom ?? '',
+                  onChange: handleDateFrom,
+                  className: 'w-40',
+                })
+              ),
+              React.createElement('span', { className: 'text-cg-text-muted text-sm pb-2.5' }, '—'),
+              React.createElement(
+                'div',
+                { className: 'flex flex-col gap-0.5' },
+                React.createElement(
+                  'span',
+                  { className: 'text-xs font-medium text-cg-text-muted' },
+                  'Hasta'
+                ),
+                React.createElement(UI.Input, {
+                  type: 'date',
+                  value: filters.dateTo ?? '',
+                  onChange: handleDateTo,
+                  className: 'w-40',
+                })
               )
+            )
           ),
 
           // ── Tabla ──
           React.createElement(
             UI.Table,
-            null,
-            // Header
+            { className: 'table-fixed w-full' },
+            // Encabezado
             React.createElement(
               UI.TableHeader,
               null,
@@ -445,33 +476,37 @@ export function ConsultationsListView() {
                 null,
                 React.createElement(
                   UI.TableHead,
-                  { sortDirection: getSortDirection('date'), onSort: () => handleSort('date') },
+                  {
+                    className: 'w-28',
+                    sortDirection: getSortDirection('date'),
+                    onSort: () => handleSort('date'),
+                  },
                   'Fecha'
                 ),
-                React.createElement(UI.TableHead, null, 'Paciente'),
+                React.createElement(UI.TableHead, { className: 'w-36' }, 'Paciente'),
                 React.createElement(
                   UI.TableHead,
                   {
+                    className: 'w-40',
                     sortDirection: getSortDirection('vet_name'),
                     onSort: () => handleSort('vet_name'),
                   },
                   'Veterinario'
                 ),
-                React.createElement(UI.TableHead, null, 'Motivo'),
+                React.createElement(UI.TableHead, null, 'Motivo / Diagnóstico'),
                 React.createElement(
                   UI.TableHead,
                   {
+                    className: 'w-40',
                     sortDirection: getSortDirection('reason_category'),
                     onSort: () => handleSort('reason_category'),
                   },
                   'Categoría'
-                ),
-                React.createElement(UI.TableHead, null, 'Diagnóstico'),
-                React.createElement(UI.TableHead, { className: 'w-20 text-right' }, 'Acciones')
+                )
               )
             ),
 
-            // Body
+            // Cuerpo
             React.createElement(UI.TableBody, null, renderTableBodyContent())
           ),
 
@@ -530,7 +565,14 @@ export function ConsultationsListView() {
               )
             )
         )
-      )
+      ),
+
+      // CreateConsultationButton controlado para el CTA del empty state
+      React.createElement(CreateConsultationButton, {
+        open: emptyStateCreateOpen,
+        onOpenChange: setEmptyStateCreateOpen,
+        onSuccess: handleCreateSuccess,
+      })
     )
   );
 }
