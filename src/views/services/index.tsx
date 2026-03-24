@@ -579,7 +579,7 @@ export function ServicesView() {
       null,
       React.createElement(
         'div',
-        { className: 'min-h-screen bg-cg-bg-secondary p-4 sm:p-6' },
+        { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
         React.createElement(
           'div',
           { className: 'w-full flex flex-col gap-6' },
@@ -665,11 +665,7 @@ export function ServicesView() {
               ),
 
               // Tabla
-              React.createElement(
-                'div',
-                { className: 'overflow-x-auto -mx-6' },
-                React.createElement('div', { className: 'px-6' }, renderTableContent())
-              )
+              renderTableContent()
             )
           )
         )
