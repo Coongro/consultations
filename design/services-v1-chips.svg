@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 480" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .text-title { fill: #2C2925; font-size: 13px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+      .text-label { fill: #6B6660; font-size: 10px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 12px; }
+      .input-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .separator { stroke: #E5E2DC; stroke-width: 1; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .chip-svc { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 14; }
+      .chip-svc-text { fill: #2C2925; font-size: 11px; }
+      .chip-qty { fill: #F0EDE8; rx: 8; }
+      .chip-qty-text { fill: #6B6660; font-size: 9px; font-weight: 500; }
+      .chip-price { fill: none; }
+      .chip-price-text { fill: #9B9893; font-size: 9px; }
+      .total-bg { fill: #F6F5F1; stroke: none; rx: 6; }
+      .total-text { fill: #2C2925; font-size: 14px; font-weight: 700; font-family: 'Noto Serif JP', serif; }
+      .total-label { fill: #9B9893; font-size: 11px; font-weight: 500; }
+    </style>
+  </defs>
+
+  <rect width="620" height="480" class="bg" rx="8"/>
+
+  <text x="16" y="22" class="text-title">Servicios — v1 Chips</text>
+  <text x="604" y="22" text-anchor="end" class="text-muted">Variante 1</text>
+  <line x1="0" y1="32" x2="620" y2="32" class="separator"/>
+  <text x="16" y="50" class="annotation">Servicios como chips removibles (similar a tags). Compacto, visual, familiar. Cantidad como badge dentro del chip.</text>
+
+  <!-- Card contenedora -->
+  <rect x="16" y="60" width="588" height="240" rx="10" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1"/>
+
+  <text x="30" y="84" class="text-section">SERVICIOS PRESTADOS</text>
+  <line x1="155" y1="80" x2="590" y2="80" class="separator"/>
+
+  <!-- Motivo -->
+  <text x="30" y="100" class="text-label">Motivo *</text>
+  <rect x="30" y="106" width="560" height="26" class="input-bg"/>
+  <text x="42" y="123" class="text-value">Control anual de rutina</text>
+
+  <!-- Buscador -->
+  <rect x="30" y="142" width="560" height="28" rx="6" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1"/>
+  <circle cx="46" cy="156" r="6" fill="none" stroke="#C4C0BA" stroke-width="1"/>
+  <line x1="50" y1="160" x2="53" y2="163" fill="none" stroke="#C4C0BA" stroke-width="1" stroke-linecap="round"/>
+  <text x="60" y="160" class="text-placeholder">Agregar servicio...</text>
+
+  <!-- Chips de servicios seleccionados -->
+  <rect x="30" y="180" width="560" height="66" rx="6" fill="#FAFAF8" stroke="none"/>
+
+  <!-- Chip 1: Consulta general -->
+  <rect x="38" y="188" width="180" height="28" class="chip-svc"/>
+  <text x="52" y="206" class="chip-svc-text">Consulta general</text>
+  <rect x="170" y="193" width="22" height="16" class="chip-qty"/>
+  <text x="181" y="205" text-anchor="middle" class="chip-qty-text">x1</text>
+  <text x="200" y="206" class="chip-price-text">$5,000</text>
+  <!-- X para remover -->
+  <text x="210" y="200" fill="#C4C0BA" font-size="9" cursor="pointer">✕</text>
+
+  <!-- Chip 2: Vacuna antirrabica -->
+  <rect x="228" y="188" width="190" height="28" class="chip-svc"/>
+  <text x="242" y="206" class="chip-svc-text">Vacuna antirrábica</text>
+  <rect x="372" y="193" width="22" height="16" class="chip-qty"/>
+  <text x="383" y="205" text-anchor="middle" class="chip-qty-text">x1</text>
+  <text x="402" y="206" class="chip-price-text">$3,500</text>
+  <text x="412" y="200" fill="#C4C0BA" font-size="9" cursor="pointer">✕</text>
+
+  <!-- Chip 3: Analisis de sangre (cant > 1) -->
+  <rect x="38" y="222" width="226" height="28" class="chip-svc"/>
+  <text x="52" y="240" class="chip-svc-text">Análisis de sangre completo</text>
+  <rect x="220" y="227" width="22" height="16" class="chip-qty"/>
+  <text x="231" y="239" text-anchor="middle" class="chip-qty-text">x2</text>
+  <text x="250" y="240" class="chip-price-text">$7,000</text>
+  <text x="260" y="234" fill="#C4C0BA" font-size="9" cursor="pointer">✕</text>
+
+  <!-- Total -->
+  <rect x="392" y="260" width="192" height="28" class="total-bg"/>
+  <text x="406" y="279" class="total-label">Total:</text>
+  <text x="572" y="280" text-anchor="end" class="total-text">$15,500</text>
+
+  <!-- ═══ Pros / Contras ═══ -->
+  <line x1="0" y1="316" x2="620" y2="316" class="separator"/>
+
+  <text x="16" y="336" class="text-label" font-weight="600">Pros</text>
+  <text x="16" y="350" class="annotation">Ultra compacto — 3 servicios en 2 lineas</text>
+  <text x="16" y="362" class="annotation">Familiar (patron de tags/chips comun en apps)</text>
+  <text x="16" y="374" class="annotation">Facil de escanear de un vistazo</text>
+
+  <text x="320" y="336" class="text-label" font-weight="600">Contras</text>
+  <text x="320" y="350" class="annotation">Editar cantidad requiere click extra (popover o inline edit)</text>
+  <text x="320" y="362" class="annotation">Con muchos servicios puede sentirse denso</text>
+  <text x="320" y="374" class="annotation">No hay espacio visible para notas por servicio</text>
+
+  <!-- Interaccion -->
+  <line x1="0" y1="390" x2="620" y2="390" class="separator"/>
+  <text x="16" y="410" class="text-section">INTERACCION</text>
+
+  <text x="16" y="428" class="text-muted" font-size="9">Click en chip → popover con cantidad editable + precio unitario + notas</text>
+  <text x="16" y="442" class="text-muted" font-size="9">Click en ✕ → remueve el servicio</text>
+  <text x="16" y="456" class="text-muted" font-size="9">showPrices=false → oculta "$5,000", "$7,000" y el total. Solo nombre + badge cantidad.</text>
+
+  <text x="16" y="476" class="text-muted">consultations/design/services-v1-chips.svg</text>
+</svg>

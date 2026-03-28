@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 560" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E8E7E2; stroke-width: 1; rx: 18; }
+      .text-title { fill: #2C2925; font-size: 13px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+      .text-label { fill: #6B6660; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 13px; }
+      .text-name { fill: #2C2925; font-size: 13px; font-weight: 500; }
+      .input-bg { fill: #FFFFFF; stroke: #E8E7E2; stroke-width: 1; rx: 7; }
+      .search-bg { fill: #F6F5F1; stroke: #E8E7E2; stroke-width: 1; rx: 7; }
+      .separator { stroke: #E8E7E2; stroke-width: 1; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .row-svc { fill: #FAFAF8; stroke: #E8E7E2; stroke-width: 1; rx: 7; }
+      .price-text { fill: #6B6760; font-size: 12px; font-weight: 400; }
+      .price-detail { fill: #9B9893; font-size: 9px; }
+      .col-label { fill: #9B9893; font-size: 9px; font-weight: 500; }
+      .total-bg { fill: #F6F5F1; stroke: none; rx: 7; }
+      .total-value { fill: #2C2925; font-size: 15px; font-weight: 900; font-family: 'Noto Serif JP', serif; }
+      .total-label { fill: #6B6760; font-size: 11px; font-weight: 500; }
+      .icon-container { fill: #F6F5F1; stroke: none; rx: 5; }
+      .icon-stroke { fill: none; stroke: #9B9893; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="620" height="560" class="bg" rx="8"/>
+
+  <text x="16" y="22" class="text-title">Servicios Prestados</text>
+  <text x="604" y="22" text-anchor="end" class="text-muted">v7</text>
+  <line x1="0" y1="32" x2="620" y2="32" class="separator"/>
+
+  <!-- ═══ CARD ═══ -->
+  <rect x="16" y="44" width="588" height="326" class="card"/>
+
+  <text x="30" y="68" class="text-section">Servicios prestados</text>
+  <line x1="30" y1="76" x2="590" y2="76" class="separator"/>
+
+  <!-- Motivo -->
+  <text x="30" y="94" class="text-label">Motivo *</text>
+  <rect x="30" y="100" width="560" height="28" class="input-bg"/>
+  <text x="42" y="118" class="text-value">Control anual de rutina</text>
+
+  <!-- Buscador -->
+  <rect x="30" y="138" width="560" height="30" class="search-bg"/>
+  <circle cx="48" cy="153" r="6" fill="none" stroke="#C4C0BA" stroke-width="1.2"/>
+  <line x1="52" y1="157" x2="56" y2="161" fill="none" stroke="#C4C0BA" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="64" y="157" class="text-placeholder">Agregar servicio...</text>
+
+  <!--
+    Layout de columnas fijas:
+    x=30..40: icono (20px container)
+    x=56: nombre
+    x=420: label "Cant."
+    x=422..458: input cantidad (36px)
+    x=478..536: precio (text-anchor=end at 536)
+    x=552..574: boton eliminar (22px)
+  -->
+
+  <!-- Col labels (sutiles, una sola vez arriba de las filas) -->
+  <text x="422" y="184" class="col-label">Cant.</text>
+  <text x="536" y="184" text-anchor="end" class="col-label">Importe</text>
+
+  <!-- ─── Servicio 1 ─── -->
+  <rect x="30" y="190" width="560" height="38" class="row-svc"/>
+
+  <!-- Icono neutro: clipboard check (coherente = "servicio prestado") -->
+  <rect x="38" y="198" width="20" height="20" class="icon-container"/>
+  <rect x="43" y="201" width="10" height="14" rx="1" class="icon-stroke"/>
+  <line x1="45" y1="208" x2="47" y2="210" class="icon-stroke"/>
+  <line x1="47" y1="210" x2="51" y2="205" class="icon-stroke"/>
+
+  <!-- Nombre (x=64, alineado despues del icono) -->
+  <text x="64" y="213" class="text-name">Consulta general</text>
+
+  <!-- Cantidad input (x=422, ancho 36) -->
+  <rect x="422" y="198" width="36" height="22" class="input-bg"/>
+  <text x="440" y="213" text-anchor="middle" class="text-value" font-size="11">1</text>
+
+  <!-- Precio (x=536, text-anchor end) -->
+  <text x="536" y="213" text-anchor="end" class="price-text">$5,000</text>
+
+  <!-- Eliminar (x=552) -->
+  <rect x="552" y="198" width="22" height="22" rx="7" fill="none" stroke="#E8E7E2" stroke-width="1"/>
+  <text x="563" y="213" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <!-- ─── Servicio 2 ─── -->
+  <rect x="30" y="234" width="560" height="38" class="row-svc"/>
+
+  <rect x="38" y="242" width="20" height="20" class="icon-container"/>
+  <rect x="43" y="245" width="10" height="14" rx="1" class="icon-stroke"/>
+  <line x1="45" y1="252" x2="47" y2="254" class="icon-stroke"/>
+  <line x1="47" y1="254" x2="51" y2="249" class="icon-stroke"/>
+
+  <text x="64" y="257" class="text-name">Vacuna antirrábica</text>
+
+  <rect x="422" y="242" width="36" height="22" class="input-bg"/>
+  <text x="440" y="257" text-anchor="middle" class="text-value" font-size="11">1</text>
+
+  <text x="536" y="257" text-anchor="end" class="price-text">$3,500</text>
+
+  <rect x="552" y="242" width="22" height="22" rx="7" fill="none" stroke="#E8E7E2" stroke-width="1"/>
+  <text x="563" y="257" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <!-- ─── Servicio 3 (cantidad > 1) ─── -->
+  <rect x="30" y="278" width="560" height="44" class="row-svc"/>
+
+  <rect x="38" y="288" width="20" height="20" class="icon-container"/>
+  <rect x="43" y="291" width="10" height="14" rx="1" class="icon-stroke"/>
+  <line x1="45" y1="298" x2="47" y2="300" class="icon-stroke"/>
+  <line x1="47" y1="300" x2="51" y2="295" class="icon-stroke"/>
+
+  <text x="64" y="301" class="text-name">Análisis de sangre completo</text>
+
+  <rect x="422" y="288" width="36" height="22" class="input-bg"/>
+  <text x="440" y="303" text-anchor="middle" class="text-value" font-size="11">2</text>
+
+  <text x="536" y="297" text-anchor="end" class="price-text">$7,000</text>
+  <text x="536" y="311" text-anchor="end" class="price-detail">2 × $3,500</text>
+
+  <rect x="552" y="288" width="22" height="22" rx="7" fill="none" stroke="#E8E7E2" stroke-width="1"/>
+  <text x="563" y="303" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <!-- Boton agregar (dashed, section 4.9 del DS) -->
+  <rect x="30" y="330" width="560" height="26" rx="7" fill="#FFFFFF" stroke="#D4D3CC" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="310" y="347" text-anchor="middle" class="text-muted" font-size="10">+ Agregar servicio</text>
+
+  <!-- Total (card footer pattern: bg fondo, border-top implicito por contraste) -->
+  <rect x="380" y="362" width="210" height="30" class="total-bg"/>
+  <text x="396" y="382" class="total-label">Total</text>
+  <text x="578" y="382" text-anchor="end" class="total-value">$15,500</text>
+
+  <!-- ═══ showPrices = false ═══ -->
+  <line x1="0" y1="408" x2="620" y2="408" class="separator"/>
+  <text x="16" y="428" class="text-section">showPrices = false</text>
+
+  <rect x="30" y="438" width="560" height="38" class="row-svc"/>
+
+  <rect x="38" y="446" width="20" height="20" class="icon-container"/>
+  <rect x="43" y="449" width="10" height="14" rx="1" class="icon-stroke"/>
+  <line x1="45" y1="456" x2="47" y2="458" class="icon-stroke"/>
+  <line x1="47" y1="458" x2="51" y2="453" class="icon-stroke"/>
+
+  <text x="64" y="461" class="text-name">Consulta general</text>
+
+  <rect x="422" y="446" width="36" height="22" class="input-bg"/>
+  <text x="440" y="461" text-anchor="middle" class="text-value" font-size="11">1</text>
+
+  <rect x="552" y="446" width="22" height="22" rx="7" fill="none" stroke="#E8E7E2" stroke-width="1"/>
+  <text x="563" y="461" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <text x="30" y="494" class="annotation">Sin columna de importe, sin total. Icono + nombre + cantidad + eliminar.</text>
+
+  <!-- ═══ NOTAS ═══ -->
+  <line x1="0" y1="510" x2="620" y2="510" class="separator"/>
+  <text x="16" y="526" class="text-muted" font-size="9">Icono: clipboard-check generico (representa "servicio prestado/completado"). Mismo icono en todas las filas = coherente, no decorativo.</text>
+  <text x="16" y="538" class="text-muted" font-size="9">Columnas fijas: icono x=38 | nombre x=64 | cant x=422 | importe x=536(end) | eliminar x=552. Alineacion vertical perfecta.</text>
+  <text x="16" y="550" class="text-muted" font-size="9">Tokens: fondo --bg, superficie --surface, bordes --border, texto --ink/--ink-3, total Noto Serif 900. Radios --r-sm (7px) y --r-xl (18px).</text>
+</svg>

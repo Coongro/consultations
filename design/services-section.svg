@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 700" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 12; }
+      .text-title { fill: #2C2925; font-size: 13px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+      .text-label { fill: #6B6660; font-size: 10px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 12px; }
+      .input-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .row-bg { fill: #FAFAF8; stroke: #E5E2DC; stroke-width: 1; rx: 8; }
+      .separator { stroke: #E5E2DC; stroke-width: 1; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .badge-change { fill: #FFF3CC; rx: 3; }
+      .badge-change-text { fill: #8A6800; font-size: 7px; font-weight: 600; }
+      .badge-price { fill: #F0EDE8; rx: 3; }
+      .badge-price-text { fill: #6B6660; font-size: 9px; }
+      .total-bg { fill: #F6F5F1; stroke: none; rx: 6; }
+      .total-text { fill: #2C2925; font-size: 14px; font-weight: 700; font-family: 'Noto Serif JP', serif; }
+      .total-label { fill: #9B9893; font-size: 11px; font-weight: 500; }
+      .chip-cat { fill: #F0EDE8; stroke: none; rx: 8; }
+      .chip-cat-text { fill: #6B6660; font-size: 9px; }
+    </style>
+  </defs>
+
+  <rect width="620" height="700" class="bg" rx="8"/>
+
+  <text x="16" y="22" class="text-title">Servicios Prestados — Rediseño</text>
+  <line x1="0" y1="32" x2="620" y2="32" class="separator"/>
+
+  <!-- ═══ ANTES ═══ -->
+  <text x="16" y="52" class="text-section">ANTES (tabla tipo spreadsheet)</text>
+  <rect x="16" y="60" width="588" height="86" rx="6" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1"/>
+
+  <!-- Header tabla vieja -->
+  <rect x="16" y="60" width="588" height="20" rx="0" fill="#FAFAF8"/>
+  <text x="26" y="74" class="text-muted" font-size="9">Servicio</text>
+  <text x="350" y="74" class="text-muted" font-size="9">Cant.</text>
+  <text x="420" y="74" class="text-muted" font-size="9">Precio unit.</text>
+  <text x="520" y="74" class="text-muted" font-size="9">Subtotal</text>
+
+  <!-- Fila vieja -->
+  <text x="26" y="98" class="text-value" font-size="10">Consulta general</text>
+  <rect x="340" y="86" width="50" height="20" class="input-bg"/>
+  <text x="360" y="100" class="text-value" font-size="10">1</text>
+  <rect x="410" y="86" width="70" height="20" class="input-bg"/>
+  <text x="425" y="100" class="text-value" font-size="10">5000.00</text>
+  <text x="530" y="100" class="text-value" font-size="10">$5,000</text>
+  <text x="580" y="100" fill="#C8423A" font-size="11">x</text>
+
+  <!-- Fila vieja 2 -->
+  <text x="26" y="122" class="text-value" font-size="10">Vacuna antirrabica</text>
+  <rect x="340" y="110" width="50" height="20" class="input-bg"/>
+  <text x="360" y="124" class="text-value" font-size="10">1</text>
+  <rect x="410" y="110" width="70" height="20" class="input-bg"/>
+  <text x="425" y="124" class="text-value" font-size="10">3500.00</text>
+  <text x="530" y="124" class="text-value" font-size="10">$3,500</text>
+  <text x="580" y="124" fill="#C8423A" font-size="11">x</text>
+
+  <text x="16" y="158" class="annotation">Problemas: parece planilla de calculo, inputs apretados, no respeta el design system, precios como inputs editables expuestos</text>
+
+  <!-- ═══ DESPUES ═══ -->
+  <line x1="0" y1="172" x2="620" y2="172" class="separator"/>
+  <text x="16" y="192" class="text-section">DESPUES (filas limpias, jerarquia clara)</text>
+  <rect x="16" y="196" width="55" height="12" class="badge-change"/>
+  <text x="20" y="205" class="badge-change-text">REDISEÑO</text>
+
+  <!-- Buscador -->
+  <rect x="16" y="216" width="588" height="32" rx="6" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1"/>
+  <circle cx="34" cy="232" r="7" fill="none" stroke="#C4C0BA" stroke-width="1.2"/>
+  <line x1="39" y1="237" x2="43" y2="241" fill="none" stroke="#C4C0BA" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="52" y="236" class="text-placeholder">Buscar servicio para agregar...</text>
+
+  <!-- Servicio 1 -->
+  <rect x="16" y="258" width="588" height="50" class="row-bg"/>
+
+  <!-- Nombre prominente -->
+  <text x="30" y="280" class="text-value" font-weight="500">Consulta general</text>
+  <rect x="150" y="270" width="70" height="16" class="chip-cat"/>
+  <text x="185" y="281" text-anchor="middle" class="chip-cat-text">Consultas</text>
+
+  <!-- Cantidad compacta -->
+  <text x="390" y="275" class="text-muted" font-size="9">Cant.</text>
+  <rect x="390" y="280" width="40" height="20" class="input-bg"/>
+  <text x="406" y="294" text-anchor="middle" class="text-value" font-size="11">1</text>
+
+  <!-- Precio (sutil, controlado por showPrices) -->
+  <text x="446" y="288" class="badge-price-text">$5,000</text>
+
+  <!-- Eliminar -->
+  <rect x="572" y="276" width="22" height="22" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="583" y="291" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <!-- Servicio 2 -->
+  <rect x="16" y="316" width="588" height="50" class="row-bg"/>
+
+  <text x="30" y="338" class="text-value" font-weight="500">Vacuna antirrábica</text>
+  <rect x="170" y="328" width="78" height="16" class="chip-cat"/>
+  <text x="209" y="339" text-anchor="middle" class="chip-cat-text">Vacunación</text>
+
+  <text x="390" y="333" class="text-muted" font-size="9">Cant.</text>
+  <rect x="390" y="338" width="40" height="20" class="input-bg"/>
+  <text x="406" y="352" text-anchor="middle" class="text-value" font-size="11">1</text>
+
+  <text x="446" y="346" class="badge-price-text">$3,500</text>
+
+  <rect x="572" y="334" width="22" height="22" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="583" y="349" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <!-- Servicio 3 (cantidad > 1) -->
+  <rect x="16" y="374" width="588" height="50" class="row-bg"/>
+
+  <text x="30" y="396" class="text-value" font-weight="500">Análisis de sangre completo</text>
+  <rect x="220" y="386" width="72" height="16" class="chip-cat"/>
+  <text x="256" y="397" text-anchor="middle" class="chip-cat-text">Laboratorio</text>
+
+  <text x="390" y="391" class="text-muted" font-size="9">Cant.</text>
+  <rect x="390" y="396" width="40" height="20" class="input-bg"/>
+  <text x="406" y="410" text-anchor="middle" class="text-value" font-size="11">2</text>
+
+  <text x="446" y="404" class="badge-price-text">$7,000</text>
+  <text x="446" y="414" class="text-muted" font-size="8">2 × $3,500</text>
+
+  <rect x="572" y="392" width="22" height="22" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="583" y="407" text-anchor="middle" fill="#C8423A" font-size="11">x</text>
+
+  <!-- Total -->
+  <rect x="380" y="434" width="224" height="32" class="total-bg"/>
+  <text x="396" y="455" class="total-label">Total:</text>
+  <text x="590" y="456" text-anchor="end" class="total-text">$15,500</text>
+
+  <!-- ═══ NOTAS ═══ -->
+  <line x1="0" y1="484" x2="620" y2="484" class="separator"/>
+  <text x="16" y="504" class="text-section">DIFERENCIAS CLAVE</text>
+
+  <!-- Grid comparativo -->
+  <rect x="16" y="514" width="285" height="54" rx="4" fill="#FFEBEE" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="26" y="530" class="text-label" font-weight="600">Antes</text>
+  <text x="26" y="544" class="annotation">Grid rigido tipo spreadsheet</text>
+  <text x="26" y="556" class="annotation">Precio unit. como input editable expuesto</text>
+
+  <rect x="319" y="514" width="285" height="54" rx="4" fill="#E8F5E9" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="329" y="530" class="text-label" font-weight="600">Despues</text>
+  <text x="329" y="544" class="annotation">Filas limpias con nombre prominente + chip categoria</text>
+  <text x="329" y="556" class="annotation">Precio como texto sutil (no input), solo cantidad editable</text>
+
+  <rect x="16" y="576" width="285" height="42" rx="4" fill="#FFEBEE" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="26" y="592" class="annotation">Encabezados de tabla (Servicio, Cant., Precio, Subtotal)</text>
+  <text x="26" y="604" class="annotation">Parece planilla de calculo, no app profesional</text>
+
+  <rect x="319" y="576" width="285" height="42" rx="4" fill="#E8F5E9" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="329" y="592" class="annotation">Sin encabezados de tabla — cada fila se explica sola</text>
+  <text x="329" y="604" class="annotation">Total alineado a la derecha, tipografia Noto Serif</text>
+
+  <!-- showPrices note -->
+  <rect x="16" y="630" width="588" height="36" rx="4" fill="#FAFAF8" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="26" y="648" class="text-label" font-weight="600">showPrices = false</text>
+  <text x="26" y="660" class="annotation">Se ocultan: precio ("$5,000"), desglose ("2 × $3,500"), y el total. Solo queda: nombre + chip + cantidad + eliminar.</text>
+
+  <text x="16" y="692" class="text-muted">consultations/design/services-section.svg — Rediseño Servicios Prestados</text>
+</svg>

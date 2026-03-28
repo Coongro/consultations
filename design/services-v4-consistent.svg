@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 640" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 12; }
+      .text-title { fill: #2C2925; font-size: 13px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+      .text-label { fill: #6B6660; font-size: 10px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 12px; }
+      .input-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .row-bg { fill: #FAFAF8; stroke: #E5E2DC; stroke-width: 1; rx: 8; }
+      .separator { stroke: #E5E2DC; stroke-width: 1; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .pill { fill: #F0EDE8; stroke: none; rx: 10; }
+      .pill-text { fill: #2C2925; font-size: 10px; font-weight: 500; }
+      .summary-text { fill: #6B6660; font-size: 10px; }
+      .total-bg { fill: #F6F5F1; stroke: none; rx: 6; }
+      .total-text { fill: #2C2925; font-size: 14px; font-weight: 700; font-family: 'Noto Serif JP', serif; }
+      .total-label { fill: #9B9893; font-size: 11px; font-weight: 500; }
+    </style>
+  </defs>
+
+  <rect width="620" height="640" class="bg" rx="8"/>
+
+  <text x="16" y="22" class="text-title">Servicios — v4 Consistente con medicamentos</text>
+  <text x="604" y="22" text-anchor="end" class="text-muted">v4</text>
+  <line x1="0" y1="32" x2="620" y2="32" class="separator"/>
+  <text x="16" y="50" class="annotation">Mismo patron que medicamentos: pill del nombre + resumen inline. Solo ui-components. Sin decoracion.</text>
+
+  <!-- ═══ SECCION COMPLETA ═══ -->
+  <rect x="16" y="62" width="588" height="340" class="card"/>
+
+  <text x="30" y="86" class="text-section">SERVICIOS PRESTADOS</text>
+  <line x1="155" y1="82" x2="590" y2="82" class="separator"/>
+
+  <!-- Motivo -->
+  <text x="30" y="102" class="text-label">Motivo *</text>
+  <rect x="30" y="108" width="560" height="26" class="input-bg"/>
+  <text x="42" y="125" class="text-value">Control anual de rutina</text>
+
+  <!-- Buscador (Combobox de ui-components) -->
+  <rect x="30" y="144" width="560" height="28" rx="6" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1"/>
+  <circle cx="46" cy="158" r="6" fill="none" stroke="#C4C0BA" stroke-width="1"/>
+  <line x1="50" y1="162" x2="53" y2="165" fill="none" stroke="#C4C0BA" stroke-width="1" stroke-linecap="round"/>
+  <text x="60" y="162" class="text-placeholder">Agregar servicio...</text>
+
+  <!-- Servicio 1: fila colapsada (mismo patron que medicamento colapsado) -->
+  <rect x="30" y="182" width="560" height="38" class="row-bg"/>
+  <!-- Pill nombre -->
+  <rect x="42" y="190" width="120" height="20" class="pill"/>
+  <text x="102" y="204" text-anchor="middle" class="pill-text">Consulta general</text>
+  <!-- Resumen: cantidad · precio -->
+  <text x="174" y="204" class="summary-text">x1</text>
+  <text x="196" y="204" class="text-muted">·</text>
+  <text x="206" y="204" class="summary-text">$5,000</text>
+  <!-- Eliminar (IconButton de ui-components) -->
+  <rect x="556" y="192" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="206" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- Servicio 2 -->
+  <rect x="30" y="226" width="560" height="38" class="row-bg"/>
+  <rect x="42" y="234" width="138" height="20" class="pill"/>
+  <text x="111" y="248" text-anchor="middle" class="pill-text">Vacuna antirrábica</text>
+  <text x="192" y="248" class="summary-text">x1</text>
+  <text x="212" y="248" class="text-muted">·</text>
+  <text x="222" y="248" class="summary-text">$3,500</text>
+  <rect x="556" y="236" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="250" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- Servicio 3 (cantidad > 1, click para editar) -->
+  <rect x="30" y="270" width="560" height="38" class="row-bg"/>
+  <rect x="42" y="278" width="200" height="20" class="pill"/>
+  <text x="142" y="292" text-anchor="middle" class="pill-text">Análisis de sangre completo</text>
+  <text x="254" y="292" class="summary-text">x2</text>
+  <text x="274" y="292" class="text-muted">·</text>
+  <text x="284" y="292" class="summary-text">$7,000</text>
+  <text x="320" y="292" class="text-muted" font-size="9">(2 × $3,500)</text>
+  <rect x="556" y="280" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="294" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- Boton agregar (dashed, mismo que medicamentos) -->
+  <rect x="30" y="316" width="560" height="26" rx="6" fill="none" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="310" y="333" text-anchor="middle" class="text-muted" font-size="10">+ Agregar servicio</text>
+
+  <!-- Total (solo si showPrices) -->
+  <rect x="392" y="352" width="192" height="28" class="total-bg"/>
+  <text x="406" y="371" class="total-label">Total:</text>
+  <text x="572" y="372" text-anchor="end" class="total-text">$15,500</text>
+
+  <!-- ═══ CLICK EN FILA → editar cantidad ═══ -->
+  <line x1="0" y1="414" x2="620" y2="414" class="separator"/>
+  <text x="16" y="434" class="text-section">CLICK EN FILA → EDITAR CANTIDAD</text>
+
+  <!-- Fila expandida (inline, no popover) -->
+  <rect x="30" y="444" width="560" height="48" rx="8" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1.5"/>
+  <rect x="42" y="454" width="200" height="20" class="pill"/>
+  <text x="142" y="468" text-anchor="middle" class="pill-text">Análisis de sangre completo</text>
+
+  <!-- Cantidad editable inline -->
+  <text x="260" y="462" class="text-label">Cant.</text>
+  <rect x="286" y="452" width="40" height="22" class="input-bg"/>
+  <text x="306" y="467" text-anchor="middle" class="text-value">2</text>
+
+  <!-- Precio unitario (read-only, solo info) -->
+  <text x="340" y="462" class="text-muted" font-size="9">× $3,500</text>
+  <text x="340" y="476" class="text-muted" font-size="9">= $7,000</text>
+
+  <rect x="556" y="454" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="468" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <text x="30" y="508" class="annotation">Click en la fila abre edicion inline (misma fila se expande). Precio unitario es read-only (del catalogo). Solo cantidad editable.</text>
+
+  <!-- ═══ showPrices = false ═══ -->
+  <line x1="0" y1="522" x2="620" y2="522" class="separator"/>
+  <text x="16" y="542" class="text-section">showPrices = false</text>
+
+  <rect x="30" y="552" width="560" height="38" class="row-bg"/>
+  <rect x="42" y="560" width="120" height="20" class="pill"/>
+  <text x="102" y="574" text-anchor="middle" class="pill-text">Consulta general</text>
+  <text x="174" y="574" class="summary-text">x1</text>
+  <rect x="556" y="562" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="576" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <text x="30" y="606" class="annotation">Sin precios: pill + cantidad + eliminar. Sin total. Misma estructura, solo menos datos.</text>
+
+  <!-- ═══ Reglas cumplidas ═══ -->
+  <text x="16" y="632" class="text-muted" font-size="9">Orden sobre decoracion ✓  Jerarquia silenciosa ✓  Compartimentacion ✓  Consistencia con medicamentos ✓  100% ui-components ✓  Noto Serif solo en total ✓</text>
+</svg>
