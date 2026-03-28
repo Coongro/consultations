@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 720" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 12; }
+      .text-title { fill: #2C2925; font-size: 13px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+      .text-label { fill: #6B6660; font-size: 10px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 12px; }
+      .input-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .row-bg { fill: #FAFAF8; stroke: #E5E2DC; stroke-width: 0.5; rx: 8; }
+      .separator { stroke: #E5E2DC; stroke-width: 1; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .total-bg { fill: #FFF8E7; stroke: none; rx: 8; }
+      .total-text { fill: #2C2925; font-size: 15px; font-weight: 700; font-family: 'Noto Serif JP', serif; }
+      .total-label { fill: #8A6800; font-size: 11px; font-weight: 500; }
+      /* Icono de servicio — color accent muted */
+      .svc-icon { fill: none; stroke: #9B9893; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+      /* Badge de cantidad — teal accent */
+      .qty-badge { fill: #E6F4F1; stroke: none; rx: 4; }
+      .qty-text { fill: #2A7B6B; font-size: 10px; font-weight: 600; }
+      /* Precio */
+      .price-text { fill: #6B6660; font-size: 11px; font-weight: 500; }
+      .price-detail { fill: #9B9893; font-size: 9px; }
+      /* Divider dorado sutil antes del total */
+      .gold-divider { stroke: #F5A800; stroke-width: 1; opacity: 0.3; }
+    </style>
+  </defs>
+
+  <rect width="620" height="720" class="bg" rx="8"/>
+
+  <text x="16" y="22" class="text-title">Servicios — v5 Pulido</text>
+  <text x="604" y="22" text-anchor="end" class="text-muted">v5</text>
+  <line x1="0" y1="32" x2="620" y2="32" class="separator"/>
+  <text x="16" y="50" class="annotation">Iconos Lucide por servicio, badge teal para cantidad, total con acento dorado. Tokens cg-*. 100% ui-components.</text>
+
+  <!-- ═══ SECCION COMPLETA ═══ -->
+  <rect x="16" y="62" width="588" height="370" class="card"/>
+
+  <text x="30" y="86" class="text-section">SERVICIOS PRESTADOS</text>
+  <line x1="155" y1="82" x2="590" y2="82" class="separator"/>
+
+  <!-- Motivo -->
+  <text x="30" y="102" class="text-label">Motivo *</text>
+  <rect x="30" y="108" width="560" height="26" class="input-bg"/>
+  <text x="42" y="125" class="text-value">Control anual de rutina</text>
+
+  <!-- Buscador -->
+  <rect x="30" y="144" width="560" height="30" rx="6" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1"/>
+  <circle cx="48" cy="159" r="7" fill="none" stroke="#C4C0BA" stroke-width="1.2"/>
+  <line x1="53" y1="164" x2="57" y2="168" fill="none" stroke="#C4C0BA" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="64" y="163" class="text-placeholder">Agregar servicio...</text>
+
+  <!-- ─── Servicio 1: Consulta general ─── -->
+  <rect x="30" y="186" width="560" height="42" class="row-bg"/>
+
+  <!-- Icono Stethoscope (Lucide, simplificado) -->
+  <circle cx="50" cy="207" r="6" class="svc-icon"/>
+  <line x1="50" y1="213" x2="50" y2="218" class="svc-icon"/>
+  <line x1="47" y1="218" x2="53" y2="218" class="svc-icon"/>
+
+  <!-- Nombre -->
+  <text x="66" y="210" class="text-value" font-weight="500">Consulta general</text>
+
+  <!-- Badge cantidad (teal) -->
+  <rect x="430" y="199" width="28" height="18" class="qty-badge"/>
+  <text x="444" y="212" text-anchor="middle" class="qty-text">x1</text>
+
+  <!-- Precio -->
+  <text x="540" y="210" text-anchor="end" class="price-text">$5,000</text>
+
+  <!-- Eliminar -->
+  <rect x="556" y="199" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="213" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- ─── Servicio 2: Vacuna antirrábica ─── -->
+  <rect x="30" y="234" width="560" height="42" class="row-bg"/>
+
+  <!-- Icono Syringe (simplificado) -->
+  <line x1="46" y1="250" x2="54" y2="262" class="svc-icon"/>
+  <line x1="44" y1="252" x2="48" y2="248" class="svc-icon"/>
+  <circle cx="55" cy="263" r="2" fill="#9B9893" stroke="none"/>
+
+  <!-- Nombre -->
+  <text x="66" y="258" class="text-value" font-weight="500">Vacuna antirrábica</text>
+
+  <!-- Badge cantidad -->
+  <rect x="430" y="247" width="28" height="18" class="qty-badge"/>
+  <text x="444" y="260" text-anchor="middle" class="qty-text">x1</text>
+
+  <!-- Precio -->
+  <text x="540" y="258" text-anchor="end" class="price-text">$3,500</text>
+
+  <!-- Eliminar -->
+  <rect x="556" y="247" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="261" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- ─── Servicio 3: Análisis de sangre (x2) ─── -->
+  <rect x="30" y="282" width="560" height="48" class="row-bg"/>
+
+  <!-- Icono FlaskConical (simplificado) -->
+  <line x1="46" y1="298" x2="50" y2="310" class="svc-icon"/>
+  <line x1="54" y1="298" x2="50" y2="310" class="svc-icon"/>
+  <line x1="46" y1="298" x2="54" y2="298" class="svc-icon"/>
+  <line x1="44" y1="294" x2="46" y2="298" class="svc-icon"/>
+  <line x1="56" y1="294" x2="54" y2="298" class="svc-icon"/>
+
+  <!-- Nombre -->
+  <text x="66" y="306" class="text-value" font-weight="500">Análisis de sangre completo</text>
+
+  <!-- Badge cantidad -->
+  <rect x="430" y="296" width="28" height="18" class="qty-badge"/>
+  <text x="444" y="309" text-anchor="middle" class="qty-text">x2</text>
+
+  <!-- Precio + desglose -->
+  <text x="540" y="304" text-anchor="end" class="price-text">$7,000</text>
+  <text x="540" y="318" text-anchor="end" class="price-detail">2 × $3,500</text>
+
+  <!-- Eliminar -->
+  <rect x="556" y="296" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="310" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- Boton agregar -->
+  <rect x="30" y="340" width="560" height="26" rx="6" fill="none" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="310" y="357" text-anchor="middle" class="text-muted" font-size="10">+ Agregar servicio</text>
+
+  <!-- Divider dorado sutil -->
+  <line x1="350" y1="378" x2="590" y2="378" class="gold-divider"/>
+
+  <!-- Total con fondo dorado claro -->
+  <rect x="370" y="386" width="220" height="34" class="total-bg"/>
+  <text x="388" y="408" class="total-label">Total</text>
+  <text x="578" y="409" text-anchor="end" class="total-text">$15,500</text>
+
+  <!-- ═══ CLICK EN FILA ═══ -->
+  <line x1="0" y1="444" x2="620" y2="444" class="separator"/>
+  <text x="16" y="464" class="text-section">CLICK EN FILA → EDITAR CANTIDAD</text>
+
+  <rect x="30" y="474" width="560" height="56" rx="8" fill="#FFFFFF" stroke="#E5E2DC" stroke-width="1.5"/>
+
+  <!-- Icono -->
+  <line x1="46" y1="496" x2="50" y2="508" class="svc-icon"/>
+  <line x1="54" y1="496" x2="50" y2="508" class="svc-icon"/>
+  <line x1="46" y1="496" x2="54" y2="496" class="svc-icon"/>
+  <line x1="44" y1="492" x2="46" y2="496" class="svc-icon"/>
+  <line x1="56" y1="492" x2="54" y2="496" class="svc-icon"/>
+
+  <!-- Nombre -->
+  <text x="66" y="500" class="text-value" font-weight="500">Análisis de sangre completo</text>
+
+  <!-- Cantidad editable -->
+  <text x="66" y="518" class="text-label">Cantidad</text>
+  <rect x="110" y="506" width="40" height="22" class="input-bg"/>
+  <text x="130" y="521" text-anchor="middle" class="text-value">2</text>
+
+  <!-- Precio info -->
+  <text x="166" y="518" class="text-muted" font-size="9">× $3,500 = $7,000</text>
+
+  <!-- Eliminar -->
+  <rect x="556" y="494" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="508" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <!-- ═══ showPrices = false ═══ -->
+  <line x1="0" y1="546" x2="620" y2="546" class="separator"/>
+  <text x="16" y="566" class="text-section">showPrices = false</text>
+
+  <rect x="30" y="576" width="560" height="42" class="row-bg"/>
+  <!-- Icono -->
+  <circle cx="50" cy="597" r="6" class="svc-icon"/>
+  <line x1="50" y1="603" x2="50" y2="608" class="svc-icon"/>
+  <line x1="47" y1="608" x2="53" y2="608" class="svc-icon"/>
+  <!-- Nombre -->
+  <text x="66" y="600" class="text-value" font-weight="500">Consulta general</text>
+  <!-- Badge cantidad -->
+  <rect x="430" y="589" width="28" height="18" class="qty-badge"/>
+  <text x="444" y="602" text-anchor="middle" class="qty-text">x1</text>
+  <!-- Eliminar -->
+  <rect x="556" y="589" width="20" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="566" y="603" text-anchor="middle" fill="#C8423A" font-size="10">x</text>
+
+  <text x="30" y="634" class="annotation">Sin precios, sin desglose, sin total, sin divider dorado. Icono + nombre + badge cantidad + eliminar.</text>
+
+  <!-- ═══ Reglas ═══ -->
+  <line x1="0" y1="648" x2="620" y2="648" class="separator"/>
+  <text x="16" y="666" class="text-muted" font-size="9">Iconos: DynamicIcon (Lucide) — Stethoscope, Syringe, FlaskConical, Scissors, etc. Color --cg-text-muted (#9B9893).</text>
+  <text x="16" y="680" class="text-muted" font-size="9">Cantidad: badge teal (--cg-accent-bg + --cg-accent). Precio: text --cg-text-secondary. Total: fondo --cg-warning-bg, texto Noto Serif.</text>
+  <text x="16" y="694" class="text-muted" font-size="9">Dorado solo en divider sutil (opacity 0.3) y fondo total (FFF8E7). Un solo CTA dorado por vista: el boton "Registrar consulta".</text>
+  <text x="16" y="714" class="text-muted">consultations/design/services-v5-polished.svg</text>
+</svg>

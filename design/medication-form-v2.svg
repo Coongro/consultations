@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 880" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 12; }
+      .text-title { fill: #2C2925; font-size: 14px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+      .text-label { fill: #6B6660; font-size: 10px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 12px; }
+      .input-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .select-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .med-card { fill: #FAFAF8; stroke: #E5E2DC; stroke-width: 1; rx: 10; }
+      .btn-primary { fill: #F5A800; rx: 6; }
+      .btn-primary-text { fill: #FFFFFF; font-size: 11px; font-weight: 500; }
+      .separator { stroke: #E5E2DC; stroke-width: 1; }
+      .badge { fill: #E3F2FD; rx: 3; }
+      .badge-text { fill: #1565C0; font-size: 8px; font-weight: 600; }
+      .badge-ortho { fill: #F0FAF4; rx: 3; }
+      .badge-ortho-text { fill: #3D9A5C; font-size: 8px; font-weight: 600; }
+      .badge-auto { fill: #E8F5E9; rx: 3; }
+      .badge-auto-text { fill: #3D9A5C; font-size: 8px; font-weight: 600; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .compound { stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .num-part { fill: #FFFFFF; }
+      .sel-part { fill: #FAFAF8; }
+    </style>
+  </defs>
+
+  <rect width="540" height="880" class="bg" rx="8"/>
+
+  <!-- Header -->
+  <text x="20" y="28" class="text-title">Medicamentos — v2 Card Expandida</text>
+  <text x="520" y="28" text-anchor="end" class="text-muted">Variante 2</text>
+  <line x1="0" y1="40" x2="540" y2="40" class="separator"/>
+
+  <text x="20" y="58" class="annotation">Cada medicamento como card individual con campos organizados en grid 2x3. Mas espacio, mejor legibilidad, ideal para 1-3 meds.</text>
+
+  <!-- ═══ Medicamento 1 — Card ═══ -->
+  <rect x="14" y="72" width="512" height="310" class="med-card"/>
+
+  <!-- Card header -->
+  <text x="28" y="94" class="text-section">MEDICAMENTO 1</text>
+  <rect x="480" y="80" width="24" height="20" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="492" y="94" text-anchor="middle" fill="#C8423A" font-size="12">x</text>
+
+  <!-- Nombre -->
+  <text x="28" y="114" class="text-label">Nombre del medicamento *</text>
+  <rect x="28" y="120" width="484" height="30" class="input-bg"/>
+  <text x="40" y="139" class="text-value">Amoxicilina</text>
+  <text x="28" y="162" class="annotation">Texto libre — el buscador con catalogo lo inyecta vet-pharmacy via view contributions</text>
+
+  <!-- Fila 1: Dosis + Via + (placeholder presentacion) -->
+  <text x="28" y="182" class="text-label">Dosis *</text>
+  <rect x="28" y="188" width="170" height="30" class="compound"/>
+  <rect x="28" y="188" width="90" height="30" class="num-part" rx="6"/>
+  <text x="40" y="207" class="text-value">15</text>
+  <line x1="118" y1="190" x2="118" y2="216" stroke="#E5E2DC" stroke-width="1"/>
+  <rect x="118" y="188" width="80" height="30" class="sel-part" rx="0"/>
+  <text x="130" y="207" class="text-value" font-size="11">mg/kg</text>
+  <text x="186" y="207" class="text-muted" font-size="9">&#9662;</text>
+  <rect x="28" y="220" width="55" height="12" class="badge-ortho"/>
+  <text x="32" y="230" class="badge-ortho-text">ORTODOXO</text>
+
+  <text x="210" y="182" class="text-label">Via de administracion</text>
+  <rect x="210" y="188" width="140" height="30" class="select-bg"/>
+  <text x="222" y="207" class="text-value" font-size="11">Oral</text>
+  <text x="338" y="207" class="text-muted" font-size="9">&#9662;</text>
+  <rect x="210" y="220" width="55" height="12" class="badge-ortho"/>
+  <text x="214" y="230" class="badge-ortho-text">ORTODOXO</text>
+
+  <!-- Presentacion (solo visible si vet-pharmacy instalado) -->
+  <text x="362" y="182" class="text-label">Presentacion</text>
+  <rect x="362" y="188" width="150" height="30" rx="6" fill="#F6F5F1" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="374" y="207" class="text-muted" font-size="10">Comp. 500mg</text>
+  <text x="374" y="230" class="annotation">Read-only (del catalogo)</text>
+
+  <!-- Fila 2: Frecuencia + Duracion -->
+  <text x="28" y="252" class="text-label">Frecuencia *</text>
+  <rect x="28" y="258" width="170" height="30" class="select-bg"/>
+  <text x="40" y="277" class="text-value" font-size="11">Cada 12 horas</text>
+  <text x="186" y="277" class="text-muted" font-size="9">&#9662;</text>
+  <rect x="28" y="290" width="55" height="12" class="badge-ortho"/>
+  <text x="32" y="300" class="badge-ortho-text">ORTODOXO</text>
+  <text x="90" y="300" class="annotation">Presets: 6h, 8h, 12h, 24h, 48h, 72h</text>
+
+  <text x="210" y="252" class="text-label">Duracion *</text>
+  <rect x="210" y="258" width="140" height="30" class="compound"/>
+  <rect x="210" y="258" width="70" height="30" class="num-part" rx="6"/>
+  <text x="222" y="277" class="text-value">7</text>
+  <line x1="280" y1="260" x2="280" y2="286" stroke="#E5E2DC" stroke-width="1"/>
+  <rect x="280" y="258" width="70" height="30" class="sel-part" rx="0"/>
+  <text x="290" y="277" class="text-value" font-size="11">dias</text>
+  <text x="340" y="277" class="text-muted" font-size="9">&#9662;</text>
+
+  <!-- Notas -->
+  <text x="362" y="252" class="text-label">Notas (opcional)</text>
+  <rect x="362" y="258" width="150" height="30" class="input-bg"/>
+  <text x="374" y="277" class="text-placeholder" font-size="10">Indicaciones...</text>
+
+  <!-- Resumen inline -->
+  <rect x="28" y="316" width="484" height="22" rx="4" fill="#F6F5F1" stroke="none"/>
+  <text x="40" y="331" class="text-muted" font-size="10">Resumen: Amoxicilina 15 mg/kg · Oral · Cada 12h · 7 dias</text>
+  <rect x="408" y="320" width="55" height="14" class="badge"/>
+  <text x="435" y="331" class="badge-text" text-anchor="middle">PREVIEW</text>
+  <text x="40" y="346" class="annotation">Linea de resumen auto-generada — util para escaneo rapido en la lista de medicamentos</text>
+
+  <!-- Fila 2: Frecuencia + Duracion bottom annotations -->
+  <text x="210" y="300" class="annotation">dias · semanas · meses</text>
+
+  <!-- ═══ Medicamento 2 — Vacio ═══ -->
+  <rect x="14" y="394" width="512" height="100" class="med-card" stroke-dasharray="4 2"/>
+
+  <text x="28" y="416" class="text-section">MEDICAMENTO 2</text>
+
+  <text x="28" y="436" class="text-label">Nombre del medicamento *</text>
+  <rect x="28" y="442" width="484" height="30" class="input-bg"/>
+  <text x="40" y="461" class="text-placeholder">Ej: Amoxicilina, Meloxicam...</text>
+
+  <text x="28" y="484" class="annotation">Los campos de dosis, via, frecuencia y duracion aparecen al ingresar el nombre</text>
+
+  <!-- Boton agregar -->
+  <rect x="14" y="506" width="512" height="30" rx="6" fill="none" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="270" y="525" text-anchor="middle" class="text-muted">+ Agregar medicamento</text>
+
+  <!-- ═══ Especificaciones ═══ -->
+  <line x1="0" y1="552" x2="540" y2="552" class="separator"/>
+  <text x="20" y="572" class="text-section">CAMPOS ORTODOXOS (estandar veterinario)</text>
+
+  <!-- Grid de specs -->
+  <rect x="20" y="582" width="245" height="44" rx="4" fill="#F0FAF4" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="30" y="598" class="text-label" font-weight="600">Dosis = cantidad + unidad</text>
+  <text x="30" y="614" class="annotation">mg/kg | mg | ml | UI/kg | gotas | comp.</text>
+
+  <rect x="275" y="582" width="245" height="44" rx="4" fill="#F0FAF4" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="285" y="598" class="text-label" font-weight="600">Via = ruta de administracion</text>
+  <text x="285" y="614" class="annotation">Oral | IM | IV | SC | Topica | Oftalmica | Otica</text>
+
+  <rect x="20" y="634" width="245" height="44" rx="4" fill="#F0FAF4" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="30" y="650" class="text-label" font-weight="600">Frecuencia = intervalo en horas</text>
+  <text x="30" y="666" class="annotation">Presets: c/6h | c/8h | c/12h | c/24h | c/48h | c/72h</text>
+
+  <rect x="275" y="634" width="245" height="44" rx="4" fill="#F0FAF4" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="285" y="650" class="text-label" font-weight="600">Duracion = cantidad + unidad</text>
+  <text x="285" y="666" class="annotation">dias | semanas | meses</text>
+
+  <!-- Auto-fill section -->
+  <text x="20" y="700" class="text-section">AUTO-FILL (cross-plugin)</text>
+
+  <rect x="20" y="710" width="500" height="56" rx="4" fill="#FAFAF8" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="30" y="728" class="text-label" font-weight="600">Consultations (este plugin):</text>
+  <text x="30" y="742" class="annotation">Nombre del medicamento es texto libre. Campos de dosis/via/frecuencia/duracion son estructurados.</text>
+  <text x="30" y="754" class="annotation">El veterinario ingresa todo manualmente — numero + selecciona unidad del select.</text>
+
+  <rect x="20" y="774" width="500" height="40" rx="4" fill="#E8F5E9" stroke="#B8D4A0" stroke-width="0.5"/>
+  <text x="30" y="792" class="text-label" font-weight="600">Con vet-pharmacy (addon):</text>
+  <text x="30" y="804" class="annotation">Reemplaza el input de nombre por un buscador con catalogo via view contributions. Precarga dosis/via.</text>
+
+  <!-- Pro/Con -->
+  <text x="20" y="836" class="text-label" font-weight="600">Pros</text>
+  <text x="20" y="848" class="annotation">Campos visibles de un vistazo, espacio para notas, linea de resumen auto-generada</text>
+  <text x="20" y="860" class="annotation">Responsive natural (cada card stackea a columna en mobile)</text>
+
+  <text x="300" y="836" class="text-label" font-weight="600">Contras</text>
+  <text x="300" y="848" class="annotation">Ocupa mas espacio vertical, puede sentirse pesado con 5+ meds</text>
+  <text x="300" y="860" class="annotation">Card vacia es visualmente grande antes de llenarse</text>
+
+  <text x="20" y="878" class="text-muted">consultations/design/medication-form-v2.svg — Card Expandida</text>
+</svg>
