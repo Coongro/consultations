@@ -1,6 +1,16 @@
 /**
- * Formulario para crear/editar consultas con secciones colapsables de datos clínicos.
+ * Formulario para crear/editar consultas.
+ * Organizado siguiendo flujo clínico SOAP:
+ *   1. Datos básicos (vet, fecha) + Selector de paciente
+ *   2. Signos vitales (peso, temperatura, FC, FR, BCS)
+ *   3. S — Motivo + Anamnesis
+ *   4. O — Examen físico por sistemas
+ *   5. A — Diagnóstico
+ *   6. P — Tratamiento + Medicamentos + Seguimiento
+ *   7. Servicios prestados (facturación)
  */
+import { PetPicker } from '@coongro/patients';
+import type { Pet } from '@coongro/patients';
 import {
   getHostReact,
   getHostUI,
@@ -15,8 +25,12 @@ import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationMutations } from '../hooks/useConsultationMutations.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationFormProps } from '../types/components.js';
-import type { MedicationInput, ServiceLineInput } from '../types/consultation.js';
-// ALL_REASON_CATEGORIES y REASON_CATEGORY_LABELS removidos del form (chips eliminados del diseño v3)
+import {
+  EXAM_SYSTEMS,
+  type MedicationInput,
+  type PhysicalExamSystem,
+  type ServiceLineInput,
+} from '../types/consultation.js';
 
 import { MedicationFormList } from './MedicationFormList.js';
 import { ServiceLineForm } from './ServiceLineForm.js';
@@ -25,6 +39,9 @@ const React = getHostReact();
 const UI = getHostUI();
 const { useState, useCallback, useEffect, useRef, useMemo } = React;
 
+const FIELD_GAP = 'flex flex-col gap-1';
+const GRID_2 = 'grid grid-cols-2 gap-3';
+
 function SectionHeader({ icon, title }: { icon: string; title: string }) {
   return React.createElement(
     'h3',
@@ -32,6 +49,10 @@ function SectionHeader({ icon, title }: { icon: string; title: string }) {
     React.createElement(UI.DynamicIcon, { icon, size: 14, className: 'text-cg-text-muted' }),
     title
   );
+}
+
+function buildDefaultExamSystems(): PhysicalExamSystem[] {
+  return EXAM_SYSTEMS.map((system) => ({ system, status: 'WNL' as const, notes: '' }));
 }
 
 export function ConsultationForm(props: ConsultationFormProps) {
@@ -49,23 +70,31 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const isEditing = !!consultationId;
   const saving = creating || updating;
 
-  // Estado del formulario
+  // --- Estado del formulario ---
+  const [selectedPetId, setSelectedPetId] = useState(petId ?? defaults?.pet_id ?? '');
   const [vetName, setVetName] = useState(defaults?.vet_name ?? '');
   const [date, setDate] = useState(defaults?.date ?? new Date().toISOString().slice(0, 16));
+
+  // Signos vitales
   const [weightKg, setWeightKg] = useState(defaults?.weight_kg ?? '');
   const [temperature, setTemperature] = useState(defaults?.temperature ?? '');
+  const [heartRate, setHeartRate] = useState('');
+  const [respiratoryRate, setRespiratoryRate] = useState('');
+  const [bcs, setBcs] = useState('');
+
+  // SOAP
   const [reason, setReason] = useState(defaults?.reason ?? '');
-  const [clinicalExamOpen, setClinicalExamOpen] = useState(false);
   const [anamnesis, setAnamnesis] = useState(defaults?.anamnesis ?? '');
-  const [physicalExam, setPhysicalExam] = useState(defaults?.physical_exam ?? '');
+  const [examSystems, setExamSystems] = useState<PhysicalExamSystem[]>(buildDefaultExamSystems);
+  const [physicalExamNotes, setPhysicalExamNotes] = useState(defaults?.physical_exam ?? '');
   const [diagnosis, setDiagnosis] = useState(defaults?.diagnosis ?? '');
   const [treatment, setTreatment] = useState(defaults?.treatment ?? '');
+  const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
   const [followUpDate, setFollowUpDate] = useState(defaults?.follow_up_date ?? '');
   const [notes, setNotes] = useState(defaults?.notes ?? '');
-  const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
-  const [serviceLines, setServiceLines] = useState<ServiceLineInput[]>(defaults?.services ?? []);
 
-  // Catálogo de servicios para ServiceLineForm
+  // Servicios
+  const [serviceLines, setServiceLines] = useState<ServiceLineInput[]>(defaults?.services ?? []);
   const [serviceCatalog, setServiceCatalog] = useState<Product[]>([]);
   const [serviceCategories, setServiceCategories] = useState<Category[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -109,7 +138,6 @@ export function ConsultationForm(props: ConsultationFormProps) {
     })();
   }, []);
 
-  // Subcategorías de servicios para el modal de creación
   const serviceSubcategories = useMemo(() => {
     const root = serviceCategories.find((c: Category) => c.slug === ROOT_SERVICE_CATEGORY_SLUG);
     if (!root) return [];
@@ -120,15 +148,24 @@ export function ConsultationForm(props: ConsultationFormProps) {
     setServiceCatalog((prev) => [...prev, product]);
   }, []);
 
-  // Contribuciones de otros plugins (ej: vet-pharmacy inyecta selector de medicamentos)
   const { sections: contributedSections } = useViewContributions('consultations.form.open', {
     onMedicationsChange: setMedications,
   });
 
-  // Precargar peso del paciente al crear consulta nueva
+  // --- PetPicker: sincronizar petId de prop ---
+  useEffect(() => {
+    if (petId) setSelectedPetId(petId);
+  }, [petId]);
+
+  const handlePetSelect = useCallback((pet: Pet | null) => {
+    setSelectedPetId(pet?.id ?? '');
+    if (pet?.weight_kg) setWeightKg(pet.weight_kg);
+  }, []);
+
+  // Precargar peso del paciente
   useEffect(() => {
     if (isEditing || weightKg) return;
-    const targetPetId = petId ?? defaults?.pet_id;
+    const targetPetId = selectedPetId || defaults?.pet_id;
     if (!targetPetId) return;
     void (async () => {
       try {
@@ -141,7 +178,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         // patients plugin puede no estar instalado
       }
     })();
-  }, [petId, defaults?.pet_id, isEditing, weightKg]);
+  }, [selectedPetId, defaults?.pet_id, isEditing, weightKg]);
 
   // Cargar defaults del settings
   useEffect(() => {
@@ -152,20 +189,25 @@ export function ConsultationForm(props: ConsultationFormProps) {
 
   // Cargar datos existentes al editar
   useEffect(() => {
-    if (existing) {
-      setVetName(existing.vet_name);
-      setDate(existing.date.slice(0, 16));
-      setWeightKg(existing.weight_kg ?? '');
-      setTemperature(existing.temperature ?? '');
-      setReason(existing.reason);
-      if (existing.anamnesis || existing.physical_exam) setClinicalExamOpen(true);
-      setAnamnesis(existing.anamnesis ?? '');
-      setPhysicalExam(existing.physical_exam ?? '');
-      setDiagnosis(existing.diagnosis ?? '');
-      setTreatment(existing.treatment ?? '');
-      setFollowUpDate(existing.follow_up_date ?? '');
-      setNotes(existing.notes ?? '');
+    if (!existing) return;
+    setVetName(existing.vet_name);
+    setDate(existing.date.slice(0, 16));
+    setWeightKg(existing.weight_kg ?? '');
+    setTemperature(existing.temperature ?? '');
+    setHeartRate(existing.heart_rate !== null ? String(existing.heart_rate) : '');
+    setRespiratoryRate(existing.respiratory_rate !== null ? String(existing.respiratory_rate) : '');
+    setBcs(existing.body_condition_score ?? '');
+    setReason(existing.reason);
+    setAnamnesis(existing.anamnesis ?? '');
+    if (existing.physical_exam_systems && Array.isArray(existing.physical_exam_systems)) {
+      setExamSystems(existing.physical_exam_systems);
     }
+    setPhysicalExamNotes(existing.physical_exam ?? '');
+    setDiagnosis(existing.diagnosis ?? '');
+    setTreatment(existing.treatment ?? '');
+    setFollowUpDate(existing.follow_up_date ?? '');
+    setNotes(existing.notes ?? '');
+    setSelectedPetId(existing.pet_id);
   }, [existing]);
 
   useEffect(() => {
@@ -200,6 +242,18 @@ export function ConsultationForm(props: ConsultationFormProps) {
     }
   }, [existingServices]);
 
+  // --- Exam systems handlers ---
+  const handleExamStatusToggle = useCallback((index: number) => {
+    setExamSystems((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, status: s.status === 'WNL' ? 'ABN' : 'WNL' } : s))
+    );
+  }, []);
+
+  const handleExamNotesChange = useCallback((index: number, value: string) => {
+    setExamSystems((prev) => prev.map((s, i) => (i === index ? { ...s, notes: value } : s)));
+  }, []);
+
+  // --- Submit ---
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -213,52 +267,50 @@ export function ConsultationForm(props: ConsultationFormProps) {
         return;
       }
 
-      // Filtrar medicamentos vacios
       const validMeds = medications.filter((m: MedicationInput) => m.name.trim());
-
-      // Filtrar service lines vacias
       const validServices = serviceLines.filter((s: ServiceLineInput) => s.product_name.trim());
+
+      // Solo guardar sistemas con hallazgos (ABN o con notas)
+      const examData = examSystems.some((s) => s.status === 'ABN' || s.notes.trim())
+        ? examSystems
+        : null;
+
+      const sharedData = {
+        vet_name: vetName.trim(),
+        date: new Date(date).toISOString(),
+        weight_kg: weightKg || null,
+        temperature: temperature || null,
+        heart_rate: heartRate ? parseInt(heartRate, 10) : null,
+        respiratory_rate: respiratoryRate ? parseInt(respiratoryRate, 10) : null,
+        body_condition_score: bcs || null,
+        reason: reason.trim(),
+        reason_category: null,
+        anamnesis: anamnesis.trim() || null,
+        physical_exam: physicalExamNotes.trim() || null,
+        physical_exam_systems: examData,
+        diagnosis: diagnosis.trim() || null,
+        treatment: treatment.trim() || null,
+        follow_up_date: followUpDate || null,
+        follow_up_notes: null,
+        notes: notes.trim() || null,
+      };
 
       if (isEditing && consultationId) {
         const result = await update(consultationId, {
-          vet_name: vetName.trim(),
-          date: new Date(date).toISOString(),
-          weight_kg: weightKg || null,
-          temperature: temperature || null,
-          reason: reason.trim(),
-          reason_category: null,
-          anamnesis: anamnesis.trim() || null,
-          physical_exam: physicalExam.trim() || null,
-          diagnosis: diagnosis.trim() || null,
-          treatment: treatment.trim() || null,
-          follow_up_date: followUpDate || null,
-          follow_up_notes: null,
-          notes: notes.trim() || null,
+          ...sharedData,
           services: validServices,
         });
         if (result && onSuccess) onSuccess(result);
       } else {
-        const targetPetId = petId ?? defaults?.pet_id;
+        const targetPetId = selectedPetId || defaults?.pet_id;
         if (!targetPetId) {
-          toast.error('Error', 'No se especificó un paciente');
+          toast.error('Error', 'Seleccioná un paciente');
           return;
         }
 
         const result = await create({
+          ...sharedData,
           pet_id: targetPetId,
-          vet_name: vetName.trim(),
-          date: new Date(date).toISOString(),
-          weight_kg: weightKg || null,
-          temperature: temperature || null,
-          reason: reason.trim(),
-          reason_category: null,
-          anamnesis: anamnesis.trim() || null,
-          physical_exam: physicalExam.trim() || null,
-          diagnosis: diagnosis.trim() || null,
-          treatment: treatment.trim() || null,
-          follow_up_date: followUpDate || null,
-          follow_up_notes: null,
-          notes: notes.trim() || null,
           medications: validMeds,
           services: validServices,
         });
@@ -267,16 +319,20 @@ export function ConsultationForm(props: ConsultationFormProps) {
     },
     [
       consultationId,
-      petId,
+      selectedPetId,
       defaults,
       isEditing,
       vetName,
       date,
       weightKg,
       temperature,
+      heartRate,
+      respiratoryRate,
+      bcs,
       reason,
       anamnesis,
-      physicalExam,
+      examSystems,
+      physicalExamNotes,
       diagnosis,
       treatment,
       followUpDate,
@@ -290,11 +346,14 @@ export function ConsultationForm(props: ConsultationFormProps) {
     ]
   );
 
+  // Si no hay petId, necesitamos mostrar PetPicker
+  const needsPetPicker = !petId && !consultationId;
+
   return React.createElement(
     'form',
     { onSubmit: handleSubmit, className: `flex flex-col gap-4 ${className}` },
 
-    // Seccion 1: Datos basicos
+    // ── Sección 1: Datos básicos + Paciente ──
     React.createElement(
       UI.Card,
       { className: 'p-4' },
@@ -302,12 +361,26 @@ export function ConsultationForm(props: ConsultationFormProps) {
         'div',
         { className: 'flex flex-col gap-3' },
         React.createElement(SectionHeader, { icon: 'ClipboardList', title: 'Datos básicos' }),
-        React.createElement(
-          'div',
-          { className: 'grid grid-cols-2 gap-3' },
+
+        // PetPicker (solo cuando no viene petId por parámetro)
+        needsPetPicker &&
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-1' },
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'Paciente *'),
+            React.createElement(PetPicker, {
+              value: selectedPetId || undefined,
+              onChange: handlePetSelect,
+              placeholder: 'Buscar paciente por nombre, raza o microchip...',
+            })
+          ),
+
+        React.createElement(
+          'div',
+          { className: GRID_2 },
+          React.createElement(
+            'div',
+            { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Veterinario *'),
             React.createElement(UI.Input, {
               type: 'text',
@@ -319,7 +392,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
           ),
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-1' },
+            { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Fecha y hora'),
             React.createElement(UI.Input, {
               type: 'datetime-local',
@@ -327,13 +400,24 @@ export function ConsultationForm(props: ConsultationFormProps) {
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value),
             })
           )
-        ),
+        )
+      )
+    ),
+
+    // ── Sección 2: Signos vitales ──
+    React.createElement(
+      UI.Card,
+      { className: 'p-4' },
+      React.createElement(
+        'div',
+        { className: 'flex flex-col gap-3' },
+        React.createElement(SectionHeader, { icon: 'HeartPulse', title: 'Signos vitales' }),
         React.createElement(
           'div',
-          { className: 'grid grid-cols-2 gap-3' },
+          { className: 'grid grid-cols-3 sm:grid-cols-5 gap-3' },
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-1' },
+            { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Peso (kg)'),
             React.createElement(UI.Input, {
               type: 'number',
@@ -342,13 +426,13 @@ export function ConsultationForm(props: ConsultationFormProps) {
               max: '200',
               value: weightKg,
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => setWeightKg(e.target.value),
-              placeholder: 'ej: 28.5',
+              placeholder: '28.5',
             })
           ),
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Temperatura (°C)'),
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'Temp. (°C)'),
             React.createElement(UI.Input, {
               type: 'number',
               step: '0.1',
@@ -356,25 +440,69 @@ export function ConsultationForm(props: ConsultationFormProps) {
               max: '42',
               value: temperature,
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTemperature(e.target.value),
-              placeholder: 'ej: 38.5',
+              placeholder: '38.5',
+            })
+          ),
+          React.createElement(
+            'div',
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'FC (lpm)'),
+            React.createElement(UI.Input, {
+              type: 'number',
+              min: '0',
+              max: '300',
+              value: heartRate,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setHeartRate(e.target.value),
+              placeholder: '120',
+            })
+          ),
+          React.createElement(
+            'div',
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'FR (rpm)'),
+            React.createElement(UI.Input, {
+              type: 'number',
+              min: '0',
+              max: '100',
+              value: respiratoryRate,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                setRespiratoryRate(e.target.value),
+              placeholder: '20',
+            })
+          ),
+          React.createElement(
+            'div',
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'BCS (1-9)'),
+            React.createElement(UI.Input, {
+              type: 'number',
+              min: '1',
+              max: '9',
+              step: '0.5',
+              value: bcs,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setBcs(e.target.value),
+              placeholder: '5',
             })
           )
         )
       )
     ),
 
-    // Seccion 2: Servicios prestados (siempre visible) + Motivo
+    // ── Sección 3 (S): Motivo + Anamnesis ──
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'Receipt', title: 'Servicios prestados' }),
+        React.createElement(SectionHeader, {
+          icon: 'MessageSquare',
+          title: 'S — Motivo y anamnesis',
+        }),
         React.createElement(
           'div',
-          { className: 'flex flex-col gap-1' },
-          React.createElement(UI.Label, null, 'Motivo *'),
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Motivo de consulta *'),
           React.createElement(UI.Input, {
             type: 'text',
             value: reason,
@@ -383,106 +511,120 @@ export function ConsultationForm(props: ConsultationFormProps) {
             required: true,
           })
         ),
-        React.createElement(ServiceLineForm, {
-          services: serviceLines,
-          onChange: setServiceLines,
-          catalog: serviceCatalog,
-          categories: serviceSubcategories,
-          catalogLoading,
-          onProductCreated: handleProductCreated,
-          showPrices: consultSettings.showPrices,
-        })
-      )
-    ),
-
-    // Seccion 3: Examen clínico (colapsable, cerrado por defecto)
-    React.createElement(
-      UI.Card,
-      { className: 'p-4' },
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-3' },
         React.createElement(
           'div',
-          {
-            className: 'flex items-center gap-2 cursor-pointer select-none',
-            onClick: () => setClinicalExamOpen(!clinicalExamOpen),
-          },
-          React.createElement(
-            'span',
-            { className: 'text-xs text-cg-text-muted' },
-            clinicalExamOpen ? '\u25BC' : '\u25B6'
-          ),
-          React.createElement(UI.DynamicIcon, {
-            icon: 'Stethoscope',
-            size: 14,
-            className: 'text-cg-text-muted',
-          }),
-          React.createElement(
-            'h3',
-            { className: 'text-sm font-medium text-cg-text-muted' },
-            'Examen clínico'
-          ),
-          !clinicalExamOpen &&
-            (anamnesis || physicalExam) &&
-            React.createElement(UI.Badge, { variant: 'secondary', size: 'sm' }, 'Con datos')
-        ),
-        clinicalExamOpen &&
-          React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Anamnesis'),
-            React.createElement(UI.Textarea, {
-              value: anamnesis,
-              onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setAnamnesis(e.target.value),
-              placeholder: 'Lo que reporta el dueño...',
-              rows: 2,
-            })
-          ),
-        clinicalExamOpen &&
-          React.createElement(
-            'div',
-            { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Examen físico'),
-            React.createElement(UI.Textarea, {
-              value: physicalExam,
-              onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setPhysicalExam(e.target.value),
-              placeholder: 'Hallazgos del examen...',
-              rows: 2,
-            })
-          )
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Anamnesis'),
+          React.createElement(UI.Textarea, {
+            value: anamnesis,
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setAnamnesis(e.target.value),
+            placeholder: 'Lo que reporta el dueño: síntomas, duración, cambios de hábitos...',
+            rows: 3,
+          })
+        )
       )
     ),
 
-    // Seccion 4: Diagnóstico
+    // ── Sección 4 (O): Examen físico por sistemas ──
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'SearchCheck', title: 'Diagnóstico' }),
+        React.createElement(SectionHeader, {
+          icon: 'Stethoscope',
+          title: 'O — Examen físico',
+        }),
+
+        // Grid de sistemas con toggle WNL/ABN
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-2' },
+          ...examSystems.map((sys, idx) =>
+            React.createElement(
+              'div',
+              {
+                key: sys.system,
+                className: `flex items-start gap-2 p-2 rounded-lg ${
+                  sys.status === 'ABN' ? 'bg-cg-danger-bg' : 'bg-cg-bg-secondary'
+                }`,
+              },
+              // Toggle WNL/ABN
+              React.createElement(
+                UI.Button,
+                {
+                  type: 'button',
+                  variant: sys.status === 'ABN' ? 'destructive' : 'outline',
+                  size: 'sm',
+                  className: 'shrink-0 w-12 text-xs font-mono',
+                  onClick: () => handleExamStatusToggle(idx),
+                },
+                sys.status
+              ),
+              // Nombre del sistema
+              React.createElement(
+                'span',
+                { className: 'text-sm text-cg-text pt-1.5 w-36 shrink-0' },
+                sys.system
+              ),
+              // Notas (visible siempre pero relevante cuando ABN)
+              React.createElement(UI.Input, {
+                type: 'text',
+                value: sys.notes,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleExamNotesChange(idx, e.target.value),
+                placeholder: sys.status === 'ABN' ? 'Describir hallazgo...' : 'Sin observaciones',
+                className: 'flex-1 text-sm',
+              })
+            )
+          )
+        ),
+
+        // Notas generales del examen (textarea legacy, por compatibilidad)
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Notas generales del examen'),
+          React.createElement(UI.Textarea, {
+            value: physicalExamNotes,
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setPhysicalExamNotes(e.target.value),
+            placeholder: 'Observaciones adicionales del examen físico...',
+            rows: 2,
+          })
+        )
+      )
+    ),
+
+    // ── Sección 5 (A): Diagnóstico ──
+    React.createElement(
+      UI.Card,
+      { className: 'p-4' },
+      React.createElement(
+        'div',
+        { className: 'flex flex-col gap-3' },
+        React.createElement(SectionHeader, { icon: 'SearchCheck', title: 'A — Diagnóstico' }),
         React.createElement(UI.Textarea, {
           value: diagnosis,
           onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDiagnosis(e.target.value),
-          placeholder: 'Diagnóstico...',
+          placeholder: 'Diagnóstico presuntivo o definitivo...',
           rows: 2,
         })
       )
     ),
 
-    // Seccion 5: Tratamiento + Medicamentos
+    // ── Sección 6 (P): Tratamiento + Medicamentos + Seguimiento ──
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'Pill', title: 'Tratamiento' }),
+        React.createElement(SectionHeader, { icon: 'Pill', title: 'P — Plan de tratamiento' }),
         React.createElement(
           'div',
-          { className: 'flex flex-col gap-1' },
+          { className: FIELD_GAP },
           React.createElement(UI.Label, null, 'Indicaciones generales'),
           React.createElement(UI.Input, {
             type: 'text',
@@ -492,7 +634,6 @@ export function ConsultationForm(props: ConsultationFormProps) {
           })
         ),
         React.createElement(UI.Label, null, 'Medicación'),
-        // Si hay contribuciones de otros plugins, usarlas; si no, fallback al formulario nativo
         ...(contributedSections.length > 0
           ? contributedSections.map((s, i) =>
               React.createElement(
@@ -507,24 +648,15 @@ export function ConsultationForm(props: ConsultationFormProps) {
                 medications,
                 onChange: setMedications,
               }),
-            ])
-      )
-    ),
-
-    // Seccion 6: Seguimiento (notas unificadas)
-    React.createElement(
-      UI.Card,
-      { className: 'p-4' },
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-3' },
+            ]),
+        React.createElement(UI.Separator, { className: 'my-1' }),
         React.createElement(SectionHeader, { icon: 'CalendarCheck', title: 'Seguimiento' }),
         React.createElement(
           'div',
-          { className: 'grid grid-cols-2 gap-3' },
+          { className: GRID_2 },
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-1' },
+            { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Próximo control'),
             React.createElement(UI.Input, {
               type: 'date',
@@ -534,7 +666,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
           ),
           React.createElement(
             'div',
-            { className: 'flex flex-col gap-1' },
+            { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Notas'),
             React.createElement(UI.Input, {
               type: 'text',
@@ -547,26 +679,39 @@ export function ConsultationForm(props: ConsultationFormProps) {
       )
     ),
 
-    // Botones
+    // ── Sección 7: Servicios prestados ──
+    React.createElement(
+      UI.Card,
+      { className: 'p-4' },
+      React.createElement(
+        'div',
+        { className: 'flex flex-col gap-3' },
+        React.createElement(SectionHeader, { icon: 'Receipt', title: 'Servicios prestados' }),
+        React.createElement(ServiceLineForm, {
+          services: serviceLines,
+          onChange: setServiceLines,
+          catalog: serviceCatalog,
+          categories: serviceSubcategories,
+          catalogLoading,
+          onProductCreated: handleProductCreated,
+          showPrices: consultSettings.showPrices,
+        })
+      )
+    ),
+
+    // ── Botones ──
     React.createElement(
       'div',
       { className: 'flex justify-end gap-3' },
       onCancel &&
         React.createElement(
           UI.Button,
-          {
-            type: 'button',
-            variant: 'outline',
-            onClick: onCancel,
-          },
+          { type: 'button', variant: 'outline', onClick: onCancel },
           'Cancelar'
         ),
       React.createElement(
         UI.Button,
-        {
-          type: 'submit',
-          disabled: saving,
-        },
+        { type: 'submit', disabled: saving },
         saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Registrar consulta'
       )
     )

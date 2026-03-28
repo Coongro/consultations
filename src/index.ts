@@ -16,6 +16,11 @@ export { MedicationList } from './components/MedicationList.js';
 export { MedicationFormList } from './components/MedicationFormList.js';
 export { ConsultationStats } from './components/ConsultationStats.js';
 export { ServiceLineForm } from './components/ServiceLineForm.js';
+export { VitalSignCard, type VitalSignCardProps } from './components/VitalSignCard.js';
+export {
+  PhysicalExamSummary,
+  type PhysicalExamSummaryProps,
+} from './components/PhysicalExamSummary.js';
 export { PriceInput, type PriceInputProps } from './components/PriceInput.js';
 export {
   ServiceFormDialog,
@@ -39,7 +44,9 @@ export type {
   MedicationInput,
   ConsultationWithMedications,
   ReasonCategory,
+  PhysicalExamSystem,
 } from './types/consultation.js';
+export { EXAM_SYSTEMS } from './types/consultation.js';
 export type { ConsultationFilters, SortDirection } from './types/filters.js';
 export type {
   PetInfo,
