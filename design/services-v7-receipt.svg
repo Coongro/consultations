@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 540" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E8E7E2; stroke-width: 1; rx: 18; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+      .text-label { fill: #6B6760; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 13px; }
+      .text-name { fill: #2C2925; font-size: 13px; font-weight: 500; }
+      .input-bg { fill: #FFFFFF; stroke: #E8E7E2; stroke-width: 1; rx: 7; }
+      .search-bg { fill: #F6F5F1; stroke: #E8E7E2; stroke-width: 1; rx: 7; }
+      .separator { stroke: #E8E7E2; stroke-width: 1; }
+      .separator-light { stroke: #E8E7E2; stroke-width: 0.5; stroke-dasharray: 2 2; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .price { fill: #3A3731; font-size: 13px; font-weight: 500; font-family: 'Noto Serif JP', serif; }
+      .price-detail { fill: #9B9893; font-size: 10px; }
+      .qty { fill: #6B6760; font-size: 11px; }
+      .total-bg { fill: #F6F5F1; stroke: none; rx: 7; }
+      .total-value { fill: #1A1916; font-size: 17px; font-weight: 900; font-family: 'Noto Serif JP', serif; }
+      .total-label { fill: #6B6760; font-size: 12px; font-weight: 700; }
+      .icon-header { fill: none; stroke: #9B9893; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="620" height="540" class="bg" rx="8"/>
+
+  <!-- ═══ CARD ═══ -->
+  <rect x="16" y="16" width="588" height="350" class="card"/>
+
+  <!-- Header de seccion con icono Receipt -->
+  <g transform="translate(30, 32)">
+    <!-- Icono Receipt (Lucide): rectangulo con lineas internas + zigzag inferior -->
+    <rect x="0" y="0" width="16" height="18" rx="2" class="icon-header"/>
+    <line x1="4" y1="5" x2="12" y2="5" class="icon-header" stroke-width="1.2"/>
+    <line x1="4" y1="9" x2="12" y2="9" class="icon-header" stroke-width="1.2"/>
+    <line x1="4" y1="13" x2="9" y2="13" class="icon-header" stroke-width="1.2"/>
+  </g>
+  <text x="52" y="46" class="text-section">Servicios prestados</text>
+  <line x1="30" y1="56" x2="590" y2="56" class="separator"/>
+
+  <!-- Motivo -->
+  <text x="30" y="74" class="text-label">Motivo *</text>
+  <rect x="30" y="80" width="560" height="28" class="input-bg"/>
+  <text x="42" y="98" class="text-value">Control anual de rutina</text>
+
+  <!-- Buscador -->
+  <rect x="30" y="118" width="560" height="30" class="search-bg"/>
+  <circle cx="48" cy="133" r="6" fill="none" stroke="#C4C0BA" stroke-width="1.2"/>
+  <line x1="52" y1="137" x2="56" y2="141" fill="none" stroke="#C4C0BA" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="64" y="137" class="text-placeholder">Agregar servicio...</text>
+
+  <!--
+    Filas tipo ticket:
+    Nombre (izq) ..... cantidad x precio (der)
+    Alineacion: nombre x=30, qty x=460, precio x=574 (end)
+  -->
+
+  <!-- Fila 1 -->
+  <text x="30" y="174" class="text-name">Consulta general</text>
+  <text x="460" y="174" class="qty">x1</text>
+  <text x="574" y="174" text-anchor="end" class="price">$5,000</text>
+
+  <!-- Separador punteado -->
+  <line x1="30" y1="184" x2="574" y2="184" class="separator-light"/>
+
+  <!-- Fila 2 -->
+  <text x="30" y="204" class="text-name">Vacuna antirrábica</text>
+  <text x="460" y="204" class="qty">x1</text>
+  <text x="574" y="204" text-anchor="end" class="price">$3,500</text>
+
+  <line x1="30" y1="214" x2="574" y2="214" class="separator-light"/>
+
+  <!-- Fila 3 (cantidad > 1) -->
+  <text x="30" y="234" class="text-name">Análisis de sangre completo</text>
+  <text x="460" y="234" class="qty">x2</text>
+  <text x="574" y="234" text-anchor="end" class="price">$7,000</text>
+  <text x="574" y="248" text-anchor="end" class="price-detail">2 x $3,500</text>
+
+  <!-- Ultima fila sin separador (DS seccion 4.2) -->
+
+  <!-- Boton agregar -->
+  <rect x="30" y="264" width="560" height="26" rx="7" fill="#FFFFFF" stroke="#D4D3CC" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="310" y="281" text-anchor="middle" class="text-muted" font-size="10">+ Agregar servicio</text>
+
+  <!-- Total: footer pattern del DS, fondo bg, border-top -->
+  <line x1="30" y1="302" x2="574" y2="302" class="separator"/>
+  <rect x="30" y="308" width="560" height="38" class="total-bg"/>
+  <text x="44" y="332" class="total-label">Total</text>
+  <text x="574" y="333" text-anchor="end" class="total-value">$15,500</text>
+
+  <!-- ═══ showPrices = false ═══ -->
+  <line x1="0" y1="382" x2="620" y2="382" class="separator"/>
+  <text x="16" y="402" class="text-section" style="text-transform: none; font-weight: 600">showPrices = false</text>
+
+  <rect x="16" y="412" width="588" height="116" class="card"/>
+
+  <g transform="translate(30, 428)">
+    <rect x="0" y="0" width="16" height="18" rx="2" class="icon-header"/>
+    <line x1="4" y1="5" x2="12" y2="5" class="icon-header" stroke-width="1.2"/>
+    <line x1="4" y1="9" x2="12" y2="9" class="icon-header" stroke-width="1.2"/>
+    <line x1="4" y1="13" x2="9" y2="13" class="icon-header" stroke-width="1.2"/>
+  </g>
+  <text x="52" y="442" class="text-section">Servicios prestados</text>
+  <line x1="30" y1="452" x2="590" y2="452" class="separator"/>
+
+  <text x="30" y="474" class="text-name">Consulta general</text>
+  <text x="574" y="474" text-anchor="end" class="qty">x1</text>
+
+  <line x1="30" y1="484" x2="574" y2="484" class="separator-light"/>
+
+  <text x="30" y="504" class="text-name">Vacuna antirrábica</text>
+  <text x="574" y="504" text-anchor="end" class="qty">x1</text>
+
+  <text x="30" y="524" class="annotation">Sin precios, sin total. Nombre + cantidad. El icono Receipt en el header da contexto de "registro de servicios".</text>
+</svg>

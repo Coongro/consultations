@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" font-family="Roboto, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #F6F5F1; }
+      .card { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 12; }
+      .text-title { fill: #2C2925; font-size: 14px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+      .text-section { fill: #9B9893; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+      .text-label { fill: #6B6660; font-size: 10px; }
+      .text-muted { fill: #9B9893; font-size: 10px; }
+      .text-placeholder { fill: #C4C0BA; font-size: 11px; }
+      .text-value { fill: #2C2925; font-size: 12px; }
+      .input-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .select-bg { fill: #FFFFFF; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .row-bg { fill: #FAFAF8; stroke: #E5E2DC; stroke-width: 1; rx: 8; }
+      .btn-primary { fill: #F5A800; rx: 6; }
+      .btn-primary-text { fill: #FFFFFF; font-size: 11px; font-weight: 500; }
+      .btn-outline { fill: none; stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .btn-outline-text { fill: #6B6660; font-size: 11px; }
+      .separator { stroke: #E5E2DC; stroke-width: 1; }
+      .badge { fill: #E3F2FD; rx: 3; }
+      .badge-text { fill: #1565C0; font-size: 8px; font-weight: 600; }
+      .annotation { fill: #9B9893; font-size: 8px; font-style: italic; }
+      .compound { stroke: #E5E2DC; stroke-width: 1; rx: 6; }
+      .num-part { fill: #FFFFFF; }
+      .sel-part { fill: #FAFAF8; }
+    </style>
+  </defs>
+
+  <rect width="720" height="520" class="bg" rx="8"/>
+
+  <!-- Header -->
+  <text x="20" y="28" class="text-title">Medicamentos — v1 Compact Inline</text>
+  <text x="700" y="28" text-anchor="end" class="text-muted">Variante 1</text>
+  <line x1="0" y1="40" x2="720" y2="40" class="separator"/>
+
+  <!-- Descripcion -->
+  <text x="20" y="58" class="annotation">Evolucion del formulario actual. Misma estructura en fila, pero con campos estructurados (numero + select) en vez de texto libre.</text>
+  <text x="20" y="70" class="annotation">Cada campo compuesto es un input partido: parte izquierda numerica, parte derecha select de unidad.</text>
+
+  <!-- ═══ Column headers ═══ -->
+  <text x="20" y="96" class="text-section">MEDICAMENTO *</text>
+  <text x="195" y="96" class="text-section">DOSIS *</text>
+  <text x="338" y="96" class="text-section">VIA</text>
+  <text x="418" y="96" class="text-section">FRECUENCIA *</text>
+  <text x="540" y="96" class="text-section">DURACION *</text>
+  <text x="665" y="96" class="text-section">NOTAS</text>
+
+  <!-- ═══ Medicamento 1 ═══ -->
+  <rect x="12" y="104" width="696" height="56" class="row-bg"/>
+
+  <!-- Nombre -->
+  <rect x="20" y="112" width="165" height="30" class="input-bg"/>
+  <text x="30" y="131" class="text-value">Amoxicilina</text>
+
+  <!-- Dosis: compound [numero | unidad] -->
+  <rect x="193" y="112" width="135" height="30" class="compound"/>
+  <rect x="193" y="112" width="65" height="30" class="num-part" rx="6"/>
+  <text x="203" y="131" class="text-value">15</text>
+  <line x1="258" y1="114" x2="258" y2="140" stroke="#E5E2DC" stroke-width="1"/>
+  <rect x="258" y="112" width="70" height="30" class="sel-part" rx="0"/>
+  <text x="268" y="131" class="text-value" font-size="11">mg/kg</text>
+  <text x="316" y="131" class="text-muted" font-size="9">&#9662;</text>
+
+  <!-- Via -->
+  <rect x="336" y="112" width="74" height="30" class="select-bg"/>
+  <text x="346" y="131" class="text-value" font-size="11">Oral</text>
+  <text x="400" y="131" class="text-muted" font-size="9">&#9662;</text>
+
+  <!-- Frecuencia: select estandarizado -->
+  <rect x="416" y="112" width="115" height="30" class="select-bg"/>
+  <text x="426" y="131" class="text-value" font-size="11">Cada 12 hs</text>
+  <text x="520" y="131" class="text-muted" font-size="9">&#9662;</text>
+
+  <!-- Duracion: compound [numero | unidad] -->
+  <rect x="538" y="112" width="115" height="30" class="compound"/>
+  <rect x="538" y="112" width="55" height="30" class="num-part" rx="6"/>
+  <text x="548" y="131" class="text-value">7</text>
+  <line x1="593" y1="114" x2="593" y2="140" stroke="#E5E2DC" stroke-width="1"/>
+  <rect x="593" y="112" width="60" height="30" class="sel-part" rx="0"/>
+  <text x="603" y="131" class="text-value" font-size="11">dias</text>
+  <text x="643" y="131" class="text-muted" font-size="9">&#9662;</text>
+
+  <!-- Notas icon + delete -->
+  <rect x="661" y="112" width="24" height="30" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="673" y="131" text-anchor="middle" fill="#9B9893" font-size="12">&#9998;</text>
+  <rect x="689" y="112" width="24" height="30" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="701" y="131" text-anchor="middle" fill="#C8423A" font-size="13">x</text>
+
+  <!-- ═══ Medicamento 2 (vacio) ═══ -->
+  <rect x="12" y="168" width="696" height="56" class="row-bg"/>
+
+  <rect x="20" y="176" width="165" height="30" class="input-bg"/>
+  <text x="30" y="195" class="text-placeholder">Ej: Amoxicilina</text>
+
+  <rect x="193" y="176" width="135" height="30" class="compound"/>
+  <rect x="193" y="176" width="65" height="30" class="num-part" rx="6"/>
+  <text x="203" y="195" class="text-placeholder">0</text>
+  <line x1="258" y1="178" x2="258" y2="204" stroke="#E5E2DC" stroke-width="1"/>
+  <rect x="258" y="176" width="70" height="30" class="sel-part" rx="0"/>
+  <text x="268" y="195" class="text-placeholder" font-size="10">mg/kg</text>
+  <text x="316" y="195" class="text-muted" font-size="9">&#9662;</text>
+
+  <rect x="336" y="176" width="74" height="30" class="select-bg"/>
+  <text x="346" y="195" class="text-placeholder" font-size="10">Via</text>
+  <text x="400" y="195" class="text-muted" font-size="9">&#9662;</text>
+
+  <rect x="416" y="176" width="115" height="30" class="select-bg"/>
+  <text x="426" y="195" class="text-placeholder" font-size="10">Frecuencia</text>
+  <text x="520" y="195" class="text-muted" font-size="9">&#9662;</text>
+
+  <rect x="538" y="176" width="115" height="30" class="compound"/>
+  <rect x="538" y="176" width="55" height="30" class="num-part" rx="6"/>
+  <text x="548" y="195" class="text-placeholder">0</text>
+  <line x1="593" y1="178" x2="593" y2="204" stroke="#E5E2DC" stroke-width="1"/>
+  <rect x="593" y="176" width="60" height="30" class="sel-part" rx="0"/>
+  <text x="603" y="195" class="text-placeholder" font-size="10">dias</text>
+  <text x="643" y="195" class="text-muted" font-size="9">&#9662;</text>
+
+  <rect x="689" y="176" width="24" height="30" rx="4" fill="none" stroke="#E5E2DC" stroke-width="1"/>
+  <text x="701" y="195" text-anchor="middle" fill="#C8423A" font-size="13">x</text>
+
+  <!-- Boton agregar -->
+  <rect x="12" y="232" width="696" height="30" rx="6" fill="none" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="360" y="251" text-anchor="middle" class="text-muted">+ Agregar medicamento</text>
+
+  <!-- ═══ Leyenda ═══ -->
+  <line x1="0" y1="280" x2="720" y2="280" class="separator"/>
+  <text x="20" y="300" class="text-section">CAMPOS ESTRUCTURADOS</text>
+
+  <!-- Dosis -->
+  <rect x="20" y="312" width="180" height="54" rx="6" fill="#FAFAF8" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="30" y="330" class="text-label" font-weight="600">Dosis (compound input)</text>
+  <text x="30" y="344" class="annotation">Parte izq: numero (decimal permitido)</text>
+  <text x="30" y="356" class="annotation">Parte der: select unidad</text>
+
+  <!-- Unidades dosis -->
+  <text x="215" y="330" class="text-label" font-weight="600">Unidades de dosis</text>
+  <text x="215" y="344" class="text-muted">mg/kg · mg · ml · UI/kg · gotas · comp.</text>
+  <rect x="215" y="350" width="55" height="13" class="badge"/>
+  <text x="220" y="360" class="badge-text">ORTODOXO</text>
+  <text x="278" y="360" class="annotation">Unidades estandar veterinarias</text>
+
+  <!-- Via -->
+  <rect x="20" y="376" width="180" height="54" rx="6" fill="#FAFAF8" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="30" y="394" class="text-label" font-weight="600">Via (select)</text>
+  <text x="30" y="408" class="annotation">Oral · IM · IV · SC · Topica</text>
+  <text x="30" y="420" class="annotation">Oftalmica · Otica</text>
+
+  <!-- Frecuencia -->
+  <rect x="215" y="376" width="180" height="54" rx="6" fill="#FAFAF8" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="225" y="394" class="text-label" font-weight="600">Frecuencia (select presets)</text>
+  <text x="225" y="408" class="annotation">Cada 6h · 8h · 12h · 24h · 48h · 72h</text>
+  <text x="225" y="420" class="annotation">Texto claro, sin abreviaturas SID/BID</text>
+
+  <!-- Duracion -->
+  <rect x="410" y="376" width="180" height="54" rx="6" fill="#FAFAF8" stroke="#E5E2DC" stroke-width="0.5"/>
+  <text x="420" y="394" class="text-label" font-weight="600">Duracion (compound input)</text>
+  <text x="420" y="408" class="annotation">Parte izq: numero entero</text>
+  <text x="420" y="420" class="annotation">Parte der: dias · semanas · meses</text>
+
+  <!-- Auto-fill note -->
+  <line x1="0" y1="444" x2="720" y2="444" class="separator"/>
+  <text x="20" y="464" class="text-section">AUTO-FILL (cuando vet-pharmacy esta instalado)</text>
+  <text x="20" y="480" class="annotation">Si vet-pharmacy esta instalado y tiene catalogo, al seleccionar medicamento se precargan: dosis default, via, presentacion.</text>
+  <text x="20" y="492" class="annotation">Sin vet-pharmacy, todos los campos son manuales pero estructurados (numero + select en vez de texto libre).</text>
+
+  <!-- Pro/Con -->
+  <text x="420" y="464" class="text-label" font-weight="600">Pros</text>
+  <text x="420" y="478" class="annotation">Compacto, familiar, facil de escanear multiples meds</text>
+  <text x="420" y="490" class="annotation">Minima curva de aprendizaje vs formulario actual</text>
+  <text x="560" y="464" class="text-label" font-weight="600">Contras</text>
+  <text x="560" y="478" class="annotation">Puede sentirse apretado en mobile</text>
+  <text x="560" y="490" class="annotation">Notas relegadas a icono</text>
+
+  <text x="20" y="512" class="text-muted">consultations/design/medication-form-v1.svg — Compact Inline</text>
+</svg>

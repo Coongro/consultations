@@ -16,7 +16,7 @@ import { useConsultationMutations } from '../hooks/useConsultationMutations.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationFormProps } from '../types/components.js';
 import type { MedicationInput, ServiceLineInput } from '../types/consultation.js';
-import { ALL_REASON_CATEGORIES, REASON_CATEGORY_LABELS } from '../utils/labels.js';
+// ALL_REASON_CATEGORIES y REASON_CATEGORY_LABELS removidos del form (chips eliminados del diseño v3)
 
 import { MedicationFormList } from './MedicationFormList.js';
 import { ServiceLineForm } from './ServiceLineForm.js';
@@ -24,6 +24,15 @@ import { ServiceLineForm } from './ServiceLineForm.js';
 const React = getHostReact();
 const UI = getHostUI();
 const { useState, useCallback, useEffect, useRef, useMemo } = React;
+
+function SectionHeader({ icon, title }: { icon: string; title: string }) {
+  return React.createElement(
+    'h3',
+    { className: 'flex items-center gap-2 text-sm font-medium text-cg-text-muted' },
+    React.createElement(UI.DynamicIcon, { icon, size: 14, className: 'text-cg-text-muted' }),
+    title
+  );
+}
 
 export function ConsultationForm(props: ConsultationFormProps) {
   const { consultationId, petId, defaults, onSuccess, onCancel, className = '' } = props;
@@ -46,13 +55,12 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [weightKg, setWeightKg] = useState(defaults?.weight_kg ?? '');
   const [temperature, setTemperature] = useState(defaults?.temperature ?? '');
   const [reason, setReason] = useState(defaults?.reason ?? '');
-  const [reasonCategory, setReasonCategory] = useState(defaults?.reason_category ?? '');
+  const [clinicalExamOpen, setClinicalExamOpen] = useState(false);
   const [anamnesis, setAnamnesis] = useState(defaults?.anamnesis ?? '');
   const [physicalExam, setPhysicalExam] = useState(defaults?.physical_exam ?? '');
   const [diagnosis, setDiagnosis] = useState(defaults?.diagnosis ?? '');
   const [treatment, setTreatment] = useState(defaults?.treatment ?? '');
   const [followUpDate, setFollowUpDate] = useState(defaults?.follow_up_date ?? '');
-  const [followUpNotes, setFollowUpNotes] = useState(defaults?.follow_up_notes ?? '');
   const [notes, setNotes] = useState(defaults?.notes ?? '');
   const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
   const [serviceLines, setServiceLines] = useState<ServiceLineInput[]>(defaults?.services ?? []);
@@ -71,10 +79,6 @@ export function ConsultationForm(props: ConsultationFormProps) {
   }, []);
 
   useEffect(() => {
-    if (!consultSettings.showPrices) {
-      setCatalogLoading(false);
-      return;
-    }
     void (async () => {
       try {
         const cats = await actions.execute<Category[]>('products.categories.listTree');
@@ -103,7 +107,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         if (catalogMountedRef.current) setCatalogLoading(false);
       }
     })();
-  }, [consultSettings.showPrices]);
+  }, []);
 
   // Subcategorías de servicios para el modal de creación
   const serviceSubcategories = useMemo(() => {
@@ -121,6 +125,24 @@ export function ConsultationForm(props: ConsultationFormProps) {
     onMedicationsChange: setMedications,
   });
 
+  // Precargar peso del paciente al crear consulta nueva
+  useEffect(() => {
+    if (isEditing || weightKg) return;
+    const targetPetId = petId ?? defaults?.pet_id;
+    if (!targetPetId) return;
+    void (async () => {
+      try {
+        const pet = await actions.execute<{ weight_kg: string | null } | undefined>(
+          'patients.pets.getById',
+          { id: targetPetId }
+        );
+        if (pet?.weight_kg) setWeightKg(pet.weight_kg);
+      } catch {
+        // patients plugin puede no estar instalado
+      }
+    })();
+  }, [petId, defaults?.pet_id, isEditing, weightKg]);
+
   // Cargar defaults del settings
   useEffect(() => {
     if (!isEditing && consultSettings.defaultVet && !vetName) {
@@ -136,13 +158,12 @@ export function ConsultationForm(props: ConsultationFormProps) {
       setWeightKg(existing.weight_kg ?? '');
       setTemperature(existing.temperature ?? '');
       setReason(existing.reason);
-      setReasonCategory(existing.reason_category ?? '');
+      if (existing.anamnesis || existing.physical_exam) setClinicalExamOpen(true);
       setAnamnesis(existing.anamnesis ?? '');
       setPhysicalExam(existing.physical_exam ?? '');
       setDiagnosis(existing.diagnosis ?? '');
       setTreatment(existing.treatment ?? '');
       setFollowUpDate(existing.follow_up_date ?? '');
-      setFollowUpNotes(existing.follow_up_notes ?? '');
       setNotes(existing.notes ?? '');
     }
   }, [existing]);
@@ -152,9 +173,12 @@ export function ConsultationForm(props: ConsultationFormProps) {
       setMedications(
         existingMeds.map((m) => ({
           name: m.name,
-          dosage: m.dosage,
-          frequency: m.frequency,
-          duration: m.duration,
+          dosage_amount: m.dosage_amount,
+          dosage_unit: m.dosage_unit,
+          route: m.route,
+          frequency_hours: m.frequency_hours,
+          duration_amount: m.duration_amount,
+          duration_unit: m.duration_unit,
           notes: m.notes,
         }))
       );
@@ -202,13 +226,13 @@ export function ConsultationForm(props: ConsultationFormProps) {
           weight_kg: weightKg || null,
           temperature: temperature || null,
           reason: reason.trim(),
-          reason_category: reasonCategory || null,
+          reason_category: null,
           anamnesis: anamnesis.trim() || null,
           physical_exam: physicalExam.trim() || null,
           diagnosis: diagnosis.trim() || null,
           treatment: treatment.trim() || null,
           follow_up_date: followUpDate || null,
-          follow_up_notes: followUpNotes.trim() || null,
+          follow_up_notes: null,
           notes: notes.trim() || null,
           services: validServices,
         });
@@ -227,13 +251,13 @@ export function ConsultationForm(props: ConsultationFormProps) {
           weight_kg: weightKg || null,
           temperature: temperature || null,
           reason: reason.trim(),
-          reason_category: reasonCategory || null,
+          reason_category: null,
           anamnesis: anamnesis.trim() || null,
           physical_exam: physicalExam.trim() || null,
           diagnosis: diagnosis.trim() || null,
           treatment: treatment.trim() || null,
           follow_up_date: followUpDate || null,
-          follow_up_notes: followUpNotes.trim() || null,
+          follow_up_notes: null,
           notes: notes.trim() || null,
           medications: validMeds,
           services: validServices,
@@ -251,13 +275,11 @@ export function ConsultationForm(props: ConsultationFormProps) {
       weightKg,
       temperature,
       reason,
-      reasonCategory,
       anamnesis,
       physicalExam,
       diagnosis,
       treatment,
       followUpDate,
-      followUpNotes,
       notes,
       medications,
       serviceLines,
@@ -279,11 +301,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
-        React.createElement(
-          'h3',
-          { className: 'text-sm font-medium text-cg-text-muted' },
-          'Datos básicos'
-        ),
+        React.createElement(SectionHeader, { icon: 'ClipboardList', title: 'Datos básicos' }),
         React.createElement(
           'div',
           { className: 'grid grid-cols-2 gap-3' },
@@ -345,46 +363,39 @@ export function ConsultationForm(props: ConsultationFormProps) {
       )
     ),
 
-    // Seccion 2: Motivo
+    // Seccion 2: Servicios prestados (siempre visible) + Motivo
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
+        React.createElement(SectionHeader, { icon: 'Receipt', title: 'Servicios prestados' }),
         React.createElement(
-          'h3',
-          { className: 'text-sm font-medium text-cg-text-muted' },
-          'Motivo de consulta'
+          'div',
+          { className: 'flex flex-col gap-1' },
+          React.createElement(UI.Label, null, 'Motivo *'),
+          React.createElement(UI.Input, {
+            type: 'text',
+            value: reason,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
+            placeholder: 'Ej: Control anual, vacunación, vómitos...',
+            required: true,
+          })
         ),
-        consultSettings.reasonCategoriesEnabled &&
-          React.createElement(
-            'div',
-            { className: 'flex flex-wrap gap-2' },
-            ALL_REASON_CATEGORIES.map((cat) =>
-              React.createElement(
-                UI.Chip,
-                {
-                  key: cat,
-                  variant: reasonCategory === cat ? 'brand' : 'default',
-                  onClick: () => setReasonCategory(reasonCategory === cat ? '' : cat),
-                  className: 'cursor-pointer',
-                },
-                REASON_CATEGORY_LABELS[cat]
-              )
-            )
-          ),
-        React.createElement(UI.Textarea, {
-          value: reason,
-          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setReason(e.target.value),
-          placeholder: 'Motivo de la consulta *',
-          rows: 2,
-          required: true,
+        React.createElement(ServiceLineForm, {
+          services: serviceLines,
+          onChange: setServiceLines,
+          catalog: serviceCatalog,
+          categories: serviceSubcategories,
+          catalogLoading,
+          onProductCreated: handleProductCreated,
+          showPrices: consultSettings.showPrices,
         })
       )
     ),
 
-    // Seccion 3: Examen clinico
+    // Seccion 3: Examen clínico (colapsable, cerrado por defecto)
     React.createElement(
       UI.Card,
       { className: 'p-4' },
@@ -392,48 +403,66 @@ export function ConsultationForm(props: ConsultationFormProps) {
         'div',
         { className: 'flex flex-col gap-3' },
         React.createElement(
-          'h3',
-          { className: 'text-sm font-medium text-cg-text-muted' },
-          'Examen clínico'
-        ),
-        React.createElement(
           'div',
-          { className: 'flex flex-col gap-1' },
-          React.createElement(UI.Label, null, 'Anamnesis'),
-          React.createElement(UI.Textarea, {
-            value: anamnesis,
-            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setAnamnesis(e.target.value),
-            placeholder: 'Lo que reporta el dueño...',
-            rows: 2,
-          })
+          {
+            className: 'flex items-center gap-2 cursor-pointer select-none',
+            onClick: () => setClinicalExamOpen(!clinicalExamOpen),
+          },
+          React.createElement(
+            'span',
+            { className: 'text-xs text-cg-text-muted' },
+            clinicalExamOpen ? '\u25BC' : '\u25B6'
+          ),
+          React.createElement(UI.DynamicIcon, {
+            icon: 'Stethoscope',
+            size: 14,
+            className: 'text-cg-text-muted',
+          }),
+          React.createElement(
+            'h3',
+            { className: 'text-sm font-medium text-cg-text-muted' },
+            'Examen clínico'
+          ),
+          !clinicalExamOpen &&
+            (anamnesis || physicalExam) &&
+            React.createElement(UI.Badge, { variant: 'secondary', size: 'sm' }, 'Con datos')
         ),
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-1' },
-          React.createElement(UI.Label, null, 'Examen físico'),
-          React.createElement(UI.Textarea, {
-            value: physicalExam,
-            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setPhysicalExam(e.target.value),
-            placeholder: 'Hallazgos del examen...',
-            rows: 2,
-          })
-        )
+        clinicalExamOpen &&
+          React.createElement(
+            'div',
+            { className: 'flex flex-col gap-1' },
+            React.createElement(UI.Label, null, 'Anamnesis'),
+            React.createElement(UI.Textarea, {
+              value: anamnesis,
+              onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setAnamnesis(e.target.value),
+              placeholder: 'Lo que reporta el dueño...',
+              rows: 2,
+            })
+          ),
+        clinicalExamOpen &&
+          React.createElement(
+            'div',
+            { className: 'flex flex-col gap-1' },
+            React.createElement(UI.Label, null, 'Examen físico'),
+            React.createElement(UI.Textarea, {
+              value: physicalExam,
+              onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setPhysicalExam(e.target.value),
+              placeholder: 'Hallazgos del examen...',
+              rows: 2,
+            })
+          )
       )
     ),
 
-    // Seccion 4: Diagnostico
+    // Seccion 4: Diagnóstico
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
-        React.createElement(
-          'h3',
-          { className: 'text-sm font-medium text-cg-text-muted' },
-          'Diagnóstico'
-        ),
+        React.createElement(SectionHeader, { icon: 'SearchCheck', title: 'Diagnóstico' }),
         React.createElement(UI.Textarea, {
           value: diagnosis,
           onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDiagnosis(e.target.value),
@@ -443,48 +472,25 @@ export function ConsultationForm(props: ConsultationFormProps) {
       )
     ),
 
-    // Seccion 5: Servicios prestados (condicional)
-    consultSettings.showPrices &&
-      React.createElement(
-        UI.Card,
-        { className: 'p-4' },
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-3' },
-          React.createElement(
-            'h3',
-            { className: 'text-sm font-medium text-cg-text-muted' },
-            'Servicios prestados'
-          ),
-          React.createElement(ServiceLineForm, {
-            services: serviceLines,
-            onChange: setServiceLines,
-            catalog: serviceCatalog,
-            categories: serviceSubcategories,
-            catalogLoading,
-            onProductCreated: handleProductCreated,
-          })
-        )
-      ),
-
-    // Seccion 6: Tratamiento + Medicamentos
+    // Seccion 5: Tratamiento + Medicamentos
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
+        React.createElement(SectionHeader, { icon: 'Pill', title: 'Tratamiento' }),
         React.createElement(
-          'h3',
-          { className: 'text-sm font-medium text-cg-text-muted' },
-          'Tratamiento'
+          'div',
+          { className: 'flex flex-col gap-1' },
+          React.createElement(UI.Label, null, 'Indicaciones generales'),
+          React.createElement(UI.Input, {
+            type: 'text',
+            value: treatment,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTreatment(e.target.value),
+            placeholder: 'Ej: Dieta blanda, reposo, collar isabelino...',
+          })
         ),
-        React.createElement(UI.Textarea, {
-          value: treatment,
-          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setTreatment(e.target.value),
-          placeholder: 'Plan de tratamiento...',
-          rows: 2,
-        }),
         React.createElement(UI.Label, null, 'Medicación'),
         // Si hay contribuciones de otros plugins, usarlas; si no, fallback al formulario nativo
         ...(contributedSections.length > 0
@@ -505,18 +511,14 @@ export function ConsultationForm(props: ConsultationFormProps) {
       )
     ),
 
-    // Seccion 7: Seguimiento
+    // Seccion 6: Seguimiento (notas unificadas)
     React.createElement(
       UI.Card,
       { className: 'p-4' },
       React.createElement(
         'div',
         { className: 'flex flex-col gap-3' },
-        React.createElement(
-          'h3',
-          { className: 'text-sm font-medium text-cg-text-muted' },
-          'Seguimiento'
-        ),
+        React.createElement(SectionHeader, { icon: 'CalendarCheck', title: 'Seguimiento' }),
         React.createElement(
           'div',
           { className: 'grid grid-cols-2 gap-3' },
@@ -533,26 +535,14 @@ export function ConsultationForm(props: ConsultationFormProps) {
           React.createElement(
             'div',
             { className: 'flex flex-col gap-1' },
-            React.createElement(UI.Label, null, 'Notas de seguimiento'),
+            React.createElement(UI.Label, null, 'Notas'),
             React.createElement(UI.Input, {
               type: 'text',
-              value: followUpNotes,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                setFollowUpNotes(e.target.value),
-              placeholder: 'Indicaciones para el próximo control...',
+              value: notes,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value),
+              placeholder: 'Observaciones, indicaciones para el próximo control...',
             })
           )
-        ),
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-1' },
-          React.createElement(UI.Label, null, 'Notas generales'),
-          React.createElement(UI.Textarea, {
-            value: notes,
-            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value),
-            placeholder: 'Observaciones adicionales...',
-            rows: 2,
-          })
         )
       )
     ),

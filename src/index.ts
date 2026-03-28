@@ -53,6 +53,16 @@ export type {
 } from './types/components.js';
 export type { ServiceLineFormProps } from './components/ServiceLineForm.js';
 
+// Constantes de medicacion (exportables cross-plugin)
+export {
+  DOSAGE_UNITS,
+  ROUTES,
+  FREQUENCY_HOURS,
+  FREQUENCY_LABELS,
+  DURATION_UNITS,
+} from './constants/medication.js';
+export type { DosageUnit, Route, FrequencyHours, DurationUnit } from './constants/medication.js';
+
 // Utilidades
 export { formatPrice, formatCurrency, sanitizePrice, isValidPrice } from './utils/price.js';
 export { createCategoryMap } from './utils/categories.js';

@@ -32,9 +32,12 @@ export interface ConsultationMedication {
   id: string;
   consultation_id: string;
   name: string;
-  dosage: string | null;
-  frequency: string | null;
-  duration: string | null;
+  dosage_amount: string | null;
+  dosage_unit: string | null;
+  route: string | null;
+  frequency_hours: number | null;
+  duration_amount: number | null;
+  duration_unit: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -79,9 +82,12 @@ export interface ConsultationUpdateData {
 
 export interface MedicationInput {
   name: string;
-  dosage?: string | null;
-  frequency?: string | null;
-  duration?: string | null;
+  dosage_amount?: string | null;
+  dosage_unit?: string | null;
+  route?: string | null;
+  frequency_hours?: number | null;
+  duration_amount?: number | null;
+  duration_unit?: string | null;
   notes?: string | null;
 }
 

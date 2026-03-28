@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const consultationMedicationTable = pgTable(
   'module_consultations_consultation_medications',
@@ -7,9 +7,12 @@ export const consultationMedicationTable = pgTable(
     id: uuid('id').primaryKey().notNull(),
     consultation_id: text('consultation_id').notNull(),
     name: text('name').notNull(),
-    dosage: text('dosage'),
-    frequency: text('frequency'),
-    duration: text('duration'),
+    dosage_amount: numeric('dosage_amount'),
+    dosage_unit: text('dosage_unit'),
+    route: text('route'),
+    frequency_hours: integer('frequency_hours'),
+    duration_amount: integer('duration_amount'),
+    duration_unit: text('duration_unit'),
     notes: text('notes'),
     created_at: timestamp('created_at', { mode: 'string' })
       .notNull()
