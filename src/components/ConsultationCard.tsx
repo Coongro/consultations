@@ -8,7 +8,7 @@ import {
   formatConsultationDate,
   formatReasonCategory,
   getReasonCategoryBadgeVariant,
-  getReasonCategoryEmoji,
+  getReasonCategoryIcon,
 } from '../utils/labels.js';
 import { formatCurrency } from '../utils/price.js';
 
@@ -18,7 +18,7 @@ const UI = getHostUI();
 export function ConsultationCard(props: ConsultationCardProps) {
   const { consultation: c, amount, onClick, actions: cardActions, className = '' } = props;
 
-  const emoji = getReasonCategoryEmoji(c.reason_category);
+  const categoryIcon = getReasonCategoryIcon(c.reason_category);
   const badgeVariant = getReasonCategoryBadgeVariant(c.reason_category);
   const categoryLabel = formatReasonCategory(c.reason_category);
   const dateStr = formatConsultationDate(c.date);
@@ -33,8 +33,12 @@ export function ConsultationCard(props: ConsultationCardProps) {
       'div',
       { className: 'flex items-start gap-3' },
 
-      // Emoji/icono
-      React.createElement('span', { className: 'text-lg flex-shrink-0 mt-0.5' }, emoji),
+      // Icono de categoría
+      React.createElement(UI.DynamicIcon, {
+        icon: categoryIcon,
+        size: 18,
+        className: 'flex-shrink-0 mt-0.5 text-cg-text-muted',
+      }),
 
       // Contenido
       React.createElement(
@@ -77,20 +81,23 @@ export function ConsultationCard(props: ConsultationCardProps) {
           c.weight_kg &&
             React.createElement(
               'span',
-              { className: 'text-xs text-cg-text-muted' },
-              `⚖️ ${c.weight_kg} kg`
+              { className: 'inline-flex items-center gap-1 text-xs text-cg-text-muted' },
+              React.createElement(UI.DynamicIcon, { icon: 'Scale', size: 12 }),
+              `${c.weight_kg} kg`
             ),
           c.temperature &&
             React.createElement(
               'span',
-              { className: 'text-xs text-cg-text-muted' },
-              `🌡️ ${c.temperature}°C`
+              { className: 'inline-flex items-center gap-1 text-xs text-cg-text-muted' },
+              React.createElement(UI.DynamicIcon, { icon: 'Thermometer', size: 12 }),
+              `${c.temperature}°C`
             ),
           c.follow_up_date &&
             React.createElement(
               'span',
-              { className: 'text-xs text-cg-text-muted' },
-              `📅 Control: ${formatConsultationDate(c.follow_up_date)}`
+              { className: 'inline-flex items-center gap-1 text-xs text-cg-text-muted' },
+              React.createElement(UI.DynamicIcon, { icon: 'Calendar', size: 12 }),
+              `Control: ${formatConsultationDate(c.follow_up_date)}`
             ),
           amount !== null &&
             amount !== undefined &&

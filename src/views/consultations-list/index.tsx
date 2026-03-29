@@ -21,11 +21,11 @@ const React = getHostReact();
 const UI = getHostUI();
 const { useState, useCallback, useEffect, useRef } = React;
 
-// Emojis por especie (mismo map que patients)
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: '🐕',
-  cat: '🐈',
-  other: '🐾',
+// Iconos Lucide por especie (coherente con patients)
+const SPECIES_ICON: Record<string, string> = {
+  dog: 'Dog',
+  cat: 'Cat',
+  other: 'PawPrint',
 };
 
 interface PetInfo {
@@ -196,7 +196,7 @@ export function ConsultationsListView() {
   /** Renderiza una fila de consulta con datos de mascota resueltos */
   function renderConsultationRow(c: Consultation) {
     const pet = petMap.get(c.pet_id);
-    const petEmoji = pet ? (SPECIES_EMOJI[pet.species] ?? '🐾') : '🐾';
+    const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
     const petName = pet ? pet.name : '…';
 
     return React.createElement(
@@ -217,7 +217,7 @@ export function ConsultationsListView() {
         React.createElement(
           'div',
           { className: 'flex items-center gap-2' },
-          React.createElement('span', null, petEmoji),
+          React.createElement(UI.DynamicIcon, { icon: petIcon, size: 16 }),
           React.createElement('span', { className: 'font-medium' }, petName)
         )
       ),
