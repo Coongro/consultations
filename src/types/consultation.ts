@@ -4,6 +4,43 @@
 
 export type ReasonCategory = 'routine' | 'vaccination' | 'illness' | 'surgery' | 'emergency';
 
+export interface PhysicalExamSystem {
+  system: string;
+  status: 'WNL' | 'ABN';
+  notes: string;
+}
+
+export const EXAM_SYSTEMS = [
+  'Apariencia general',
+  'Ojos',
+  'Oídos',
+  'Cavidad oral',
+  'Ganglios linfáticos',
+  'Cardiovascular',
+  'Respiratorio',
+  'Abdominal',
+  'Musculoesquelético',
+  'Neurológico',
+  'Piel / Tegumento',
+  'Urogenital',
+] as const;
+
+/** Ejemplos contextuales de hallazgos por sistema, usados como placeholder en ExamSystemRow */
+export const EXAM_SYSTEM_EXAMPLES: Record<string, string> = {
+  'Apariencia general': 'Ej: Alerta, buen estado corporal',
+  Ojos: 'Ej: Secreción ocular, conjuntivitis',
+  Oídos: 'Ej: Otitis, cerumen excesivo',
+  'Cavidad oral': 'Ej: Sarro grado II, gingivitis',
+  'Ganglios linfáticos': 'Ej: Submandibulares reactivos',
+  Cardiovascular: 'Ej: Soplo grado III/VI, arritmia',
+  Respiratorio: 'Ej: Crepitaciones, disnea leve',
+  Abdominal: 'Ej: Dolor a la palpación, distensión',
+  Musculoesquelético: 'Ej: Claudicación MPD, dolor lumbar',
+  Neurológico: 'Ej: Ataxia, déficit propioceptivo',
+  'Piel / Tegumento': 'Ej: Alopecia focal, dermatitis',
+  Urogenital: 'Ej: Criptorquidia, secreción vulvar',
+};
+
 export interface Consultation {
   id: string;
   pet_id: string;
@@ -11,10 +48,14 @@ export interface Consultation {
   date: string;
   weight_kg: string | null;
   temperature: string | null;
+  heart_rate: number | null;
+  respiratory_rate: number | null;
+  body_condition_score: string | null;
   reason: string;
   reason_category: string | null;
   anamnesis: string | null;
   physical_exam: string | null;
+  physical_exam_systems: PhysicalExamSystem[] | null;
   diagnosis: string | null;
   diagnosis_tags: string[] | null;
   treatment: string | null;
@@ -48,10 +89,14 @@ export interface ConsultationCreateData {
   date?: string;
   weight_kg?: string | null;
   temperature?: string | null;
+  heart_rate?: number | null;
+  respiratory_rate?: number | null;
+  body_condition_score?: string | null;
   reason: string;
   reason_category?: string | null;
   anamnesis?: string | null;
   physical_exam?: string | null;
+  physical_exam_systems?: PhysicalExamSystem[] | null;
   diagnosis?: string | null;
   diagnosis_tags?: string[] | null;
   treatment?: string | null;
@@ -67,10 +112,14 @@ export interface ConsultationUpdateData {
   date?: string;
   weight_kg?: string | null;
   temperature?: string | null;
+  heart_rate?: number | null;
+  respiratory_rate?: number | null;
+  body_condition_score?: string | null;
   reason?: string;
   reason_category?: string | null;
   anamnesis?: string | null;
   physical_exam?: string | null;
+  physical_exam_systems?: PhysicalExamSystem[] | null;
   diagnosis?: string | null;
   diagnosis_tags?: string[] | null;
   treatment?: string | null;
