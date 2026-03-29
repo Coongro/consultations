@@ -27,6 +27,7 @@ import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationFormProps } from '../types/components.js';
 import {
   EXAM_SYSTEMS,
+  type Consultation,
   type MedicationInput,
   type PhysicalExamSystem,
   type ServiceLineInput,
@@ -163,23 +164,43 @@ export function ConsultationForm(props: ConsultationFormProps) {
     if (pet?.weight_kg) setWeightKg(pet.weight_kg);
   }, []);
 
-  // Precargar peso del paciente
+  // Precargar signos vitales de la última consulta del paciente
+  const vitalsLoadedRef = useRef(false);
   useEffect(() => {
-    if (isEditing || weightKg) return;
+    if (isEditing || vitalsLoadedRef.current) return;
     const targetPetId = selectedPetId || defaults?.pet_id;
     if (!targetPetId) return;
+    vitalsLoadedRef.current = true;
     void (async () => {
+      // Cargar peso desde ficha del paciente
       try {
         const pet = await actions.execute<{ weight_kg: string | null } | undefined>(
           'patients.pets.getById',
           { id: targetPetId }
         );
-        if (pet?.weight_kg) setWeightKg(pet.weight_kg);
+        if (pet?.weight_kg && !weightKg) setWeightKg(pet.weight_kg);
       } catch {
         // patients plugin puede no estar instalado
       }
+
+      // Cargar vitales de la última consulta
+      try {
+        const lastConsultations = await actions.execute<Consultation[]>(
+          'consultations.records.listByPet',
+          { petId: targetPetId, limit: 1 }
+        );
+        const last = lastConsultations?.[0];
+        if (!last) return;
+        if (last.temperature && !temperature) setTemperature(last.temperature);
+        if (last.heart_rate && !heartRate) setHeartRate(String(last.heart_rate));
+        if (last.respiratory_rate && !respiratoryRate)
+          setRespiratoryRate(String(last.respiratory_rate));
+        if (last.body_condition_score && !bcs) setBcs(last.body_condition_score);
+      } catch {
+        // Primera consulta del paciente, sin datos previos
+      }
     })();
-  }, [selectedPetId, defaults?.pet_id, isEditing, weightKg]);
+  }, [selectedPetId, defaults?.pet_id, isEditing]);
 
   // Cargar defaults del settings
   useEffect(() => {
