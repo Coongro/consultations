@@ -1,5 +1,11 @@
 # @coongro/consultations
 
+## 0.4.1
+
+### Patch Changes
+
+- d432646: Adopt core Avatar fix: use UI.Avatar with icon prop, replace emoji with DynamicIcon
+
 ## 0.4.0
 
 ### Minor Changes
