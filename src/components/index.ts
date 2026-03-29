@@ -5,7 +5,12 @@ export { ConsultationForm } from './ConsultationForm.js';
 export { MedicationList } from './MedicationList.js';
 export { MedicationFormList } from './MedicationFormList.js';
 export { VitalSignCard, type VitalSignCardProps } from './VitalSignCard.js';
-export { ExamSystemRow, type ExamSystemRowProps } from './ExamSystemRow.js';
+export {
+  ExamSystemRow,
+  ExamSystemList,
+  type ExamSystemRowProps,
+  type ExamSystemListProps,
+} from './ExamSystemRow.js';
 export { PhysicalExamSummary, type PhysicalExamSummaryProps } from './PhysicalExamSummary.js';
 export { PriceInput, type PriceInputProps } from './PriceInput.js';
 export {

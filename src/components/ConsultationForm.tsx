@@ -32,7 +32,7 @@ import {
   type ServiceLineInput,
 } from '../types/consultation.js';
 
-import { ExamSystemRow } from './ExamSystemRow.js';
+import { ExamSystemList } from './ExamSystemRow.js';
 import { MedicationFormList } from './MedicationFormList.js';
 import { ServiceLineForm } from './ServiceLineForm.js';
 
@@ -539,21 +539,11 @@ export function ConsultationForm(props: ConsultationFormProps) {
         }),
 
         // Grid de sistemas con toggle WNL/ABN
-        React.createElement(
-          'div',
-          {
-            className:
-              'flex flex-col divide-y divide-cg-border rounded-lg border border-cg-border overflow-hidden',
-          },
-          ...examSystems.map((sys, idx) =>
-            React.createElement(ExamSystemRow, {
-              key: sys.system,
-              system: sys,
-              onStatusToggle: () => handleExamStatusToggle(idx),
-              onNotesChange: (value: string) => handleExamNotesChange(idx, value),
-            })
-          )
-        ),
+        React.createElement(ExamSystemList, {
+          systems: examSystems,
+          onStatusToggle: handleExamStatusToggle,
+          onNotesChange: handleExamNotesChange,
+        }),
 
         // Notas generales del examen (textarea legacy, por compatibilidad)
         React.createElement(
