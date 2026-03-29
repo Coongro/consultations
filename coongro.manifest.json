@@ -80,22 +80,6 @@
       }
     ],
     "settings": {
-      "groups": [
-        {
-          "id": "consultations",
-          "label": "Consultas",
-          "order": 50
-        }
-      ],
-      "pages": [
-        {
-          "id": "consultations.general",
-          "group": "consultations",
-          "label": "General",
-          "icon": "assets/icons/general.svg",
-          "order": 10
-        }
-      ],
       "sections": [
         {
           "id": "consultations.general.main",
@@ -143,6 +127,44 @@
               ]
             }
           ]
+        },
+        {
+          "id": "consultations.formulario",
+          "page": "consultations.general",
+          "label": "Formulario",
+          "order": 20,
+          "items": [
+            {
+              "key": "consultations.prefillVitals",
+              "type": "boolean",
+              "label": "Prellenar signos vitales",
+              "description": "Al crear una consulta, prellenar peso, temperatura, FC, FR y BCS con los valores de la última consulta del paciente",
+              "default": true,
+              "tags": [
+                "consultations",
+                "prefillvitals",
+                "prellenar",
+                "signos",
+                "vitales"
+              ]
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "id": "consultations",
+          "label": "Consultas",
+          "order": 50
+        }
+      ],
+      "pages": [
+        {
+          "id": "consultations.general",
+          "group": "consultations",
+          "label": "General",
+          "icon": "assets/icons/general.svg",
+          "order": 10
         }
       ]
     }

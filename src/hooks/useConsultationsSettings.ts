@@ -10,12 +10,14 @@ export interface ConsultationsSettings {
   reasonCategoriesEnabled: boolean;
   defaultVet: string;
   showPrices: boolean;
+  prefillVitals: boolean;
 }
 
 const DEFAULTS: Record<string, unknown> = {
   'consultations.reasonCategories': true,
   'consultations.defaultVet': '',
   'consultations.showPrices': true,
+  'consultations.prefillVitals': true,
 };
 
 function parseSettings(raw: Record<string, unknown>): ConsultationsSettings {
@@ -25,6 +27,7 @@ function parseSettings(raw: Record<string, unknown>): ConsultationsSettings {
     reasonCategoriesEnabled: get('consultations.reasonCategories') as boolean,
     defaultVet: (get('consultations.defaultVet') as string) || '',
     showPrices: get('consultations.showPrices') as boolean,
+    prefillVitals: get('consultations.prefillVitals') as boolean,
   };
 }
 

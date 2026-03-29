@@ -167,7 +167,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
   // Precargar signos vitales de la última consulta del paciente
   const vitalsLoadedRef = useRef(false);
   useEffect(() => {
-    if (isEditing || vitalsLoadedRef.current) return;
+    if (isEditing || vitalsLoadedRef.current || !consultSettings.prefillVitals) return;
     const targetPetId = selectedPetId || defaults?.pet_id;
     if (!targetPetId) return;
     vitalsLoadedRef.current = true;
