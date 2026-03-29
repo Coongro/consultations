@@ -541,7 +541,10 @@ export function ConsultationForm(props: ConsultationFormProps) {
         // Grid de sistemas con toggle WNL/ABN
         React.createElement(
           'div',
-          { className: 'flex flex-col gap-2' },
+          {
+            className:
+              'flex flex-col divide-y divide-cg-border rounded-lg border border-cg-border overflow-hidden',
+          },
           ...examSystems.map((sys, idx) =>
             React.createElement(ExamSystemRow, {
               key: sys.system,

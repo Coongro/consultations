@@ -29,28 +29,35 @@ export function ExamSystemRow({
   return React.createElement(
     'div',
     {
-      className: `grid grid-cols-[48px_160px_1fr] items-center gap-2 p-2 rounded-lg ${
-        isAbnormal ? 'bg-cg-danger-bg' : 'bg-cg-bg-secondary'
+      className: `grid items-center gap-3 py-1.5 px-2 rounded transition-colors ${
+        isAbnormal ? 'bg-cg-danger-bg' : ''
       } ${className}`,
+      style: { gridTemplateColumns: '44px 140px 1fr' },
     },
     React.createElement(
-      UI.Button,
+      'button',
       {
         type: 'button',
-        variant: isAbnormal ? 'destructive' : 'outline',
-        size: 'sm',
-        className: 'w-12 text-xs font-mono',
+        className: `inline-flex items-center justify-center h-7 rounded text-xs font-mono font-medium transition-colors ${
+          isAbnormal ? 'bg-cg-danger text-white' : 'text-cg-text-muted hover:bg-cg-bg-secondary'
+        }`,
         onClick: onStatusToggle,
       },
       system.status
     ),
-    React.createElement('span', { className: 'text-sm text-cg-text truncate' }, system.system),
+    React.createElement(
+      'span',
+      {
+        className: `text-sm truncate ${isAbnormal ? 'text-cg-text font-medium' : 'text-cg-text-muted'}`,
+      },
+      system.system
+    ),
     React.createElement(UI.Input, {
       type: 'text',
       value: system.notes,
       onChange: (e: React.ChangeEvent<HTMLInputElement>) => onNotesChange(e.target.value),
-      placeholder: isAbnormal ? 'Describir hallazgo...' : 'Sin observaciones',
-      className: 'text-sm',
+      placeholder: isAbnormal ? 'Describir hallazgo...' : '',
+      className: 'text-sm h-8',
     })
   );
 }
