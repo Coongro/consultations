@@ -8,7 +8,7 @@ import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro
 import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationDetailProps, PetInfo } from '../types/components.js';
-import type { ConsultationService } from '../types/consultation.js';
+import type { ConsultationService, PhysicalExamSystem } from '../types/consultation.js';
 import {
   formatConsultationDateTime,
   formatReasonCategory,
@@ -17,6 +17,8 @@ import {
 import { formatCurrency } from '../utils/price.js';
 
 import { MedicationList } from './MedicationList.js';
+import { PhysicalExamSummary } from './PhysicalExamSummary.js';
+import { VitalSignCard } from './VitalSignCard.js';
 
 const React = getHostReact();
 const UI = getHostUI();
@@ -164,7 +166,8 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
     { label: 'Notas', value: c.notes },
   ].filter((s) => s.value);
 
-  const hasVitals = c.weight_kg || c.temperature;
+  const hasVitals =
+    c.weight_kg || c.temperature || c.heart_rate || c.respiratory_rate || c.body_condition_score;
   const servicesTotal = services.reduce(
     (acc: number, s: ConsultationService) => acc + (parseFloat(s.subtotal) || 0),
     0
@@ -334,53 +337,35 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
               'div',
               { className: 'grid grid-cols-2 gap-3' },
               c.weight_kg &&
-                React.createElement(
-                  'div',
-                  { className: 'flex items-center gap-2 p-3 rounded-lg bg-cg-bg-secondary' },
-                  React.createElement(UI.DynamicIcon, {
-                    icon: 'Scale',
-                    size: 16,
-                    className: 'text-cg-text-muted shrink-0',
-                  }),
-                  React.createElement(
-                    'div',
-                    null,
-                    React.createElement(
-                      'span',
-                      { className: 'text-xs text-cg-text-muted block' },
-                      'Peso'
-                    ),
-                    React.createElement(
-                      'span',
-                      { className: 'text-sm font-semibold text-cg-text' },
-                      `${c.weight_kg} kg`
-                    )
-                  )
-                ),
+                React.createElement(VitalSignCard, {
+                  icon: 'Scale',
+                  label: 'Peso',
+                  value: `${c.weight_kg} kg`,
+                }),
               c.temperature &&
-                React.createElement(
-                  'div',
-                  { className: 'flex items-center gap-2 p-3 rounded-lg bg-cg-bg-secondary' },
-                  React.createElement(UI.DynamicIcon, {
-                    icon: 'Thermometer',
-                    size: 16,
-                    className: 'text-cg-text-muted shrink-0',
-                  }),
-                  React.createElement(
-                    'div',
-                    null,
-                    React.createElement(
-                      'span',
-                      { className: 'text-xs text-cg-text-muted block' },
-                      'Temp.'
-                    ),
-                    React.createElement(
-                      'span',
-                      { className: 'text-sm font-semibold text-cg-text' },
-                      `${c.temperature}°C`
-                    )
-                  )
-                )
+                React.createElement(VitalSignCard, {
+                  icon: 'Thermometer',
+                  label: 'Temp.',
+                  value: `${c.temperature}°C`,
+                }),
+              c.heart_rate &&
+                React.createElement(VitalSignCard, {
+                  icon: 'HeartPulse',
+                  label: 'FC',
+                  value: `${c.heart_rate} lpm`,
+                }),
+              c.respiratory_rate &&
+                React.createElement(VitalSignCard, {
+                  icon: 'Wind',
+                  label: 'FR',
+                  value: `${c.respiratory_rate} rpm`,
+                }),
+              c.body_condition_score &&
+                React.createElement(VitalSignCard, {
+                  icon: 'Gauge',
+                  label: 'BCS',
+                  value: `${c.body_condition_score}/9`,
+                })
             )
           ),
 
@@ -485,6 +470,40 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
                 // Separador entre secciones (excepto la última)
                 idx < clinicalSections.length - 1 && React.createElement(UI.Separator, null)
               )
+            )
+          ),
+
+        // Examen físico por sistemas (si hay datos)
+        c.physical_exam_systems &&
+          Array.isArray(c.physical_exam_systems) &&
+          c.physical_exam_systems.some((s: PhysicalExamSystem) => s.status === 'ABN' || s.notes) &&
+          React.createElement(
+            UI.Card,
+            { className: 'overflow-hidden' },
+            React.createElement(
+              'div',
+              {
+                className:
+                  'px-5 py-3 border-b border-cg-border bg-cg-bg-secondary flex items-center gap-2',
+              },
+              React.createElement(UI.DynamicIcon, {
+                icon: 'Stethoscope',
+                size: 15,
+                className: 'text-cg-text-muted',
+              }),
+              React.createElement(
+                'h2',
+                { className: 'text-sm font-semibold text-cg-text' },
+                'Examen físico por sistemas'
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'p-4' },
+              React.createElement(PhysicalExamSummary, {
+                systems: c.physical_exam_systems,
+                onlyAbnormal: false,
+              })
             )
           ),
 

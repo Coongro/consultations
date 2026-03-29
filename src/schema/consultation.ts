@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { jsonb, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { integer, jsonb, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const consultationTable = pgTable('module_consultations_consultations', {
   id: uuid('id').primaryKey().notNull(),
@@ -10,10 +10,14 @@ export const consultationTable = pgTable('module_consultations_consultations', {
     .default(sql`now()`),
   weight_kg: numeric('weight_kg'),
   temperature: numeric('temperature'),
+  heart_rate: integer('heart_rate'),
+  respiratory_rate: integer('respiratory_rate'),
+  body_condition_score: numeric('body_condition_score'),
   reason: text('reason').notNull(),
   reason_category: text('reason_category'),
   anamnesis: text('anamnesis'),
   physical_exam: text('physical_exam'),
+  physical_exam_systems: jsonb('physical_exam_systems'),
   diagnosis: text('diagnosis'),
   diagnosis_tags: jsonb('diagnosis_tags'),
   treatment: text('treatment'),
