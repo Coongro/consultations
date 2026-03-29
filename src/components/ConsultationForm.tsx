@@ -565,7 +565,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
               // Nombre del sistema
               React.createElement(
                 'span',
-                { className: 'text-sm text-cg-text pt-1.5 w-36 shrink-0' },
+                { className: 'text-sm text-cg-text pt-1.5 w-40 shrink-0 truncate' },
                 sys.system
               ),
               // Notas (visible siempre pero relevante cuando ABN)
@@ -575,7 +575,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                   handleExamNotesChange(idx, e.target.value),
                 placeholder: sys.status === 'ABN' ? 'Describir hallazgo...' : 'Sin observaciones',
-                className: 'flex-1 text-sm',
+                className: 'flex-1 min-w-0 text-sm',
               })
             )
           )

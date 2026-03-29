@@ -49,7 +49,7 @@ export function PhysicalExamSummary({
         ),
         React.createElement(
           'span',
-          { className: 'text-sm text-cg-text w-36 shrink-0' },
+          { className: 'text-sm text-cg-text w-40 shrink-0 truncate' },
           sys.system
         ),
         sys.notes &&
