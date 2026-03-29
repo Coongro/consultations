@@ -8,12 +8,13 @@ export const REASON_CATEGORY_LABELS: Record<ReasonCategory, string> = {
   emergency: 'Emergencia',
 };
 
-export const REASON_CATEGORY_EMOJI: Record<ReasonCategory, string> = {
-  routine: '🔵',
-  vaccination: '💉',
-  illness: '🤒',
-  surgery: '🔪',
-  emergency: '🚨',
+/** Mapeo categoría → nombre de icono Lucide */
+export const REASON_CATEGORY_ICON: Record<ReasonCategory, string> = {
+  routine: 'CalendarCheck',
+  vaccination: 'Syringe',
+  illness: 'Thermometer',
+  surgery: 'Scissors',
+  emergency: 'Siren',
 };
 
 export const REASON_CATEGORY_BADGE_VARIANTS: Record<ReasonCategory, string> = {
@@ -42,9 +43,9 @@ export function getReasonCategoryBadgeVariant(category: string | null): string {
   return REASON_CATEGORY_BADGE_VARIANTS[category as ReasonCategory] ?? 'secondary';
 }
 
-export function getReasonCategoryEmoji(category: string | null): string {
-  if (!category) return '📋';
-  return REASON_CATEGORY_EMOJI[category as ReasonCategory] ?? '📋';
+export function getReasonCategoryIcon(category: string | null): string {
+  if (!category) return 'ClipboardList';
+  return REASON_CATEGORY_ICON[category as ReasonCategory] ?? 'ClipboardList';
 }
 
 export function formatConsultationDate(dateStr: string): string {
