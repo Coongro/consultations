@@ -32,6 +32,7 @@ import {
   type ServiceLineInput,
 } from '../types/consultation.js';
 
+import { ExamSystemRow } from './ExamSystemRow.js';
 import { MedicationFormList } from './MedicationFormList.js';
 import { ServiceLineForm } from './ServiceLineForm.js';
 
@@ -542,42 +543,12 @@ export function ConsultationForm(props: ConsultationFormProps) {
           'div',
           { className: 'flex flex-col gap-2' },
           ...examSystems.map((sys, idx) =>
-            React.createElement(
-              'div',
-              {
-                key: sys.system,
-                className: `flex items-start gap-2 p-2 rounded-lg ${
-                  sys.status === 'ABN' ? 'bg-cg-danger-bg' : 'bg-cg-bg-secondary'
-                }`,
-              },
-              // Toggle WNL/ABN
-              React.createElement(
-                UI.Button,
-                {
-                  type: 'button',
-                  variant: sys.status === 'ABN' ? 'destructive' : 'outline',
-                  size: 'sm',
-                  className: 'shrink-0 w-12 text-xs font-mono',
-                  onClick: () => handleExamStatusToggle(idx),
-                },
-                sys.status
-              ),
-              // Nombre del sistema
-              React.createElement(
-                'span',
-                { className: 'text-sm text-cg-text pt-1.5 w-40 shrink-0 truncate' },
-                sys.system
-              ),
-              // Notas (visible siempre pero relevante cuando ABN)
-              React.createElement(UI.Input, {
-                type: 'text',
-                value: sys.notes,
-                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleExamNotesChange(idx, e.target.value),
-                placeholder: sys.status === 'ABN' ? 'Describir hallazgo...' : 'Sin observaciones',
-                className: 'flex-1 min-w-0 text-sm',
-              })
-            )
+            React.createElement(ExamSystemRow, {
+              key: sys.system,
+              system: sys,
+              onStatusToggle: () => handleExamStatusToggle(idx),
+              onNotesChange: (value: string) => handleExamNotesChange(idx, value),
+            })
           )
         ),
 
