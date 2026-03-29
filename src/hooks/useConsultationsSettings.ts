@@ -11,6 +11,7 @@ export interface ConsultationsSettings {
   defaultVet: string;
   showPrices: boolean;
   prefillVitals: boolean;
+  structuredExam: boolean;
 }
 
 const DEFAULTS: Record<string, unknown> = {
@@ -18,6 +19,7 @@ const DEFAULTS: Record<string, unknown> = {
   'consultations.defaultVet': '',
   'consultations.showPrices': true,
   'consultations.prefillVitals': true,
+  'consultations.structuredExam': true,
 };
 
 function parseSettings(raw: Record<string, unknown>): ConsultationsSettings {
@@ -28,6 +30,7 @@ function parseSettings(raw: Record<string, unknown>): ConsultationsSettings {
     defaultVet: (get('consultations.defaultVet') as string) || '',
     showPrices: get('consultations.showPrices') as boolean,
     prefillVitals: get('consultations.prefillVitals') as boolean,
+    structuredExam: get('consultations.structuredExam') as boolean,
   };
 }
 

@@ -147,6 +147,20 @@
                 "signos",
                 "vitales"
               ]
+            },
+            {
+              "key": "consultations.structuredExam",
+              "type": "boolean",
+              "label": "Examen físico estructurado",
+              "description": "Mostrar checklist por sistemas (WNL/ABN) en vez de texto libre para el examen físico",
+              "default": true,
+              "tags": [
+                "consultations",
+                "structuredexam",
+                "examen",
+                "físico",
+                "sistemas"
+              ]
             }
           ]
         }

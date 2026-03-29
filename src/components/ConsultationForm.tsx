@@ -547,7 +547,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       )
     ),
 
-    // ── Sección 4 (O): Examen físico por sistemas ──
+    // ── Sección 4 (O): Examen físico ──
     React.createElement(
       UI.Card,
       { className: 'p-4' },
@@ -559,24 +559,31 @@ export function ConsultationForm(props: ConsultationFormProps) {
           title: 'O — Examen físico',
         }),
 
-        // Grid de sistemas con toggle WNL/ABN
-        React.createElement(ExamSystemList, {
-          systems: examSystems,
-          onStatusToggle: handleExamStatusToggle,
-          onNotesChange: handleExamNotesChange,
-        }),
+        // Checklist por sistemas (si structuredExam habilitado)
+        consultSettings.structuredExam &&
+          React.createElement(ExamSystemList, {
+            systems: examSystems,
+            onStatusToggle: handleExamStatusToggle,
+            onNotesChange: handleExamNotesChange,
+          }),
 
-        // Notas generales del examen (textarea legacy, por compatibilidad)
+        // Textarea libre (siempre visible como notas adicionales si structured, o como único campo si no)
         React.createElement(
           'div',
           { className: FIELD_GAP },
-          React.createElement(UI.Label, null, 'Notas generales del examen'),
+          React.createElement(
+            UI.Label,
+            null,
+            consultSettings.structuredExam ? 'Notas generales del examen' : 'Examen físico'
+          ),
           React.createElement(UI.Textarea, {
             value: physicalExamNotes,
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setPhysicalExamNotes(e.target.value),
-            placeholder: 'Observaciones adicionales del examen físico...',
-            rows: 2,
+            placeholder: consultSettings.structuredExam
+              ? 'Observaciones adicionales del examen físico...'
+              : 'Hallazgos del examen físico...',
+            rows: consultSettings.structuredExam ? 2 : 4,
           })
         )
       )
