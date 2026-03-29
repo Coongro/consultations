@@ -25,6 +25,22 @@ export const EXAM_SYSTEMS = [
   'Urogenital',
 ] as const;
 
+/** Ejemplos contextuales de hallazgos por sistema, usados como placeholder en ExamSystemRow */
+export const EXAM_SYSTEM_EXAMPLES: Record<string, string> = {
+  'Apariencia general': 'Ej: Alerta, buen estado corporal',
+  Ojos: 'Ej: Secreción ocular, conjuntivitis',
+  Oídos: 'Ej: Otitis, cerumen excesivo',
+  'Cavidad oral': 'Ej: Sarro grado II, gingivitis',
+  'Ganglios linfáticos': 'Ej: Submandibulares reactivos',
+  Cardiovascular: 'Ej: Soplo grado III/VI, arritmia',
+  Respiratorio: 'Ej: Crepitaciones, disnea leve',
+  Abdominal: 'Ej: Dolor a la palpación, distensión',
+  Musculoesquelético: 'Ej: Claudicación MPD, dolor lumbar',
+  Neurológico: 'Ej: Ataxia, déficit propioceptivo',
+  'Piel / Tegumento': 'Ej: Alopecia focal, dermatitis',
+  Urogenital: 'Ej: Criptorquidia, secreción vulvar',
+};
+
 export interface Consultation {
   id: string;
   pet_id: string;

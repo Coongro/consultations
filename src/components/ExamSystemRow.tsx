@@ -7,7 +7,7 @@
  */
 import { getHostReact, getHostUI } from '@coongro/plugin-sdk';
 
-import type { PhysicalExamSystem } from '../types/consultation.js';
+import { EXAM_SYSTEM_EXAMPLES, type PhysicalExamSystem } from '../types/consultation.js';
 
 const React = getHostReact();
 const UI = getHostUI();
@@ -61,7 +61,7 @@ export function ExamSystemRow({
       type: 'text',
       value: system.notes,
       onChange: (e: React.ChangeEvent<HTMLInputElement>) => onNotesChange(e.target.value),
-      placeholder: isAbnormal ? 'Hallazgo...' : '',
+      placeholder: EXAM_SYSTEM_EXAMPLES[system.system] ?? '',
       className: 'text-sm h-8',
     })
   );
