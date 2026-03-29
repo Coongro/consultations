@@ -34,10 +34,10 @@ const SECTION_ICONS: Record<string, string> = {
   Notas: 'FileText',
 };
 
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: '🐕',
-  cat: '🐈',
-  other: '🐾',
+const SPECIES_ICON: Record<string, string> = {
+  dog: 'Dog',
+  cat: 'Cat',
+  other: 'PawPrint',
 };
 
 const SEX_LABELS: Record<string, string> = {
@@ -174,7 +174,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   );
 
   // Info de mascota para el header
-  const petEmoji = pet ? (SPECIES_EMOJI[pet.species] ?? '🐾') : '🐾';
+  const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
   const petName = pet?.name ?? 'Paciente';
   const petDetails = [
     pet?.breed,
@@ -243,7 +243,12 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             { className: 'flex items-center gap-4' },
             React.createElement(UI.Avatar, {
               size: 'lg',
-              icon: React.createElement('span', { className: 'text-2xl' }, petEmoji),
+              icon: React.createElement(UI.DynamicIcon, {
+                icon: petIcon,
+                size: 28,
+                className: 'text-cg-text-muted',
+              }),
+              className: 'bg-cg-bg-tertiary',
             }),
             React.createElement(
               'div',

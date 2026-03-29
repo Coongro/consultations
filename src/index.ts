@@ -75,12 +75,12 @@ export { formatPrice, formatCurrency, sanitizePrice, isValidPrice } from './util
 export { createCategoryMap } from './utils/categories.js';
 export {
   REASON_CATEGORY_LABELS,
-  REASON_CATEGORY_EMOJI,
+  REASON_CATEGORY_ICON,
   REASON_CATEGORY_BADGE_VARIANTS,
   ALL_REASON_CATEGORIES,
   formatReasonCategory,
   getReasonCategoryBadgeVariant,
-  getReasonCategoryEmoji,
+  getReasonCategoryIcon,
   formatConsultationDate,
   formatConsultationDateTime,
 } from './utils/labels.js';
