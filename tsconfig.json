@@ -37,6 +37,9 @@
       "@coongro/contacts": [
         "../contacts/dist/index.d.ts"
       ],
+      "@coongro/calendar": [
+        "../calendar/dist/index.d.ts"
+      ],
       "@coongro/products": [
         "../products/dist/index.d.ts"
       ],
