@@ -10,8 +10,17 @@ import type {
   ConsultationUpdateData,
 } from '../types/consultation.js';
 
+import { syncFollowUpEvent, removeFollowUpEvent } from './useConsultationCalendarSync.js';
+
 const React = getHostReact();
 const { useState, useCallback } = React;
+
+async function resolvePetName(petId: string): Promise<string> {
+  const pet = await actions.execute<{ name: string } | undefined>('patients.pets.getById', {
+    id: petId,
+  });
+  return pet?.name ?? 'Paciente';
+}
 
 export interface UseConsultationMutationsResult {
   creating: boolean;
@@ -75,6 +84,12 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
 
         if (promises.length > 0) await Promise.all(promises);
 
+        // Sincronizar evento de seguimiento en calendario
+        if (consultation.follow_up_date) {
+          const petName = await resolvePetName(consultation.pet_id);
+          await syncFollowUpEvent(consultation, petName);
+        }
+
         toast.success('Consulta registrada', data.reason);
         return consultation;
       } catch (err) {
@@ -124,8 +139,19 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
           }
         }
 
+        // Sincronizar o eliminar evento de seguimiento
+        const updated = result[0];
+        if (updated) {
+          if (updated.follow_up_date) {
+            const petName = await resolvePetName(updated.pet_id);
+            await syncFollowUpEvent(updated, petName);
+          } else {
+            await removeFollowUpEvent(id);
+          }
+        }
+
         toast.success('Consulta actualizada', '');
-        return result[0] ?? null;
+        return updated ?? null;
       } catch (err) {
         toast.error(
           'Error',

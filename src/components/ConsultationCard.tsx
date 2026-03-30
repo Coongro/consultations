@@ -1,6 +1,7 @@
 /**
  * Card resumida de una consulta. Usada en el timeline y en listados.
  */
+import { formatEventDate } from '@coongro/calendar';
 import { getHostReact, getHostUI } from '@coongro/plugin-sdk';
 
 import type { ConsultationCardProps } from '../types/components.js';
@@ -97,7 +98,7 @@ export function ConsultationCard(props: ConsultationCardProps) {
               'span',
               { className: 'inline-flex items-center gap-1 text-xs text-cg-text-muted' },
               React.createElement(UI.DynamicIcon, { icon: 'Calendar', size: 12 }),
-              `Control: ${formatConsultationDate(c.follow_up_date)}`
+              `Control: ${formatEventDate(c.follow_up_date)}`
             ),
           amount !== null &&
             amount !== undefined &&
