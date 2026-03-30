@@ -3,6 +3,8 @@
  * Encabezado con info de mascota, panel lateral sticky (vet, vitales, seguimiento),
  * y contenido clínico principal.
  */
+import { useEventsByEntity, formatEventDate, EventCard } from '@coongro/calendar';
+import type { CalendarEvent } from '@coongro/calendar';
 import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
 
 import { useConsultation } from '../hooks/useConsultation.js';
@@ -97,6 +99,10 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   }, [consultation?.pet_id, petProp]);
 
   const pet = petProp ?? fetchedPet;
+
+  // Evento de seguimiento vinculado a esta consulta
+  const { data: calendarEvents } = useEventsByEntity(consultationId, 'consultation');
+  const followUpEvent: CalendarEvent | undefined = calendarEvents?.[0];
 
   // Contribuciones de otros plugins para la zona de medicamentos
   const { sections: medContributions } = useViewContributions('consultations.detail.open', {
@@ -374,8 +380,35 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             )
           ),
 
-        // Próximo control
-        c.follow_up_date &&
+        // Próximo control (desde evento del calendario)
+        followUpEvent &&
+          React.createElement(
+            UI.Card,
+            { className: 'p-3 border-cg-warning-border bg-cg-warning-bg' },
+            React.createElement(
+              'div',
+              { className: 'flex items-center gap-2 mb-2' },
+              React.createElement(UI.DynamicIcon, {
+                icon: 'Calendar',
+                size: 16,
+                className: 'text-cg-warning-text',
+              }),
+              React.createElement(
+                'span',
+                { className: 'text-xs font-semibold uppercase tracking-wider text-cg-text-muted' },
+                'Próximo control'
+              )
+            ),
+            React.createElement(EventCard, {
+              event: followUpEvent,
+              showTime: true,
+              showStatus: true,
+            })
+          ),
+
+        // Fallback: follow_up_date sin evento de calendario (consultas previas a la integración)
+        !followUpEvent &&
+          c.follow_up_date &&
           React.createElement(
             UI.Card,
             { className: 'p-4 border-cg-warning-border bg-cg-warning-bg' },
@@ -396,12 +429,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             React.createElement(
               'p',
               { className: 'text-sm font-medium text-cg-text' },
-              new Date(c.follow_up_date).toLocaleDateString('es-AR', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })
+              formatEventDate(c.follow_up_date)
             )
           ),
 
