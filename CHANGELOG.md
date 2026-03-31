@@ -1,5 +1,11 @@
 # @coongro/consultations
 
+## 0.5.0
+
+### Minor Changes
+
+- 4048f99: Integrate @coongro/calendar for follow-up scheduling and event display
+
 ## 0.4.1
 
 ### Patch Changes
