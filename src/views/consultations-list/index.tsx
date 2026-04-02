@@ -1,5 +1,6 @@
 /**
  * Vista principal: historial de consultas con stats, filtros inline y tabla.
+ * Usa DataTable de ui-components para renderizado desktop + cards en móvil.
  */
 import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
@@ -19,7 +20,7 @@ import {
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useCallback, useEffect, useRef } = React;
+const { useState, useCallback, useEffect, useRef, useMemo } = React;
 
 // Iconos Lucide por especie (coherente con patients)
 const SPECIES_ICON: Record<string, string> = {
@@ -35,24 +36,11 @@ interface PetInfo {
 
 const SORTABLE_KEYS = new Set(['date', 'vet_name', 'reason_category']);
 
-/** Genera lista de números de página con elipsis */
-function buildPageNumbers(current: number, total: number): Array<number | '...'> {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const pages: Array<number | '...'> = [1];
-  if (current > 3) pages.push('...');
-  const start = Math.max(2, current - 1);
-  const end = Math.min(total - 1, current + 1);
-  for (let i = start; i <= end; i++) pages.push(i);
-  if (current < total - 2) pages.push('...');
-  pages.push(total);
-  return pages;
-}
-
 export function ConsultationsListView() {
   const { views } = usePlugin();
   const { settings: consultSettings } = useConsultationsSettings();
 
-  const [localSearch, setLocalSearch] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const [sortKey, setSortKey] = useState<string>('date');
   const [sortDir, setSortDir] = useState<SortDirection>('desc');
 
@@ -69,8 +57,6 @@ export function ConsultationsListView() {
     search: doSearch,
     setSort,
     pagination,
-    nextPage,
-    prevPage,
     goToPage,
     refetch,
   } = useConsultations({ pageSize: 20 });
@@ -84,7 +70,6 @@ export function ConsultationsListView() {
     ];
 
     if (unknownIds.length === 0) {
-      // Todos ya conocidos, refrescar el state
       setPetMap(new Map(petCacheRef.current));
       return;
     }
@@ -131,11 +116,10 @@ export function ConsultationsListView() {
     [views]
   );
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value;
-      setLocalSearch(val);
-      doSearch(val);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchValue(value);
+      doSearch(value);
     },
     [doSearch]
   );
@@ -144,7 +128,7 @@ export function ConsultationsListView() {
     (cat: string) => {
       setFilters({
         ...filters,
-        reasonCategory: filters.reasonCategory === cat ? undefined : cat,
+        reasonCategory: cat || undefined,
       });
     },
     [filters, setFilters]
@@ -164,89 +148,176 @@ export function ConsultationsListView() {
     [filters, setFilters]
   );
 
-  const handleClearFilters = useCallback(() => {
-    setFilters({});
-    setLocalSearch('');
-    doSearch('');
-  }, [setFilters, doSearch]);
-
   const handleSort = useCallback(
-    (key: string) => {
+    (key: string, direction: 'asc' | 'desc' | null) => {
       if (!SORTABLE_KEYS.has(key)) return;
-      const newDir: SortDirection = sortKey === key && sortDir === 'asc' ? 'desc' : 'asc';
-      setSortKey(key);
-      setSortDir(newDir);
-      setSort(key, newDir);
+      setSortKey(direction ? key : 'date');
+      setSortDir((direction ?? 'desc') as SortDirection);
+      setSort(key, direction ?? 'desc');
     },
-    [sortKey, sortDir, setSort]
+    [setSort]
   );
-
-  function getSortDirection(colKey: string): 'asc' | 'desc' | false | undefined {
-    if (!SORTABLE_KEYS.has(colKey)) return undefined;
-    return sortKey === colKey ? (sortDir as 'asc' | 'desc') : false;
-  }
-
-  const hasFilters = localSearch || filters.reasonCategory || filters.dateFrom || filters.dateTo;
 
   // Estado para abrir el formulario desde el empty state
   const [emptyStateCreateOpen, setEmptyStateCreateOpen] = useState(false);
 
-  const COL_COUNT = 5; // Fecha, Paciente, Veterinario, Motivo+Diagnóstico, Categoría
-
-  /** Renderiza una fila de consulta con datos de mascota resueltos */
-  function renderConsultationRow(c: Consultation) {
-    const pet = petMap.get(c.pet_id);
-    const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
-    const petName = pet ? pet.name : '…';
-
-    return React.createElement(
-      UI.TableRow,
+  // Columnas para DataTable
+  const columns = useMemo(
+    () => [
       {
-        key: c.id,
-        onClick: () => handleConsultationClick(c),
-        className: 'cursor-pointer',
+        key: 'date',
+        header: 'Fecha',
+        sortable: true,
+        className: 'w-28',
+        render: (c: Consultation) => formatConsultationDate(c.date),
       },
-      React.createElement(
-        UI.TableCell,
-        { className: 'whitespace-nowrap' },
-        formatConsultationDate(c.date)
-      ),
-      React.createElement(
-        UI.TableCell,
-        null,
-        React.createElement(
-          'div',
-          { className: 'flex items-center gap-2' },
-          React.createElement(UI.DynamicIcon, { icon: petIcon, size: 16 }),
-          React.createElement('span', { className: 'font-medium' }, petName)
-        )
-      ),
-      React.createElement(UI.TableCell, null, c.vet_name),
-      // Motivo + Diagnóstico combinados
-      React.createElement(
-        UI.TableCell,
-        null,
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-0.5 min-w-0' },
+      {
+        key: 'pet',
+        header: 'Paciente',
+        className: 'w-36',
+        render: (c: Consultation) => {
+          const pet = petMap.get(c.pet_id);
+          const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
+          const petName = pet ? pet.name : '\u2026';
+          return React.createElement(
+            'div',
+            { className: 'flex items-center gap-2' },
+            React.createElement(UI.DynamicIcon, { icon: petIcon, size: 16 }),
+            React.createElement('span', { className: 'font-medium' }, petName)
+          );
+        },
+      },
+      {
+        key: 'vet_name',
+        header: 'Veterinario',
+        sortable: true,
+        className: 'w-40',
+        render: (c: Consultation) => c.vet_name,
+      },
+      {
+        key: 'reason',
+        header: 'Motivo / Diagnóstico',
+        render: (c: Consultation) =>
           React.createElement(
-            'span',
-            { className: 'text-sm font-medium text-cg-text truncate block' },
-            c.reason
-          ),
-          c.diagnosis &&
+            'div',
+            { className: 'flex flex-col gap-0.5 min-w-0' },
             React.createElement(
               'span',
-              { className: 'text-xs text-cg-text-muted truncate block' },
-              c.diagnosis
-            )
+              { className: 'text-sm font-medium text-cg-text truncate block' },
+              c.reason
+            ),
+            c.diagnosis &&
+              React.createElement(
+                'span',
+                { className: 'text-xs text-cg-text-muted truncate block' },
+                c.diagnosis
+              )
+          ),
+      },
+      {
+        key: 'reason_category',
+        header: 'Categoría',
+        sortable: true,
+        className: 'w-40',
+        render: (c: Consultation) =>
+          c.reason_category
+            ? React.createElement(
+                UI.Badge,
+                {
+                  variant: getReasonCategoryBadgeVariant(c.reason_category),
+                  size: 'sm',
+                },
+                formatReasonCategory(c.reason_category)
+              )
+            : '\u2014',
+      },
+    ],
+    [petMap]
+  );
+
+  // Filtros de categoría para DataTable
+  const filterSections = useMemo(() => {
+    if (!consultSettings.reasonCategoriesEnabled) return [];
+    return [
+      {
+        label: 'Categoría',
+        options: [
+          { value: '', label: 'Todas' },
+          ...ALL_REASON_CATEGORIES.map((cat) => ({
+            value: cat,
+            label: REASON_CATEGORY_LABELS[cat] ?? cat,
+          })),
+        ],
+        value: filters.reasonCategory ?? '',
+        onChange: handleCategoryFilter,
+      },
+    ];
+  }, [consultSettings.reasonCategoriesEnabled, filters.reasonCategory, handleCategoryFilter]);
+
+  // Slot derecho: filtros de fecha
+  const dateFilterSlot = useMemo(
+    () =>
+      React.createElement(
+        'div',
+        {
+          className: 'flex items-center gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
+        },
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-0.5' },
+          React.createElement(
+            'span',
+            { className: 'text-xs font-medium text-cg-text-muted' },
+            'Desde'
+          ),
+          React.createElement(UI.Input, {
+            type: 'date',
+            value: filters.dateFrom ?? '',
+            onChange: handleDateFrom,
+            className: 'w-40',
+          })
+        ),
+        React.createElement('span', { className: 'text-cg-text-muted text-sm pb-2.5' }, '\u2014'),
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-0.5' },
+          React.createElement(
+            'span',
+            { className: 'text-xs font-medium text-cg-text-muted' },
+            'Hasta'
+          ),
+          React.createElement(UI.Input, {
+            type: 'date',
+            value: filters.dateTo ?? '',
+            onChange: handleDateTo,
+            className: 'w-40',
+          })
         )
       ),
-      React.createElement(
-        UI.TableCell,
-        null,
-        c.reason_category
-          ? React.createElement(
+    [filters.dateFrom, filters.dateTo, handleDateFrom, handleDateTo]
+  );
+
+  // Mobile render: cada consulta como card
+  const mobileRender = useCallback(
+    (c: Consultation) => {
+      const pet = petMap.get(c.pet_id);
+      const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
+      const petName = pet ? pet.name : '\u2026';
+
+      return React.createElement(
+        'div',
+        { className: 'flex flex-col gap-1' },
+        // Fecha + categoría
+        React.createElement(
+          'div',
+          { className: 'flex items-center justify-between' },
+          React.createElement(
+            'span',
+            { className: 'text-xs', style: { color: 'var(--cg-text-muted)' } },
+            formatConsultationDate(c.date)
+          ),
+          c.reason_category &&
+            React.createElement(
               UI.Badge,
               {
                 variant: getReasonCategoryBadgeVariant(c.reason_category),
@@ -254,98 +325,33 @@ export function ConsultationsListView() {
               },
               formatReasonCategory(c.reason_category)
             )
-          : '—'
-      )
-    );
-  }
-
-  /** Contenido del cuerpo de la tabla segun el estado actual */
-  function renderTableBodyContent(): React.ReactNode {
-    if (loading) {
-      return Array.from({ length: 5 }).map((_, i) =>
+        ),
+        // Paciente + icono
         React.createElement(
-          UI.TableRow,
-          { key: `sk-${i}` },
-          Array.from({ length: COL_COUNT }).map((_, j) =>
-            React.createElement(
-              UI.TableCell,
-              { key: j },
-              React.createElement(UI.Skeleton, { className: 'h-4' })
-            )
-          )
+          'div',
+          { className: 'flex items-center gap-2' },
+          React.createElement(UI.DynamicIcon, { icon: petIcon, size: 16 }),
+          React.createElement('span', { className: 'font-medium text-sm' }, petName)
+        ),
+        // Motivo + diagnóstico
+        React.createElement('div', { className: 'text-sm text-cg-text truncate' }, c.reason),
+        c.diagnosis &&
+          React.createElement(
+            'div',
+            { className: 'text-xs truncate', style: { color: 'var(--cg-text-muted)' } },
+            c.diagnosis
+          ),
+        // Veterinario
+        React.createElement(
+          'div',
+          { className: 'text-xs', style: { color: 'var(--cg-text-muted)' } },
+          c.vet_name
         )
       );
-    }
+    },
+    [petMap]
+  );
 
-    if (error) {
-      return React.createElement(
-        UI.TableRow,
-        null,
-        React.createElement(
-          UI.TableCell,
-          { colSpan: COL_COUNT, className: 'p-0' },
-          React.createElement(UI.ErrorDisplay, {
-            title: 'Error al cargar',
-            message: error,
-            onRetry: () => {
-              void refetch();
-            },
-          })
-        )
-      );
-    }
-
-    if (consultations.length === 0) {
-      return React.createElement(
-        UI.TableRow,
-        null,
-        React.createElement(
-          UI.TableCell,
-          { colSpan: COL_COUNT, className: 'p-0' },
-          hasFilters
-            ? React.createElement(UI.EmptyState, {
-                icon: React.createElement(UI.DynamicIcon, {
-                  icon: 'SearchX',
-                  size: 24,
-                  className: 'text-cg-text-muted',
-                }),
-                title: 'No se encontraron consultas',
-                description: 'Probá ajustando los filtros o limpiando la búsqueda.',
-                action: React.createElement(
-                  UI.Button,
-                  { variant: 'outline', size: 'sm', onClick: handleClearFilters },
-                  'Limpiar filtros'
-                ),
-              })
-            : React.createElement(UI.EmptyState, {
-                icon: React.createElement(UI.DynamicIcon, {
-                  icon: 'ClipboardList',
-                  size: 24,
-                  className: 'text-cg-text-muted',
-                }),
-                title: 'Sin consultas registradas',
-                description:
-                  'Registrá la primera consulta de un paciente para comenzar a construir su historial clínico.',
-                action: React.createElement(
-                  UI.Button,
-                  {
-                    variant: 'brand',
-                    onClick: () => setEmptyStateCreateOpen(true),
-                    className: 'gap-2',
-                  },
-                  React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 18 }),
-                  'Nueva consulta'
-                ),
-              })
-        )
-      );
-    }
-
-    return consultations.map(renderConsultationRow);
-  }
-
-  // La estructura completa (stats, filtros, tabla) se muestra siempre;
-  // el empty state se renderiza dentro de la tabla.
   return React.createElement(
     'div',
     { className: 'font-inter min-h-screen bg-cg-bg-secondary p-6' },
@@ -360,211 +366,61 @@ export function ConsultationsListView() {
         }),
       }),
 
-      // ── Stats ──
+      // Stats
       React.createElement(ConsultationStats, { layout: 'row' }),
 
-      // ── Contenedor tabla + filtros ──
+      // Contenedor con DataTable
       React.createElement(
         'div',
         { className: 'bg-cg-bg rounded-xl border border-cg-border p-6 shadow-sm' },
-        React.createElement(
-          'div',
-          { className: 'flex flex-col gap-4' },
-
-          // Filtros: búsqueda + categorías + fechas
-          React.createElement(
-            'div',
-            { className: 'flex flex-wrap items-center justify-between gap-4' },
-
-            // Izquierda: búsqueda + categorías
-            React.createElement(
-              'div',
-              { className: 'flex items-center gap-3 min-w-0 flex-1' },
-
-              React.createElement(UI.SearchInput, {
-                placeholder: 'Buscar...',
-                value: localSearch,
-                onChange: handleSearchChange,
-                className: 'w-56 shrink-0',
-              }),
-              consultSettings.reasonCategoriesEnabled &&
-                React.createElement(UI.ButtonGroup, null, [
-                  React.createElement(
-                    UI.ButtonGroupItem,
-                    {
-                      key: '__all',
-                      active: !filters.reasonCategory,
-                      onClick: () => setFilters({ ...filters, reasonCategory: undefined }),
-                    },
-                    'Todas'
-                  ),
-                  ...ALL_REASON_CATEGORIES.map((cat) =>
-                    React.createElement(
-                      UI.ButtonGroupItem,
-                      {
-                        key: cat,
-                        active: filters.reasonCategory === cat,
-                        onClick: () => handleCategoryFilter(cat),
-                      },
-                      REASON_CATEGORY_LABELS[cat] ?? cat
-                    )
-                  ),
-                ]),
-              hasFilters &&
-                React.createElement(
-                  UI.Button,
-                  {
-                    variant: 'link',
-                    size: 'xs',
-                    onClick: handleClearFilters,
-                  },
-                  'Limpiar filtros'
-                )
-            ),
-
-            // Fechas (derecha, agrupadas visualmente)
-            React.createElement(
-              'div',
+        React.createElement(UI.DataTable, {
+          data: consultations,
+          rowKey: (c: Consultation) => c.id,
+          loading,
+          error: error ?? undefined,
+          onRetry: () => {
+            void refetch();
+          },
+          columns,
+          searchPlaceholder: 'Buscar...',
+          searchValue,
+          onSearchChange: handleSearch,
+          filterSections,
+          filterRightSlot: dateFilterSlot,
+          sortKey: sortKey || null,
+          sortDirection: sortDir as 'asc' | 'desc' | null,
+          onSortChange: handleSort,
+          pagination: {
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+          },
+          onPageChange: goToPage,
+          onRowClick: handleConsultationClick,
+          emptyState: {
+            title: 'Sin consultas registradas',
+            description:
+              'Registrá la primera consulta de un paciente para comenzar a construir su historial clínico.',
+            icon: React.createElement(UI.DynamicIcon, {
+              icon: 'ClipboardList',
+              size: 24,
+              className: 'text-cg-text-muted',
+            }),
+            action: React.createElement(
+              UI.Button,
               {
-                className:
-                  'flex items-center gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
+                variant: 'brand',
+                onClick: () => setEmptyStateCreateOpen(true),
+                className: 'gap-2',
               },
-              React.createElement(
-                'div',
-                { className: 'flex flex-col gap-0.5' },
-                React.createElement(
-                  'span',
-                  { className: 'text-xs font-medium text-cg-text-muted' },
-                  'Desde'
-                ),
-                React.createElement(UI.Input, {
-                  type: 'date',
-                  value: filters.dateFrom ?? '',
-                  onChange: handleDateFrom,
-                  className: 'w-40',
-                })
-              ),
-              React.createElement('span', { className: 'text-cg-text-muted text-sm pb-2.5' }, '—'),
-              React.createElement(
-                'div',
-                { className: 'flex flex-col gap-0.5' },
-                React.createElement(
-                  'span',
-                  { className: 'text-xs font-medium text-cg-text-muted' },
-                  'Hasta'
-                ),
-                React.createElement(UI.Input, {
-                  type: 'date',
-                  value: filters.dateTo ?? '',
-                  onChange: handleDateTo,
-                  className: 'w-40',
-                })
-              )
-            )
-          ),
-
-          // ── Tabla ──
-          React.createElement(
-            UI.Table,
-            { className: 'table-fixed w-full' },
-            // Encabezado
-            React.createElement(
-              UI.TableHeader,
-              null,
-              React.createElement(
-                UI.TableRow,
-                null,
-                React.createElement(
-                  UI.TableHead,
-                  {
-                    className: 'w-28',
-                    sortDirection: getSortDirection('date'),
-                    onSort: () => handleSort('date'),
-                  },
-                  'Fecha'
-                ),
-                React.createElement(UI.TableHead, { className: 'w-36' }, 'Paciente'),
-                React.createElement(
-                  UI.TableHead,
-                  {
-                    className: 'w-40',
-                    sortDirection: getSortDirection('vet_name'),
-                    onSort: () => handleSort('vet_name'),
-                  },
-                  'Veterinario'
-                ),
-                React.createElement(UI.TableHead, null, 'Motivo / Diagnóstico'),
-                React.createElement(
-                  UI.TableHead,
-                  {
-                    className: 'w-40',
-                    sortDirection: getSortDirection('reason_category'),
-                    onSort: () => handleSort('reason_category'),
-                  },
-                  'Categoría'
-                )
-              )
+              React.createElement(UI.DynamicIcon, { icon: 'Plus', size: 18 }),
+              'Nueva consulta'
             ),
-
-            // Cuerpo
-            React.createElement(UI.TableBody, null, renderTableBodyContent())
-          ),
-
-          // ── Paginación ──
-          !loading &&
-            consultations.length > 0 &&
-            React.createElement(
-              'div',
-              {
-                className: 'flex items-center justify-between text-sm text-cg-text-muted pt-2',
-              },
-              React.createElement(
-                'span',
-                null,
-                `${(pagination.page - 1) * pagination.pageSize + 1}–${Math.min(pagination.page * pagination.pageSize, pagination.total)} de ${pagination.total}`
-              ),
-              React.createElement(
-                UI.Pagination,
-                null,
-                React.createElement(
-                  UI.PaginationContent,
-                  null,
-                  React.createElement(
-                    UI.PaginationItem,
-                    null,
-                    React.createElement(UI.PaginationPrevious, {
-                      onClick: prevPage,
-                      disabled: pagination.page <= 1,
-                    })
-                  ),
-                  ...buildPageNumbers(pagination.page, pagination.totalPages).map((item, i) =>
-                    React.createElement(
-                      UI.PaginationItem,
-                      { key: i },
-                      item === '...'
-                        ? React.createElement(UI.PaginationEllipsis)
-                        : React.createElement(
-                            UI.PaginationLink,
-                            {
-                              isActive: item === pagination.page,
-                              onClick: () => goToPage(item),
-                            },
-                            item
-                          )
-                    )
-                  ),
-                  React.createElement(
-                    UI.PaginationItem,
-                    null,
-                    React.createElement(UI.PaginationNext, {
-                      onClick: nextPage,
-                      disabled: pagination.page >= pagination.totalPages,
-                    })
-                  )
-                )
-              )
-            )
-        )
+            filteredTitle: 'No se encontraron consultas',
+            filteredDescription: 'Probá ajustando los filtros o limpiando la búsqueda.',
+          },
+          mobileRender,
+        })
       ),
 
       // CreateConsultationButton controlado para el CTA del empty state
