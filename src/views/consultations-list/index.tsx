@@ -255,34 +255,46 @@ export function ConsultationsListView() {
   }, [consultSettings.reasonCategoriesEnabled, filters.reasonCategory, handleCategoryFilter]);
 
   // Slot derecho: filtros de fecha
-  const dateFilterSlot = React.createElement(
-    'div',
-    {
-      className: 'flex items-center gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
-    },
-    React.createElement(
-      'div',
-      { className: 'flex flex-col gap-0.5' },
-      React.createElement('span', { className: 'text-xs font-medium text-cg-text-muted' }, 'Desde'),
-      React.createElement(UI.Input, {
-        type: 'date',
-        value: filters.dateFrom ?? '',
-        onChange: handleDateFrom,
-        className: 'w-40',
-      })
-    ),
-    React.createElement('span', { className: 'text-cg-text-muted text-sm pb-2.5' }, '\u2014'),
-    React.createElement(
-      'div',
-      { className: 'flex flex-col gap-0.5' },
-      React.createElement('span', { className: 'text-xs font-medium text-cg-text-muted' }, 'Hasta'),
-      React.createElement(UI.Input, {
-        type: 'date',
-        value: filters.dateTo ?? '',
-        onChange: handleDateTo,
-        className: 'w-40',
-      })
-    )
+  const dateFilterSlot = useMemo(
+    () =>
+      React.createElement(
+        'div',
+        {
+          className: 'flex items-center gap-2 shrink-0 bg-cg-bg-secondary rounded-lg px-3 py-2',
+        },
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-0.5' },
+          React.createElement(
+            'span',
+            { className: 'text-xs font-medium text-cg-text-muted' },
+            'Desde'
+          ),
+          React.createElement(UI.Input, {
+            type: 'date',
+            value: filters.dateFrom ?? '',
+            onChange: handleDateFrom,
+            className: 'w-40',
+          })
+        ),
+        React.createElement('span', { className: 'text-cg-text-muted text-sm pb-2.5' }, '\u2014'),
+        React.createElement(
+          'div',
+          { className: 'flex flex-col gap-0.5' },
+          React.createElement(
+            'span',
+            { className: 'text-xs font-medium text-cg-text-muted' },
+            'Hasta'
+          ),
+          React.createElement(UI.Input, {
+            type: 'date',
+            value: filters.dateTo ?? '',
+            onChange: handleDateTo,
+            className: 'w-40',
+          })
+        )
+      ),
+    [filters.dateFrom, filters.dateTo, handleDateFrom, handleDateTo]
   );
 
   // Mobile render: cada consulta como card
