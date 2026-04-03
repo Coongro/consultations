@@ -2,6 +2,7 @@
  * Vista principal: historial de consultas con stats, filtros inline y tabla.
  * Usa DataTable de ui-components para renderizado desktop + cards en móvil.
  */
+import { DatePicker } from '@coongro/calendar';
 import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
 import { ConsultationStats } from '../../components/ConsultationStats.js';
@@ -135,15 +136,15 @@ export function ConsultationsListView() {
   );
 
   const handleDateFrom = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFilters({ ...filters, dateFrom: e.target.value || undefined });
+    (date: string) => {
+      setFilters({ ...filters, dateFrom: date || undefined });
     },
     [filters, setFilters]
   );
 
   const handleDateTo = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFilters({ ...filters, dateTo: e.target.value || undefined });
+    (date: string) => {
+      setFilters({ ...filters, dateTo: date || undefined });
     },
     [filters, setFilters]
   );
@@ -270,10 +271,11 @@ export function ConsultationsListView() {
             { className: 'text-xs font-medium text-cg-text-muted' },
             'Desde'
           ),
-          React.createElement(UI.Input, {
-            type: 'date',
+          React.createElement(DatePicker, {
             value: filters.dateFrom ?? '',
             onChange: handleDateFrom,
+            placeholder: 'Desde',
+            maxDate: filters.dateTo,
             className: 'w-40',
           })
         ),
@@ -286,10 +288,11 @@ export function ConsultationsListView() {
             { className: 'text-xs font-medium text-cg-text-muted' },
             'Hasta'
           ),
-          React.createElement(UI.Input, {
-            type: 'date',
+          React.createElement(DatePicker, {
             value: filters.dateTo ?? '',
             onChange: handleDateTo,
+            placeholder: 'Hasta',
+            minDate: filters.dateFrom,
             className: 'w-40',
           })
         )

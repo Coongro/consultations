@@ -9,6 +9,7 @@
  *   6. P — Tratamiento + Medicamentos + Seguimiento
  *   7. Servicios prestados (facturación)
  */
+import { DatePicker, DateTimePicker } from '@coongro/calendar';
 import { PetPicker } from '@coongro/patients';
 import type { Pet } from '@coongro/patients';
 import {
@@ -416,10 +417,10 @@ export function ConsultationForm(props: ConsultationFormProps) {
             'div',
             { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Fecha y hora'),
-            React.createElement(UI.Input, {
-              type: 'datetime-local',
+            React.createElement(DateTimePicker, {
               value: date,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value),
+              onChange: (datetime: string) => setDate(datetime),
+              step: 30,
             })
           )
         )
@@ -650,10 +651,11 @@ export function ConsultationForm(props: ConsultationFormProps) {
             'div',
             { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Próximo control'),
-            React.createElement(UI.Input, {
-              type: 'date',
+            React.createElement(DatePicker, {
               value: followUpDate,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setFollowUpDate(e.target.value),
+              onChange: (date: string) => setFollowUpDate(date),
+              placeholder: 'Seleccionar fecha',
+              minDate: new Date().toISOString().split('T')[0],
             })
           ),
           React.createElement(

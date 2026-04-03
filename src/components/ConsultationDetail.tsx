@@ -401,6 +401,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             ),
             React.createElement(EventCard, {
               event: followUpEvent,
+              showDate: true,
               showTime: true,
               showStatus: true,
             })

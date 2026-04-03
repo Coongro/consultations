@@ -13,7 +13,7 @@ const UI = getHostUI();
 const { useState, useCallback } = React;
 
 export function ConsultationDetailView(props: { consultationId?: string }) {
-  const { views, toast } = usePlugin();
+  const { views } = usePlugin();
   const consultationId =
     props.consultationId ?? (views.params as Record<string, string>)?.consultationId;
 
@@ -32,8 +32,7 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
   const handleEditSuccess = useCallback(() => {
     setShowEditModal(false);
     setRefreshKey((k: number) => k + 1);
-    toast.success('Consulta actualizada', 'Los cambios se guardaron correctamente');
-  }, [toast]);
+  }, []);
 
   const handleDelete = useCallback(
     (c: Consultation) => {
