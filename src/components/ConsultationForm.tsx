@@ -419,7 +419,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
             React.createElement(UI.Label, null, 'Fecha y hora'),
             React.createElement(DateTimePicker, {
               value: date,
-              onChange: (datetime: string) => setDate(datetime),
+              onChange: setDate,
               step: 30,
             })
           )
@@ -653,7 +653,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
             React.createElement(UI.Label, null, 'Próximo control'),
             React.createElement(DatePicker, {
               value: followUpDate,
-              onChange: (date: string) => setFollowUpDate(date),
+              onChange: setFollowUpDate,
               placeholder: 'Seleccionar fecha',
               minDate: new Date().toISOString().split('T')[0],
             })
