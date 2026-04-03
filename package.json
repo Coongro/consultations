@@ -1,6 +1,6 @@
 {
   "name": "@coongro/consultations",
-  "version": "0.3.0",
+  "version": "0.5.1",
   "type": "module",
   "description": "Bloque de historia clinica: consultas veterinarias, diagnosticos y tratamientos",
   "main": "dist/index.js",
