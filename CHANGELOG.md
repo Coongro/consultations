@@ -1,5 +1,11 @@
 # @coongro/consultations
 
+## 0.6.0
+
+### Minor Changes
+
+- 928484e: Use calendar DatePicker/DateTimePicker instead of native inputs, fix duplicate toast on edit
+
 ## 0.5.0
 
 ### Minor Changes
