@@ -9,7 +9,7 @@
  *   6. P — Tratamiento + Medicamentos + Seguimiento
  *   7. Servicios prestados (facturación)
  */
-import { DatePicker, DateTimePicker } from '@coongro/calendar';
+import { DatePicker, DateTimePicker, TimePicker } from '@coongro/calendar';
 import { PetPicker } from '@coongro/patients';
 import type { Pet } from '@coongro/patients';
 import {
@@ -18,8 +18,11 @@ import {
   usePlugin,
   useViewContributions,
   actions,
+  settings,
 } from '@coongro/plugin-sdk';
 import type { Product, Category } from '@coongro/products';
+import { StaffPicker } from '@coongro/staff';
+import type { StaffMember } from '@coongro/staff';
 
 import { ROOT_SERVICE_CATEGORY_SLUG } from '../constants/services.js';
 import { useConsultation } from '../hooks/useConsultation.js';
@@ -33,6 +36,7 @@ import {
   type PhysicalExamSystem,
   type ServiceLineInput,
 } from '../types/consultation.js';
+import { parseFollowUpDate } from '../utils/follow-up.js';
 
 import { ExamSystemList } from './ExamSystemRow.js';
 import { MedicationFormList } from './MedicationFormList.js';
@@ -75,6 +79,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
 
   // --- Estado del formulario ---
   const [selectedPetId, setSelectedPetId] = useState(petId ?? defaults?.pet_id ?? '');
+  const [staffId, setStaffId] = useState<string | null>(defaults?.staff_id ?? null);
   const [vetName, setVetName] = useState(defaults?.vet_name ?? '');
   const [date, setDate] = useState(defaults?.date ?? new Date().toISOString().slice(0, 16));
 
@@ -93,7 +98,10 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [diagnosis, setDiagnosis] = useState(defaults?.diagnosis ?? '');
   const [treatment, setTreatment] = useState(defaults?.treatment ?? '');
   const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
-  const [followUpDate, setFollowUpDate] = useState(defaults?.follow_up_date ?? '');
+  const defaultFollowUp = parseFollowUpDate(defaults?.follow_up_date);
+  const [followUpDate, setFollowUpDate] = useState(defaultFollowUp.date);
+  const [followUpStartTime, setFollowUpStartTime] = useState(defaultFollowUp.startTime);
+  const [followUpEndTime, setFollowUpEndTime] = useState(defaultFollowUp.endTime);
   const [notes, setNotes] = useState(defaults?.notes ?? '');
 
   // Servicios
@@ -165,6 +173,11 @@ export function ConsultationForm(props: ConsultationFormProps) {
     if (pet?.weight_kg) setWeightKg(pet.weight_kg);
   }, []);
 
+  const handleStaffSelect = useCallback((member: StaffMember | null) => {
+    setStaffId(member?.id ?? null);
+    setVetName(member?.contact_name ?? '');
+  }, []);
+
   // Precargar signos vitales de la última consulta del paciente
   const vitalsLoadedRef = useRef(false);
   useEffect(() => {
@@ -203,16 +216,17 @@ export function ConsultationForm(props: ConsultationFormProps) {
     })();
   }, [selectedPetId, defaults?.pet_id, isEditing]);
 
-  // Cargar defaults del settings
+  // Preseleccionar el ultimo veterinario usado
   useEffect(() => {
-    if (!isEditing && consultSettings.defaultVet && !vetName) {
-      setVetName(consultSettings.defaultVet);
+    if (!isEditing && !staffId && consultSettings.defaultStaffId) {
+      setStaffId(consultSettings.defaultStaffId);
     }
-  }, [consultSettings.defaultVet, isEditing, vetName]);
+  }, [consultSettings.defaultStaffId, isEditing, staffId]);
 
   // Cargar datos existentes al editar
   useEffect(() => {
     if (!existing) return;
+    setStaffId(existing.staff_id ?? null);
     setVetName(existing.vet_name);
     setDate(existing.date.slice(0, 16));
     setWeightKg(existing.weight_kg ?? '');
@@ -228,7 +242,10 @@ export function ConsultationForm(props: ConsultationFormProps) {
     setPhysicalExamNotes(existing.physical_exam ?? '');
     setDiagnosis(existing.diagnosis ?? '');
     setTreatment(existing.treatment ?? '');
-    setFollowUpDate(existing.follow_up_date ?? '');
+    const parsed = parseFollowUpDate(existing.follow_up_date);
+    setFollowUpDate(parsed.date);
+    setFollowUpStartTime(parsed.startTime);
+    setFollowUpEndTime(parsed.endTime);
     setNotes(existing.notes ?? '');
     setSelectedPetId(existing.pet_id);
   }, [existing]);
@@ -285,8 +302,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
         toast.error('Error', 'El motivo de consulta es obligatorio');
         return;
       }
-      if (!vetName.trim()) {
-        toast.error('Error', 'El nombre del veterinario es obligatorio');
+      if (!staffId && !vetName.trim()) {
+        toast.error('Error', 'Seleccioná un veterinario');
         return;
       }
 
@@ -299,6 +316,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         : null;
 
       const sharedData = {
+        staff_id: staffId || null,
         vet_name: vetName.trim(),
         date: new Date(date).toISOString(),
         weight_kg: weightKg || null,
@@ -313,7 +331,9 @@ export function ConsultationForm(props: ConsultationFormProps) {
         physical_exam_systems: examData,
         diagnosis: diagnosis.trim() || null,
         treatment: treatment.trim() || null,
-        follow_up_date: followUpDate || null,
+        follow_up_date: followUpDate
+          ? `${followUpDate} ${followUpStartTime}-${followUpEndTime}`
+          : null,
         follow_up_notes: null,
         notes: notes.trim() || null,
       };
@@ -337,7 +357,13 @@ export function ConsultationForm(props: ConsultationFormProps) {
           medications: validMeds,
           services: validServices,
         });
-        if (result && onSuccess) onSuccess(result);
+        if (result && onSuccess) {
+          // Recordar el veterinario para la proxima consulta
+          if (staffId) {
+            void settings.set('consultations.defaultStaffId', staffId);
+          }
+          onSuccess(result);
+        }
       }
     },
     [
@@ -345,6 +371,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       selectedPetId,
       defaults,
       isEditing,
+      staffId,
       vetName,
       date,
       weightKg,
@@ -359,6 +386,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
       diagnosis,
       treatment,
       followUpDate,
+      followUpStartTime,
+      followUpEndTime,
       notes,
       medications,
       serviceLines,
@@ -405,12 +434,10 @@ export function ConsultationForm(props: ConsultationFormProps) {
             'div',
             { className: FIELD_GAP },
             React.createElement(UI.Label, null, 'Veterinario *'),
-            React.createElement(UI.Input, {
-              type: 'text',
-              value: vetName,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setVetName(e.target.value),
-              placeholder: 'Nombre del veterinario',
-              required: true,
+            React.createElement(StaffPicker, {
+              value: staffId,
+              onChange: handleStaffSelect,
+              placeholder: 'Buscar veterinario...',
             })
           ),
           React.createElement(
@@ -646,7 +673,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         React.createElement(SectionHeader, { icon: 'CalendarCheck', title: 'Seguimiento' }),
         React.createElement(
           'div',
-          { className: GRID_2 },
+          { className: 'grid grid-cols-4 gap-3' },
           React.createElement(
             'div',
             { className: FIELD_GAP },
@@ -656,6 +683,33 @@ export function ConsultationForm(props: ConsultationFormProps) {
               onChange: setFollowUpDate,
               placeholder: 'Seleccionar fecha',
               minDate: new Date().toISOString().split('T')[0],
+            })
+          ),
+          React.createElement(
+            'div',
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'Inicio'),
+            React.createElement(TimePicker, {
+              value: followUpStartTime,
+              onChange: (t: string) => {
+                setFollowUpStartTime(t);
+                const [h, m] = t.split(':').map(Number);
+                const endMin = h * 60 + m + 30;
+                setFollowUpEndTime(
+                  `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`
+                );
+              },
+              step: 30,
+            })
+          ),
+          React.createElement(
+            'div',
+            { className: FIELD_GAP },
+            React.createElement(UI.Label, null, 'Fin'),
+            React.createElement(TimePicker, {
+              value: followUpEndTime,
+              onChange: setFollowUpEndTime,
+              step: 30,
             })
           ),
           React.createElement(

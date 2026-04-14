@@ -12,6 +12,7 @@ export { CreateConsultationButton } from './components/CreateConsultationButton.
 export { ConsultationTimeline } from './components/ConsultationTimeline.js';
 export { ConsultationDetail } from './components/ConsultationDetail.js';
 export { ConsultationForm } from './components/ConsultationForm.js';
+export { DefaultVetSetting } from './components/DefaultVetSetting.js';
 export { MedicationList } from './components/MedicationList.js';
 export { MedicationFormList } from './components/MedicationFormList.js';
 export { ConsultationStats } from './components/ConsultationStats.js';
@@ -42,6 +43,8 @@ export type {
   ConsultationCreateData,
   ConsultationUpdateData,
   MedicationInput,
+  ServiceLineInput,
+  ConsultationService,
   ConsultationWithMedications,
   ReasonCategory,
   PhysicalExamSystem,
@@ -59,6 +62,9 @@ export type {
   CreateConsultationButtonProps,
 } from './types/components.js';
 export type { ServiceLineFormProps } from './components/ServiceLineForm.js';
+
+// Constantes de servicios
+export { ROOT_SERVICE_CATEGORY_SLUG } from './constants/services.js';
 
 // Constantes de medicacion (exportables cross-plugin)
 export {

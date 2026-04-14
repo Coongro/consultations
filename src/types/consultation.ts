@@ -45,6 +45,7 @@ export interface Consultation {
   id: string;
   pet_id: string;
   vet_name: string;
+  staff_id: string | null;
   date: string;
   weight_kg: string | null;
   temperature: string | null;
@@ -86,6 +87,7 @@ export interface ConsultationMedication {
 export interface ConsultationCreateData {
   pet_id: string;
   vet_name: string;
+  staff_id?: string | null;
   date?: string;
   weight_kg?: string | null;
   temperature?: string | null;
@@ -109,6 +111,7 @@ export interface ConsultationCreateData {
 
 export interface ConsultationUpdateData {
   vet_name?: string;
+  staff_id?: string | null;
   date?: string;
   weight_kg?: string | null;
   temperature?: string | null;

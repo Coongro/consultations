@@ -45,6 +45,12 @@
       ],
       "@coongro/products/server": [
         "../products/dist/server.d.ts"
+      ],
+      "@coongro/staff": [
+        "../staff/dist/index.d.ts"
+      ],
+      "@coongro/appointments": [
+        "../appointments/dist/index.d.ts"
       ]
     }
   },
