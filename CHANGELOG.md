@@ -1,5 +1,11 @@
 # @coongro/consultations
 
+## 0.6.1
+
+### Patch Changes
+
+- fd20414: fix: staff_id migration, follow-up appointments, default vet setting
+
 ## 0.6.0
 
 ### Minor Changes
