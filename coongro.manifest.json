@@ -82,6 +82,14 @@
     "settings": {
       "sections": [
         {
+          "id": "consultations.general.vet",
+          "page": "consultations.general",
+          "label": "Veterinario",
+          "order": 5,
+          "component": "./dist/index.js",
+          "export": "DefaultVetSetting"
+        },
+        {
           "id": "consultations.general.main",
           "page": "consultations.general",
           "label": "General",
@@ -98,19 +106,6 @@
                 "reasoncategories",
                 "categorías",
                 "motivo"
-              ]
-            },
-            {
-              "key": "consultations.defaultVet",
-              "type": "string",
-              "label": "Veterinario predeterminado",
-              "description": "Nombre del veterinario que se preselecciona al crear consultas",
-              "default": "",
-              "tags": [
-                "consultations",
-                "defaultvet",
-                "veterinario",
-                "predeterminado"
               ]
             },
             {

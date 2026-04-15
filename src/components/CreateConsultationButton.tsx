@@ -22,6 +22,7 @@ const { useState, useCallback } = React;
 export function CreateConsultationButton(props: CreateConsultationButtonProps) {
   const {
     petId: petIdProp,
+    defaults,
     label = 'Nueva consulta',
     onSuccess,
     onCancel,
@@ -94,6 +95,7 @@ export function CreateConsultationButton(props: CreateConsultationButtonProps) {
         ? // Con petId: formulario directo
           React.createElement(ConsultationForm, {
             petId: petIdProp,
+            defaults,
             onSuccess: handleSuccess,
             onCancel: handleClose,
           })
@@ -114,6 +116,7 @@ export function CreateConsultationButton(props: CreateConsultationButtonProps) {
             selectedPetId
               ? React.createElement(ConsultationForm, {
                   petId: selectedPetId,
+                  defaults,
                   onSuccess: handleSuccess,
                   onCancel: handleClose,
                 })

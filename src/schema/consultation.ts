@@ -5,6 +5,7 @@ export const consultationTable = pgTable('module_consultations_consultations', {
   id: uuid('id').primaryKey().notNull(),
   pet_id: text('pet_id').notNull(),
   vet_name: text('vet_name').notNull(),
+  staff_id: text('staff_id'),
   date: timestamp('date', { mode: 'string' })
     .notNull()
     .default(sql`now()`),
