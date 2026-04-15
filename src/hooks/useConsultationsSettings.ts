@@ -8,7 +8,7 @@ const { useState, useEffect } = React;
 
 export interface ConsultationsSettings {
   reasonCategoriesEnabled: boolean;
-  defaultVet: string;
+  defaultStaffId: string;
   showPrices: boolean;
   prefillVitals: boolean;
   structuredExam: boolean;
@@ -16,7 +16,7 @@ export interface ConsultationsSettings {
 
 const DEFAULTS: Record<string, unknown> = {
   'consultations.reasonCategories': true,
-  'consultations.defaultVet': '',
+  'consultations.defaultStaffId': '',
   'consultations.showPrices': true,
   'consultations.prefillVitals': true,
   'consultations.structuredExam': true,
@@ -27,7 +27,7 @@ function parseSettings(raw: Record<string, unknown>): ConsultationsSettings {
 
   return {
     reasonCategoriesEnabled: get('consultations.reasonCategories') as boolean,
-    defaultVet: (get('consultations.defaultVet') as string) || '',
+    defaultStaffId: (get('consultations.defaultStaffId') as string) || '',
     showPrices: get('consultations.showPrices') as boolean,
     prefillVitals: get('consultations.prefillVitals') as boolean,
     structuredExam: get('consultations.structuredExam') as boolean,

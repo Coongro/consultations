@@ -6,6 +6,7 @@
 import { useEventsByEntity, formatEventDate, EventCard } from '@coongro/calendar';
 import type { CalendarEvent } from '@coongro/calendar';
 import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
+import { StaffBadge } from '@coongro/staff';
 
 import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
@@ -313,22 +314,24 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
           { className: 'p-4' },
           React.createElement(
             'div',
-            { className: 'flex items-center gap-3' },
-            React.createElement(UI.Avatar, { size: 'sm', name: c.vet_name }),
+            { className: 'flex flex-col gap-1' },
             React.createElement(
-              'div',
-              null,
-              React.createElement(
-                'span',
-                { className: 'text-xs text-cg-text-muted uppercase tracking-wider block' },
-                'Veterinario/a'
-              ),
-              React.createElement(
-                'span',
-                { className: 'text-sm font-medium text-cg-text' },
-                `Dr(a). ${c.vet_name}`
-              )
-            )
+              'span',
+              { className: 'text-xs text-cg-text-muted uppercase tracking-wider block' },
+              'Veterinario/a'
+            ),
+            c.staff_id
+              ? React.createElement(StaffBadge, { staffId: c.staff_id, variant: 'default' })
+              : React.createElement(
+                  'div',
+                  { className: 'flex items-center gap-3' },
+                  React.createElement(UI.Avatar, { size: 'sm', name: c.vet_name }),
+                  React.createElement(
+                    'span',
+                    { className: 'text-sm font-medium text-cg-text' },
+                    `Dr(a). ${c.vet_name}`
+                  )
+                )
           )
         ),
 
