@@ -49,7 +49,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@coongro/appointments": ">=0.1.0",
     "@coongro/calendar": ">=0.1.0",
     "@coongro/patients": ">=0.1.0",
     "@coongro/products": ">=0.1.0",
