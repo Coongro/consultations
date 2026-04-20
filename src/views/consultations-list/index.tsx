@@ -2,7 +2,7 @@
  * Vista principal: historial de consultas con stats, filtros inline y tabla.
  * Usa DataTable de ui-components para renderizado desktop + cards en móvil.
  */
-import { DatePicker } from '@coongro/calendar';
+import { DatePicker, useTenantTimezone } from '@coongro/calendar';
 import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
 import { ConsultationStats } from '../../components/ConsultationStats.js';
@@ -38,6 +38,7 @@ interface PetInfo {
 const SORTABLE_KEYS = new Set(['date', 'vet_name', 'reason_category']);
 
 export function ConsultationsListView() {
+  const tz = useTenantTimezone();
   const { views } = usePlugin();
   const { settings: consultSettings } = useConsultationsSettings();
 
@@ -170,7 +171,7 @@ export function ConsultationsListView() {
         header: 'Fecha',
         sortable: true,
         className: 'w-28',
-        render: (c: Consultation) => formatConsultationDate(c.date),
+        render: (c: Consultation) => formatConsultationDate(c.date, tz),
       },
       {
         key: 'pet',
@@ -317,7 +318,7 @@ export function ConsultationsListView() {
           React.createElement(
             'span',
             { className: 'text-xs', style: { color: 'var(--cg-text-muted)' } },
-            formatConsultationDate(c.date)
+            formatConsultationDate(c.date, tz)
           ),
           c.reason_category &&
             React.createElement(

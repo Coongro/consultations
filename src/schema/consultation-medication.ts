@@ -14,7 +14,7 @@ export const consultationMedicationTable = pgTable(
     duration_amount: integer('duration_amount'),
     duration_unit: text('duration_unit'),
     notes: text('notes'),
-    created_at: timestamp('created_at', { mode: 'string' })
+    created_at: timestamp('created_at', { mode: 'date', withTimezone: true })
       .notNull()
       .default(sql`now()`),
   }

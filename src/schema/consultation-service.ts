@@ -10,7 +10,7 @@ export const consultationServiceTable = pgTable('module_consultations_services',
   unit_price: numeric('unit_price').notNull(),
   subtotal: numeric('subtotal').notNull(),
   notes: text('notes'),
-  created_at: timestamp('created_at', { mode: 'string' })
+  created_at: timestamp('created_at', { mode: 'date', withTimezone: true })
     .notNull()
     .default(sql`now()`),
 });

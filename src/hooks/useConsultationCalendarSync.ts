@@ -4,27 +4,31 @@
  * Si no, crea un evento de calendario como fallback.
  */
 import type { EventCreateData, CalendarEvent } from '@coongro/calendar';
+import { addMinutes, localToUTC } from '@coongro/datetime';
 import { actions } from '@coongro/plugin-sdk';
 
 import type { Consultation } from '../types/consultation.js';
-import { parseFollowUpDate } from '../utils/follow-up.js';
 
 const ENTITY_TYPE = 'consultation';
 const DEFAULT_DURATION_MIN = 30;
 
-function buildFollowUpEvent(consultation: Consultation, petName: string): EventCreateData {
-  const { date, startTime, endTime } = parseFollowUpDate(consultation.follow_up_date);
-
-  const startIso = `${date}T${startTime}:00.000Z`;
-  // Si endTime difiere de startTime, usar esa hora; si no, calcular +30min
-  const hasExplicitEnd = endTime !== startTime;
-  let endIso: string;
-  if (hasExplicitEnd) {
-    endIso = `${date}T${endTime}:00.000Z`;
-  } else {
-    const endMs = new Date(startIso).getTime() + DEFAULT_DURATION_MIN * 60 * 1000;
-    endIso = new Date(endMs).toISOString();
+function buildFollowUpEvent(
+  consultation: Consultation,
+  petName: string,
+  tz: string
+): EventCreateData {
+  const date = consultation.follow_up_date;
+  if (!date) {
+    throw new Error('buildFollowUpEvent invoked without follow_up_date');
   }
+  const startTime = consultation.follow_up_start_time ?? '09:00';
+  const endTime = consultation.follow_up_end_time ?? startTime;
+
+  const startIso = localToUTC(date, startTime, tz);
+  const hasExplicitEnd = endTime !== startTime;
+  const endIso = hasExplicitEnd
+    ? localToUTC(date, endTime, tz)
+    : addMinutes(startIso, DEFAULT_DURATION_MIN);
 
   return {
     title: `Seguimiento: ${petName}`,
@@ -89,7 +93,8 @@ async function tryCreateFollowUpAppointment(
  */
 export async function syncFollowUpEvent(
   consultation: Consultation,
-  petName: string
+  petName: string,
+  tz: string
 ): Promise<CalendarEvent | null> {
   if (!consultation.follow_up_date) return null;
 
@@ -98,7 +103,7 @@ export async function syncFollowUpEvent(
     entityType: ENTITY_TYPE,
   });
 
-  const eventData = buildFollowUpEvent(consultation, petName);
+  const eventData = buildFollowUpEvent(consultation, petName, tz);
   const existingEvent = existing?.[0];
 
   if (existingEvent) {
