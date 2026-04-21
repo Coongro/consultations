@@ -2,6 +2,7 @@
  * Hook para operaciones de mutacion de consultas (crear, editar, eliminar).
  * Al crear, maneja la creacion atomica de medicamentos.
  */
+import { useTenantTimezone } from '@coongro/calendar';
 import { getHostReact, actions, usePlugin } from '@coongro/plugin-sdk';
 
 import type {
@@ -34,6 +35,7 @@ export interface UseConsultationMutationsResult {
 
 export function useConsultationMutations(): UseConsultationMutationsResult {
   const { toast } = usePlugin();
+  const tz = useTenantTimezone();
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -87,7 +89,7 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
         // Sincronizar evento de seguimiento en calendario
         if (consultation.follow_up_date) {
           const petName = await resolvePetName(consultation.pet_id);
-          await syncFollowUpEvent(consultation, petName);
+          await syncFollowUpEvent(consultation, petName, tz);
         }
 
         toast.success('Consulta registrada', data.reason);
@@ -144,7 +146,7 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
         if (updated) {
           if (updated.follow_up_date) {
             const petName = await resolvePetName(updated.pet_id);
-            await syncFollowUpEvent(updated, petName);
+            await syncFollowUpEvent(updated, petName, tz);
           } else {
             await removeFollowUpEvent(id);
           }

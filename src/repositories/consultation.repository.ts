@@ -1,9 +1,26 @@
+import { asDateKey, dbNow, toDateKey, toUTCTimestamp } from '@coongro/datetime';
 import type { ModuleDatabaseAPI } from '@coongro/plugin-sdk';
 import type { SQL } from 'drizzle-orm';
 import { eq, and, or, ilike, isNull, sql, asc, desc, gte, lte, count } from 'drizzle-orm';
 
 import { consultationTable } from '../schema/consultation.js';
 import type { ConsultationRow, NewConsultationRow } from '../schema/consultation.js';
+import type { Consultation, PhysicalExamSystem } from '../types/consultation.js';
+
+/** Mapper boundary: row de DB (strings sin brand) → entidad de dominio (UTCTimestamp). */
+function toConsultation(row: ConsultationRow): Consultation {
+  return {
+    ...row,
+    physical_exam_systems: row.physical_exam_systems as PhysicalExamSystem[] | null,
+    diagnosis_tags: row.diagnosis_tags as string[] | null,
+    metadata: row.metadata as Record<string, unknown> | null,
+    date: toUTCTimestamp(row.date),
+    follow_up_date: row.follow_up_date ? asDateKey(row.follow_up_date) : null,
+    deleted_at: row.deleted_at ? toUTCTimestamp(row.deleted_at) : null,
+    created_at: toUTCTimestamp(row.created_at),
+    updated_at: toUTCTimestamp(row.updated_at),
+  };
+}
 
 export interface ConsultationSearchParams {
   petId?: string;
@@ -31,29 +48,35 @@ export class ConsultationRepository {
   // CRUD base
   // ---------------------------------------------------------------------------
 
-  async list(): Promise<ConsultationRow[]> {
-    return this.db.ormQuery((tx) =>
+  async list(): Promise<Consultation[]> {
+    const rows = await this.db.ormQuery((tx) =>
       tx
         .select()
         .from(consultationTable)
         .where(isNull(consultationTable.deleted_at))
         .orderBy(desc(consultationTable.date))
     );
+    return rows.map(toConsultation);
   }
 
-  async getById({ id }: { id: string }): Promise<ConsultationRow | undefined> {
+  async getById({ id }: { id: string }): Promise<Consultation | undefined> {
     const rows = await this.db.ormQuery((tx) =>
       tx.select().from(consultationTable).where(eq(consultationTable.id, id)).limit(1)
     );
-    return rows[0];
+    return rows[0] ? toConsultation(rows[0]) : undefined;
   }
 
-  async create({ data }: { data: NewConsultationRow }): Promise<ConsultationRow[]> {
+  async create({ data }: { data: NewConsultationRow }): Promise<Consultation[]> {
+    const dataAny = data as Record<string, unknown>;
+    if (typeof dataAny.date === 'string') dataAny.date = new Date(dataAny.date);
     const row = {
       ...data,
       id: data.id ?? crypto.randomUUID(),
     };
-    return this.db.ormQuery((tx) => tx.insert(consultationTable).values(row).returning());
+    const rows = await this.db.ormQuery((tx) =>
+      tx.insert(consultationTable).values(row).returning()
+    );
+    return rows.map(toConsultation);
   }
 
   async update({
@@ -62,14 +85,17 @@ export class ConsultationRepository {
   }: {
     id: string;
     data: Partial<NewConsultationRow>;
-  }): Promise<ConsultationRow[]> {
-    return this.db.ormQuery((tx) =>
+  }): Promise<Consultation[]> {
+    const dataAny = data as Record<string, unknown>;
+    if (typeof dataAny.date === 'string') dataAny.date = new Date(dataAny.date);
+    const rows = await this.db.ormQuery((tx) =>
       tx
         .update(consultationTable)
-        .set({ ...data, updated_at: new Date().toISOString() } as Partial<NewConsultationRow>)
+        .set({ ...data, updated_at: dbNow() } as Partial<NewConsultationRow>)
         .where(eq(consultationTable.id, id))
         .returning()
     );
+    return rows.map(toConsultation);
   }
 
   async delete({ id }: { id: string }): Promise<void> {
@@ -82,25 +108,27 @@ export class ConsultationRepository {
   // Soft delete
   // ---------------------------------------------------------------------------
 
-  async softDelete({ id }: { id: string }): Promise<ConsultationRow[]> {
-    const now = new Date().toISOString();
-    return this.db.ormQuery((tx) =>
+  async softDelete({ id }: { id: string }): Promise<Consultation[]> {
+    const now = dbNow();
+    const rows = await this.db.ormQuery((tx) =>
       tx
         .update(consultationTable)
         .set({ deleted_at: now, updated_at: now } as Partial<ConsultationRow>)
         .where(eq(consultationTable.id, id))
         .returning()
     );
+    return rows.map(toConsultation);
   }
 
-  async restore({ id }: { id: string }): Promise<ConsultationRow[]> {
-    return this.db.ormQuery((tx) =>
+  async restore({ id }: { id: string }): Promise<Consultation[]> {
+    const rows = await this.db.ormQuery((tx) =>
       tx
         .update(consultationTable)
-        .set({ deleted_at: null, updated_at: new Date().toISOString() } as Partial<ConsultationRow>)
+        .set({ deleted_at: null, updated_at: dbNow() } as Partial<ConsultationRow>)
         .where(eq(consultationTable.id, id))
         .returning()
     );
+    return rows.map(toConsultation);
   }
 
   // ---------------------------------------------------------------------------
@@ -119,8 +147,8 @@ export class ConsultationRepository {
     offset: searchOffset,
     orderBy: orderByField,
     orderDir = 'desc',
-  }: ConsultationSearchParams): Promise<ConsultationRow[]> {
-    return this.db.ormQuery((tx) => {
+  }: ConsultationSearchParams): Promise<Consultation[]> {
+    const rows = await this.db.ormQuery((tx) => {
       const conditions: SQL[] = [];
 
       if (!includeDeleted) {
@@ -140,11 +168,11 @@ export class ConsultationRepository {
       }
 
       if (dateFrom) {
-        conditions.push(gte(consultationTable.date, dateFrom));
+        conditions.push(gte(consultationTable.date, new Date(dateFrom)));
       }
 
       if (dateTo) {
-        conditions.push(lte(consultationTable.date, dateTo));
+        conditions.push(lte(consultationTable.date, new Date(dateTo)));
       }
 
       if (query) {
@@ -196,6 +224,7 @@ export class ConsultationRepository {
 
       return q;
     });
+    return rows.map(toConsultation);
   }
 
   // ---------------------------------------------------------------------------
@@ -210,8 +239,8 @@ export class ConsultationRepository {
     petId: string;
     limit?: number;
     offset?: number;
-  }): Promise<ConsultationRow[]> {
-    return this.db.ormQuery((tx) => {
+  }): Promise<Consultation[]> {
+    const rows = await this.db.ormQuery((tx) => {
       let q = tx
         .select()
         .from(consultationTable)
@@ -227,6 +256,7 @@ export class ConsultationRepository {
 
       return q;
     });
+    return rows.map(toConsultation);
   }
 
   async countByPet({ petId }: { petId: string }): Promise<number> {
@@ -239,7 +269,7 @@ export class ConsultationRepository {
     return rows[0]?.value ?? 0;
   }
 
-  async getLatestByPet({ petId }: { petId: string }): Promise<ConsultationRow | undefined> {
+  async getLatestByPet({ petId }: { petId: string }): Promise<Consultation | undefined> {
     const rows = await this.db.ormQuery((tx) =>
       tx
         .select()
@@ -248,7 +278,7 @@ export class ConsultationRepository {
         .orderBy(desc(consultationTable.date))
         .limit(1)
     );
-    return rows[0];
+    return rows[0] ? toConsultation(rows[0]) : undefined;
   }
 
   // ---------------------------------------------------------------------------
@@ -278,16 +308,14 @@ export class ConsultationRepository {
     return rows[0]?.value ?? 0;
   }
 
-  async countPendingFollowUps(): Promise<number> {
+  async countPendingFollowUps({ tz }: { tz: string }): Promise<number> {
+    const today = toDateKey(new Date(), tz);
     const rows = await this.db.ormQuery((tx) =>
       tx
         .select({ value: count() })
         .from(consultationTable)
         .where(
-          and(
-            isNull(consultationTable.deleted_at),
-            gte(consultationTable.follow_up_date, new Date().toISOString().slice(0, 10))
-          )
+          and(isNull(consultationTable.deleted_at), gte(consultationTable.follow_up_date, today))
         )
     );
     return rows[0]?.value ?? 0;

@@ -1,6 +1,7 @@
 /**
  * Tipos de consulta para uso en componentes y hooks.
  */
+import type { DateKey, UTCTimestamp } from '@coongro/datetime';
 
 export type ReasonCategory = 'routine' | 'vaccination' | 'illness' | 'surgery' | 'emergency';
 
@@ -46,7 +47,7 @@ export interface Consultation {
   pet_id: string;
   vet_name: string;
   staff_id: string | null;
-  date: string;
+  date: UTCTimestamp;
   weight_kg: string | null;
   temperature: string | null;
   heart_rate: number | null;
@@ -60,14 +61,16 @@ export interface Consultation {
   diagnosis: string | null;
   diagnosis_tags: string[] | null;
   treatment: string | null;
-  follow_up_date: string | null;
+  follow_up_date: DateKey | null;
+  follow_up_start_time: string | null;
+  follow_up_end_time: string | null;
   follow_up_notes: string | null;
   attachments: unknown;
   metadata: Record<string, unknown> | null;
   notes: string | null;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
+  deleted_at: UTCTimestamp | null;
+  created_at: UTCTimestamp;
+  updated_at: UTCTimestamp;
 }
 
 export interface ConsultationMedication {
@@ -81,14 +84,14 @@ export interface ConsultationMedication {
   duration_amount: number | null;
   duration_unit: string | null;
   notes: string | null;
-  created_at: string;
+  created_at: UTCTimestamp;
 }
 
 export interface ConsultationCreateData {
   pet_id: string;
   vet_name: string;
   staff_id?: string | null;
-  date?: string;
+  date?: UTCTimestamp;
   weight_kg?: string | null;
   temperature?: string | null;
   heart_rate?: number | null;
@@ -102,7 +105,9 @@ export interface ConsultationCreateData {
   diagnosis?: string | null;
   diagnosis_tags?: string[] | null;
   treatment?: string | null;
-  follow_up_date?: string | null;
+  follow_up_date?: DateKey | null;
+  follow_up_start_time?: string | null;
+  follow_up_end_time?: string | null;
   follow_up_notes?: string | null;
   notes?: string | null;
   medications?: MedicationInput[];
@@ -112,7 +117,7 @@ export interface ConsultationCreateData {
 export interface ConsultationUpdateData {
   vet_name?: string;
   staff_id?: string | null;
-  date?: string;
+  date?: UTCTimestamp;
   weight_kg?: string | null;
   temperature?: string | null;
   heart_rate?: number | null;
@@ -126,7 +131,9 @@ export interface ConsultationUpdateData {
   diagnosis?: string | null;
   diagnosis_tags?: string[] | null;
   treatment?: string | null;
-  follow_up_date?: string | null;
+  follow_up_date?: DateKey | null;
+  follow_up_start_time?: string | null;
+  follow_up_end_time?: string | null;
   follow_up_notes?: string | null;
   notes?: string | null;
   services?: ServiceLineInput[];

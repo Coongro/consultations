@@ -1,3 +1,6 @@
+import { utcToLocal } from '@coongro/datetime';
+import type { UTCTimestamp } from '@coongro/datetime';
+
 import type { ReasonCategory } from '../types/consultation.js';
 
 export const REASON_CATEGORY_LABELS: Record<ReasonCategory, string> = {
@@ -48,22 +51,10 @@ export function getReasonCategoryIcon(category: string | null): string {
   return REASON_CATEGORY_ICON[category as ReasonCategory] ?? 'ClipboardList';
 }
 
-export function formatConsultationDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+export function formatConsultationDate(value: UTCTimestamp, tz: string): string {
+  return utcToLocal(value, tz).setLocale('es-AR').toFormat('dd/MM/yyyy');
 }
 
-export function formatConsultationDateTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+export function formatConsultationDateTime(value: UTCTimestamp, tz: string): string {
+  return utcToLocal(value, tz).setLocale('es-AR').toFormat('dd/MM/yyyy HH:mm');
 }

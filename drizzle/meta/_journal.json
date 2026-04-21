@@ -36,6 +36,13 @@
       "when": 1744502400000,
       "tag": "0004_add_staff_id",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776560000000,
+      "tag": "0005_strict_datetime_and_followup",
+      "breakpoints": true
     }
   ]
 }

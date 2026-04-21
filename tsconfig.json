@@ -51,6 +51,9 @@
       ],
       "@coongro/appointments": [
         "../appointments/dist/index.d.ts"
+      ],
+      "@coongro/datetime": [
+        "../../packages/datetime/dist/index.d.ts"
       ]
     }
   },
