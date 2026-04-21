@@ -1,7 +1,7 @@
 /**
  * Card resumida de una consulta. Usada en el timeline y en listados.
  */
-import { formatEventDate } from '@coongro/calendar';
+import { useTenantTimezone } from '@coongro/calendar';
 import { getHostReact, getHostUI } from '@coongro/plugin-sdk';
 
 import type { ConsultationCardProps } from '../types/components.js';
@@ -22,7 +22,8 @@ export function ConsultationCard(props: ConsultationCardProps) {
   const categoryIcon = getReasonCategoryIcon(c.reason_category);
   const badgeVariant = getReasonCategoryBadgeVariant(c.reason_category);
   const categoryLabel = formatReasonCategory(c.reason_category);
-  const dateStr = formatConsultationDate(c.date);
+  const tz = useTenantTimezone();
+  const dateStr = formatConsultationDate(c.date, tz);
 
   return React.createElement(
     UI.Card,
@@ -98,7 +99,7 @@ export function ConsultationCard(props: ConsultationCardProps) {
               'span',
               { className: 'inline-flex items-center gap-1 text-xs text-cg-text-muted' },
               React.createElement(UI.DynamicIcon, { icon: 'Calendar', size: 12 }),
-              `Control: ${formatEventDate(c.follow_up_date)}`
+              `Control: ${c.follow_up_date}`
             ),
           amount !== null &&
             amount !== undefined &&

@@ -1,6 +1,7 @@
 /**
  * Hook para obtener estadísticas de consultas.
  */
+import { useTenantTimezone } from '@coongro/calendar';
 import { getHostReact, actions } from '@coongro/plugin-sdk';
 
 const React = getHostReact();
@@ -18,6 +19,7 @@ export function useConsultationStats(): {
   error: string | null;
   refetch: () => Promise<void>;
 } {
+  const tz = useTenantTimezone();
   const [stats, setStats] = useState<ConsultationStatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export function useConsultationStats(): {
           'consultations.records.countByReasonCategory'
         ),
         actions.execute<number>('consultations.records.countTotal'),
-        actions.execute<number>('consultations.records.countPendingFollowUps'),
+        actions.execute<number>('consultations.records.countPendingFollowUps', { tz }),
       ]);
 
       if (!mountedRef.current) return;
@@ -51,7 +53,7 @@ export function useConsultationStats(): {
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, []);
+  }, [tz]);
 
   useEffect(() => {
     void fetch();

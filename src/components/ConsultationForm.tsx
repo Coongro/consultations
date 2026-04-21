@@ -9,7 +9,8 @@
  *   6. P — Tratamiento + Medicamentos + Seguimiento
  *   7. Servicios prestados (facturación)
  */
-import { DatePicker, DateTimePicker, TimePicker } from '@coongro/calendar';
+import { DatePicker, DateTimePicker, TimePicker, useTenantTimezone } from '@coongro/calendar';
+import { localToUTC, parseDateKey, toDateKey, utcToLocal } from '@coongro/datetime';
 import { PetPicker } from '@coongro/patients';
 import type { Pet } from '@coongro/patients';
 import {
@@ -36,7 +37,6 @@ import {
   type PhysicalExamSystem,
   type ServiceLineInput,
 } from '../types/consultation.js';
-import { parseFollowUpDate } from '../utils/follow-up.js';
 
 import { ExamSystemList } from './ExamSystemRow.js';
 import { MedicationFormList } from './MedicationFormList.js';
@@ -66,6 +66,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const { consultationId, petId, defaults, onSuccess, onCancel, className = '' } = props;
 
   const { toast } = usePlugin();
+  const tz = useTenantTimezone();
   const { settings: consultSettings } = useConsultationsSettings();
   const { create, update, creating, updating } = useConsultationMutations();
   const {
@@ -81,7 +82,9 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [selectedPetId, setSelectedPetId] = useState(petId ?? defaults?.pet_id ?? '');
   const [staffId, setStaffId] = useState<string | null>(defaults?.staff_id ?? null);
   const [vetName, setVetName] = useState(defaults?.vet_name ?? '');
-  const [date, setDate] = useState(defaults?.date ?? new Date().toISOString().slice(0, 16));
+  const [date, setDate] = useState(
+    defaults?.date ?? utcToLocal(new Date(), tz).toFormat("yyyy-MM-dd'T'HH:mm")
+  );
 
   // Signos vitales
   const [weightKg, setWeightKg] = useState(defaults?.weight_kg ?? '');
@@ -98,10 +101,13 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [diagnosis, setDiagnosis] = useState(defaults?.diagnosis ?? '');
   const [treatment, setTreatment] = useState(defaults?.treatment ?? '');
   const [medications, setMedications] = useState<MedicationInput[]>(defaults?.medications ?? []);
-  const defaultFollowUp = parseFollowUpDate(defaults?.follow_up_date);
-  const [followUpDate, setFollowUpDate] = useState(defaultFollowUp.date);
-  const [followUpStartTime, setFollowUpStartTime] = useState(defaultFollowUp.startTime);
-  const [followUpEndTime, setFollowUpEndTime] = useState(defaultFollowUp.endTime);
+  const [followUpDate, setFollowUpDate] = useState<string>(defaults?.follow_up_date ?? '');
+  const [followUpStartTime, setFollowUpStartTime] = useState<string>(
+    defaults?.follow_up_start_time ?? '09:00'
+  );
+  const [followUpEndTime, setFollowUpEndTime] = useState<string>(
+    defaults?.follow_up_end_time ?? '09:30'
+  );
   const [notes, setNotes] = useState(defaults?.notes ?? '');
 
   // Servicios
@@ -242,10 +248,9 @@ export function ConsultationForm(props: ConsultationFormProps) {
     setPhysicalExamNotes(existing.physical_exam ?? '');
     setDiagnosis(existing.diagnosis ?? '');
     setTreatment(existing.treatment ?? '');
-    const parsed = parseFollowUpDate(existing.follow_up_date);
-    setFollowUpDate(parsed.date);
-    setFollowUpStartTime(parsed.startTime);
-    setFollowUpEndTime(parsed.endTime);
+    setFollowUpDate(existing.follow_up_date ?? '');
+    setFollowUpStartTime(existing.follow_up_start_time ?? '09:00');
+    setFollowUpEndTime(existing.follow_up_end_time ?? '09:30');
     setNotes(existing.notes ?? '');
     setSelectedPetId(existing.pet_id);
   }, [existing]);
@@ -318,7 +323,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       const sharedData = {
         staff_id: staffId || null,
         vet_name: vetName.trim(),
-        date: new Date(date).toISOString(),
+        date: localToUTC(date.slice(0, 10), date.slice(11, 16), tz),
         weight_kg: weightKg || null,
         temperature: temperature || null,
         heart_rate: heartRate ? parseInt(heartRate, 10) : null,
@@ -331,9 +336,9 @@ export function ConsultationForm(props: ConsultationFormProps) {
         physical_exam_systems: examData,
         diagnosis: diagnosis.trim() || null,
         treatment: treatment.trim() || null,
-        follow_up_date: followUpDate
-          ? `${followUpDate} ${followUpStartTime}-${followUpEndTime}`
-          : null,
+        follow_up_date: followUpDate ? parseDateKey(followUpDate) : null,
+        follow_up_start_time: followUpDate ? followUpStartTime : null,
+        follow_up_end_time: followUpDate ? followUpEndTime : null,
         follow_up_notes: null,
         notes: notes.trim() || null,
       };
@@ -682,7 +687,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
               value: followUpDate,
               onChange: setFollowUpDate,
               placeholder: 'Seleccionar fecha',
-              minDate: new Date().toISOString().split('T')[0],
+              minDate: toDateKey(new Date(), tz),
             })
           ),
           React.createElement(

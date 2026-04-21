@@ -3,7 +3,7 @@
  * Encabezado con info de mascota, panel lateral sticky (vet, vitales, seguimiento),
  * y contenido clínico principal.
  */
-import { useEventsByEntity, formatEventDate, EventCard } from '@coongro/calendar';
+import { useEventsByEntity, EventCard, useTenantTimezone } from '@coongro/calendar';
 import type { CalendarEvent } from '@coongro/calendar';
 import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
 import { StaffBadge } from '@coongro/staff';
@@ -61,6 +61,7 @@ function calculateAge(birthDate: string | null): string {
 }
 
 export function ConsultationDetail(props: ConsultationDetailProps) {
+  const tz = useTenantTimezone();
   const {
     consultationId,
     pet: petProp = null,
@@ -270,7 +271,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
               React.createElement(
                 'p',
                 { className: 'text-sm text-cg-text-muted mt-1' },
-                formatConsultationDateTime(c.date)
+                formatConsultationDateTime(c.date, tz)
               )
             )
           ),
@@ -433,7 +434,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             React.createElement(
               'p',
               { className: 'text-sm font-medium text-cg-text' },
-              formatEventDate(c.follow_up_date)
+              c.follow_up_date
             )
           ),
 
