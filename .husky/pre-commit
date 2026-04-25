@@ -1,1 +1,13 @@
-npm run quality
+#!/usr/bin/env sh
+# Validar solo los archivos staged en lugar del repo entero.
+# Esto evita falsos positivos por archivos preexistentes con CRLF en Windows.
+
+# Skip en CI (CI corre quality en su propio step)
+[ -n "$CI" ] && exit 0
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR -- 'src/*.ts' 'src/*.tsx')
+[ -z "$STAGED" ] && exit 0
+
+echo "$STAGED" | xargs npx prettier --check
+echo "$STAGED" | xargs npx eslint
+npm run typecheck

@@ -111,11 +111,27 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
     async (id: string, data: ConsultationUpdateData): Promise<Consultation | null> => {
       setUpdating(true);
       try {
-        const { services, ...updateData } = data;
+        const { medications, services, ...updateData } = data;
         const result = await actions.execute<Consultation[]>('consultations.records.update', {
           id,
           data: updateData,
         });
+
+        // Reemplazar medicamentos si se proporcionan
+        if (medications !== undefined) {
+          await actions.execute('consultations.medications.deleteByConsultation', {
+            consultationId: id,
+          });
+          if (medications.length > 0) {
+            await Promise.all(
+              medications.map((med) =>
+                actions.execute('consultations.medications.create', {
+                  data: { ...med, consultation_id: id },
+                })
+              )
+            );
+          }
+        }
 
         // Reemplazar service lines si se proporcionan
         if (services !== undefined) {

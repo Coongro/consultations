@@ -346,6 +346,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       if (isEditing && consultationId) {
         const result = await update(consultationId, {
           ...sharedData,
+          medications: validMeds,
           services: validServices,
         });
         if (result && onSuccess) onSuccess(result);
