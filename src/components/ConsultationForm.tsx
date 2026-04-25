@@ -222,11 +222,24 @@ export function ConsultationForm(props: ConsultationFormProps) {
     })();
   }, [selectedPetId, defaults?.pet_id, isEditing]);
 
-  // Preseleccionar el ultimo veterinario usado
+  // Preseleccionar el ultimo veterinario usado: aplica staffId + nombre del staff
   useEffect(() => {
-    if (!isEditing && !staffId && consultSettings.defaultStaffId) {
-      setStaffId(consultSettings.defaultStaffId);
-    }
+    if (isEditing || staffId || !consultSettings.defaultStaffId) return;
+    const id = consultSettings.defaultStaffId;
+    let cancelled = false;
+    setStaffId(id);
+    void actions
+      .execute<StaffMember>('staff.members.getById', { id })
+      .then((member) => {
+        if (cancelled || !member) return;
+        setVetName(member.contact_name);
+      })
+      .catch(() => {
+        // Staff no encontrado: el setting puede haber quedado huérfano
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [consultSettings.defaultStaffId, isEditing, staffId]);
 
   // Cargar datos existentes al editar
@@ -307,10 +320,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         toast.error('Error', 'El motivo de consulta es obligatorio');
         return;
       }
-      if (!staffId && !vetName.trim()) {
-        toast.error('Error', 'Seleccioná un veterinario');
-        return;
-      }
+      // staff_id es obligatorio: validación nativa del browser via input espejo en el form
 
       const validMeds = medications.filter((m: MedicationInput) => m.name.trim());
       const validServices = serviceLines.filter((s: ServiceLineInput) => s.product_name.trim());
@@ -438,12 +448,30 @@ export function ConsultationForm(props: ConsultationFormProps) {
           { className: GRID_2 },
           React.createElement(
             'div',
-            { className: FIELD_GAP },
+            { className: FIELD_GAP, style: { position: 'relative' } },
             React.createElement(UI.Label, null, 'Veterinario *'),
             React.createElement(StaffPicker, {
               value: staffId,
               onChange: handleStaffSelect,
               placeholder: 'Buscar veterinario...',
+            }),
+            // Input espejo para validación nativa "required" sobre el StaffPicker
+            React.createElement('input', {
+              type: 'text',
+              tabIndex: -1,
+              required: true,
+              'aria-label': 'Veterinario',
+              value: staffId ?? '',
+              onChange: () => {},
+              style: {
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                height: '1px',
+                opacity: 0,
+                pointerEvents: 'none',
+              },
             })
           ),
           React.createElement(
