@@ -37,11 +37,23 @@
       "@coongro/contacts": [
         "../contacts/dist/index.d.ts"
       ],
+      "@coongro/calendar": [
+        "../calendar/dist/index.d.ts"
+      ],
       "@coongro/products": [
         "../products/dist/index.d.ts"
       ],
       "@coongro/products/server": [
         "../products/dist/server.d.ts"
+      ],
+      "@coongro/staff": [
+        "../staff/dist/index.d.ts"
+      ],
+      "@coongro/appointments": [
+        "../appointments/dist/index.d.ts"
+      ],
+      "@coongro/datetime": [
+        "../../packages/datetime/dist/index.d.ts"
       ]
     }
   },

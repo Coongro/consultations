@@ -3,12 +3,15 @@
  * Encabezado con info de mascota, panel lateral sticky (vet, vitales, seguimiento),
  * y contenido clínico principal.
  */
+import { useEventsByEntity, EventCard, useTenantTimezone } from '@coongro/calendar';
+import type { CalendarEvent } from '@coongro/calendar';
 import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
+import { StaffBadge } from '@coongro/staff';
 
 import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationDetailProps, PetInfo } from '../types/components.js';
-import type { ConsultationService } from '../types/consultation.js';
+import type { ConsultationService, PhysicalExamSystem } from '../types/consultation.js';
 import {
   formatConsultationDateTime,
   formatReasonCategory,
@@ -17,6 +20,8 @@ import {
 import { formatCurrency } from '../utils/price.js';
 
 import { MedicationList } from './MedicationList.js';
+import { PhysicalExamSummary } from './PhysicalExamSummary.js';
+import { VitalSignCard } from './VitalSignCard.js';
 
 const React = getHostReact();
 const UI = getHostUI();
@@ -32,10 +37,10 @@ const SECTION_ICONS: Record<string, string> = {
   Notas: 'FileText',
 };
 
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: '🐕',
-  cat: '🐈',
-  other: '🐾',
+const SPECIES_ICON: Record<string, string> = {
+  dog: 'Dog',
+  cat: 'Cat',
+  other: 'PawPrint',
 };
 
 const SEX_LABELS: Record<string, string> = {
@@ -56,6 +61,7 @@ function calculateAge(birthDate: string | null): string {
 }
 
 export function ConsultationDetail(props: ConsultationDetailProps) {
+  const tz = useTenantTimezone();
   const {
     consultationId,
     pet: petProp = null,
@@ -95,6 +101,10 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   }, [consultation?.pet_id, petProp]);
 
   const pet = petProp ?? fetchedPet;
+
+  // Evento de seguimiento vinculado a esta consulta
+  const { data: calendarEvents } = useEventsByEntity(consultationId, 'consultation');
+  const followUpEvent: CalendarEvent | undefined = calendarEvents?.[0];
 
   // Contribuciones de otros plugins para la zona de medicamentos
   const { sections: medContributions } = useViewContributions('consultations.detail.open', {
@@ -164,14 +174,15 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
     { label: 'Notas', value: c.notes },
   ].filter((s) => s.value);
 
-  const hasVitals = c.weight_kg || c.temperature;
+  const hasVitals =
+    c.weight_kg || c.temperature || c.heart_rate || c.respiratory_rate || c.body_condition_score;
   const servicesTotal = services.reduce(
     (acc: number, s: ConsultationService) => acc + (parseFloat(s.subtotal) || 0),
     0
   );
 
   // Info de mascota para el header
-  const petEmoji = pet ? (SPECIES_EMOJI[pet.species] ?? '🐾') : '🐾';
+  const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
   const petName = pet?.name ?? 'Paciente';
   const petDetails = [
     pet?.breed,
@@ -240,7 +251,12 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             { className: 'flex items-center gap-4' },
             React.createElement(UI.Avatar, {
               size: 'lg',
-              icon: React.createElement('span', { className: 'text-2xl' }, petEmoji),
+              icon: React.createElement(UI.DynamicIcon, {
+                icon: petIcon,
+                size: 28,
+                className: 'text-cg-text-muted',
+              }),
+              className: 'bg-cg-bg-tertiary',
             }),
             React.createElement(
               'div',
@@ -255,7 +271,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
               React.createElement(
                 'p',
                 { className: 'text-sm text-cg-text-muted mt-1' },
-                formatConsultationDateTime(c.date)
+                formatConsultationDateTime(c.date, tz)
               )
             )
           ),
@@ -299,22 +315,24 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
           { className: 'p-4' },
           React.createElement(
             'div',
-            { className: 'flex items-center gap-3' },
-            React.createElement(UI.Avatar, { size: 'sm', name: c.vet_name }),
+            { className: 'flex flex-col gap-1' },
             React.createElement(
-              'div',
-              null,
-              React.createElement(
-                'span',
-                { className: 'text-xs text-cg-text-muted uppercase tracking-wider block' },
-                'Veterinario/a'
-              ),
-              React.createElement(
-                'span',
-                { className: 'text-sm font-medium text-cg-text' },
-                `Dr(a). ${c.vet_name}`
-              )
-            )
+              'span',
+              { className: 'text-xs text-cg-text-muted uppercase tracking-wider block' },
+              'Veterinario/a'
+            ),
+            c.staff_id
+              ? React.createElement(StaffBadge, { staffId: c.staff_id, variant: 'default' })
+              : React.createElement(
+                  'div',
+                  { className: 'flex items-center gap-3' },
+                  React.createElement(UI.Avatar, { size: 'sm', name: c.vet_name }),
+                  React.createElement(
+                    'span',
+                    { className: 'text-sm font-medium text-cg-text' },
+                    `Dr(a). ${c.vet_name}`
+                  )
+                )
           )
         ),
 
@@ -334,58 +352,68 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
               'div',
               { className: 'grid grid-cols-2 gap-3' },
               c.weight_kg &&
-                React.createElement(
-                  'div',
-                  { className: 'flex items-center gap-2 p-3 rounded-lg bg-cg-bg-secondary' },
-                  React.createElement(UI.DynamicIcon, {
-                    icon: 'Scale',
-                    size: 16,
-                    className: 'text-cg-text-muted shrink-0',
-                  }),
-                  React.createElement(
-                    'div',
-                    null,
-                    React.createElement(
-                      'span',
-                      { className: 'text-xs text-cg-text-muted block' },
-                      'Peso'
-                    ),
-                    React.createElement(
-                      'span',
-                      { className: 'text-sm font-semibold text-cg-text' },
-                      `${c.weight_kg} kg`
-                    )
-                  )
-                ),
+                React.createElement(VitalSignCard, {
+                  icon: 'Scale',
+                  label: 'Peso',
+                  value: `${c.weight_kg} kg`,
+                }),
               c.temperature &&
-                React.createElement(
-                  'div',
-                  { className: 'flex items-center gap-2 p-3 rounded-lg bg-cg-bg-secondary' },
-                  React.createElement(UI.DynamicIcon, {
-                    icon: 'Thermometer',
-                    size: 16,
-                    className: 'text-cg-text-muted shrink-0',
-                  }),
-                  React.createElement(
-                    'div',
-                    null,
-                    React.createElement(
-                      'span',
-                      { className: 'text-xs text-cg-text-muted block' },
-                      'Temp.'
-                    ),
-                    React.createElement(
-                      'span',
-                      { className: 'text-sm font-semibold text-cg-text' },
-                      `${c.temperature}°C`
-                    )
-                  )
-                )
+                React.createElement(VitalSignCard, {
+                  icon: 'Thermometer',
+                  label: 'Temp.',
+                  value: `${c.temperature}°C`,
+                }),
+              c.heart_rate &&
+                React.createElement(VitalSignCard, {
+                  icon: 'HeartPulse',
+                  label: 'FC',
+                  value: `${c.heart_rate} lpm`,
+                }),
+              c.respiratory_rate &&
+                React.createElement(VitalSignCard, {
+                  icon: 'Wind',
+                  label: 'FR',
+                  value: `${c.respiratory_rate} rpm`,
+                }),
+              c.body_condition_score &&
+                React.createElement(VitalSignCard, {
+                  icon: 'Gauge',
+                  label: 'BCS',
+                  value: `${c.body_condition_score}/9`,
+                })
             )
           ),
 
-        // Próximo control
-        c.follow_up_date &&
+        // Próximo control (desde evento del calendario)
+        followUpEvent &&
+          React.createElement(
+            UI.Card,
+            { className: 'p-3 border-cg-warning-border bg-cg-warning-bg' },
+            React.createElement(
+              'div',
+              { className: 'flex items-center gap-2 mb-2' },
+              React.createElement(UI.DynamicIcon, {
+                icon: 'Calendar',
+                size: 16,
+                className: 'text-cg-warning-text',
+              }),
+              React.createElement(
+                'span',
+                { className: 'text-xs font-semibold uppercase tracking-wider text-cg-text-muted' },
+                'Próximo control'
+              )
+            ),
+            React.createElement(EventCard, {
+              event: followUpEvent,
+              showDate: true,
+              showTime: true,
+              showStatus: true,
+            })
+          ),
+
+        // Fallback: follow_up_date sin evento de calendario (consultas previas a la integración)
+        !followUpEvent &&
+          c.follow_up_date &&
           React.createElement(
             UI.Card,
             { className: 'p-4 border-cg-warning-border bg-cg-warning-bg' },
@@ -406,12 +434,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
             React.createElement(
               'p',
               { className: 'text-sm font-medium text-cg-text' },
-              new Date(c.follow_up_date).toLocaleDateString('es-AR', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })
+              c.follow_up_date
             )
           ),
 
@@ -485,6 +508,40 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
                 // Separador entre secciones (excepto la última)
                 idx < clinicalSections.length - 1 && React.createElement(UI.Separator, null)
               )
+            )
+          ),
+
+        // Examen físico por sistemas (si hay datos)
+        c.physical_exam_systems &&
+          Array.isArray(c.physical_exam_systems) &&
+          c.physical_exam_systems.some((s: PhysicalExamSystem) => s.status === 'ABN' || s.notes) &&
+          React.createElement(
+            UI.Card,
+            { className: 'overflow-hidden' },
+            React.createElement(
+              'div',
+              {
+                className:
+                  'px-5 py-3 border-b border-cg-border bg-cg-bg-secondary flex items-center gap-2',
+              },
+              React.createElement(UI.DynamicIcon, {
+                icon: 'Stethoscope',
+                size: 15,
+                className: 'text-cg-text-muted',
+              }),
+              React.createElement(
+                'h2',
+                { className: 'text-sm font-semibold text-cg-text' },
+                'Examen físico por sistemas'
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'p-4' },
+              React.createElement(PhysicalExamSummary, {
+                systems: c.physical_exam_systems,
+                onlyAbnormal: false,
+              })
             )
           ),
 

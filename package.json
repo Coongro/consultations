@@ -1,6 +1,6 @@
 {
   "name": "@coongro/consultations",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "type": "module",
   "description": "Bloque de historia clinica: consultas veterinarias, diagnosticos y tratamientos",
   "main": "dist/index.js",
@@ -13,6 +13,10 @@
     "./server": {
       "types": "./dist/server.d.ts",
       "default": "./dist/server.js"
+    },
+    "./constants/medication": {
+      "types": "./dist/constants/medication.d.ts",
+      "default": "./dist/constants/medication.js"
     }
   },
   "files": [
@@ -45,15 +49,20 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@coongro/calendar": ">=0.1.0",
     "@coongro/patients": ">=0.1.0",
-    "@coongro/products": ">=0.1.0"
+    "@coongro/products": ">=0.1.0",
+    "@coongro/staff": ">=0.1.0"
   },
   "peerDependencies": {
+    "@coongro/datetime": ">=0.24.0",
     "@coongro/plugin-sdk": ">=0.13.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
+    "@coongro/datetime": ">=0.24.0",
     "@coongro/plugin-sdk": ">=0.14.0",
+    "@types/luxon": "^3.4.2",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.1",

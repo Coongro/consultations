@@ -99,6 +99,8 @@ export interface ConsultationDetailProps {
 export interface CreateConsultationButtonProps {
   /** ID del paciente. Si se omite, muestra PetPicker para seleccionarlo. */
   petId?: string;
+  /** Valores por defecto para pre-llenar el formulario */
+  defaults?: Partial<ConsultationCreateData>;
   label?: string;
   onSuccess?: (consultation: Consultation) => void;
   onCancel?: () => void;

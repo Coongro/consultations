@@ -15,6 +15,34 @@
       "when": 1771385111659,
       "tag": "0001_lyrical_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774393200000,
+      "tag": "0002_structured_medication_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774944000000,
+      "tag": "0003_vital_signs_and_physical_exam",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744502400000,
+      "tag": "0004_add_staff_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776560000000,
+      "tag": "0005_strict_datetime_and_followup",
+      "breakpoints": true
     }
   ]
 }

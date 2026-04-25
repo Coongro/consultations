@@ -1,9 +1,8 @@
 /**
  * Componente para gestionar líneas de servicios prestados en una consulta.
  *
- * Usa el Combobox de ui-components para buscar en el catálogo de servicios.
- * Si el texto no existe, "Crear '...'" abre un ServiceFormDialog para crear
- * el servicio y agregarlo a la línea de la consulta.
+ * Diseño tipo ticket/recibo: nombre izquierda, cantidad centro, precio derecha.
+ * showPrices controla visibilidad de precios y total, no de la sección completa.
  */
 import { getHostReact, getHostUI, actions } from '@coongro/plugin-sdk';
 import type { Product, Category } from '@coongro/products';
@@ -32,26 +31,25 @@ function buildServiceLine(product: Product): ServiceLineInput {
 export interface ServiceLineFormProps {
   services: ServiceLineInput[];
   onChange: (services: ServiceLineInput[]) => void;
-  /** Catálogo de productos/servicios disponibles */
   catalog: Product[];
-  /** Categorías para el modal de creación de servicio */
   categories: Category[];
-  /** Indica si el catálogo está cargando */
   catalogLoading?: boolean;
-  /** Callback cuando se crea un producto nuevo (para que el caller actualice su catálogo) */
   onProductCreated?: (product: Product) => void;
+  showPrices?: boolean;
 }
 
 interface ServiceSearchContentProps {
   catalog: Product[];
   categoryMap: Map<string, string>;
   onCreateRequest: (name: string) => void;
+  showPrices: boolean;
 }
 
 function ServiceSearchContent({
   catalog,
   categoryMap,
   onCreateRequest,
+  showPrices,
 }: ServiceSearchContentProps) {
   const { search, setOpen } = UI.useComboboxContext();
 
@@ -82,7 +80,6 @@ function ServiceSearchContent({
   return React.createElement(
     UI.ComboboxContent,
     null,
-
     filtered.length > 0
       ? filtered.map((p: Product) =>
           React.createElement(
@@ -92,7 +89,7 @@ function ServiceSearchContent({
               value: p.id,
               subtitle: [
                 categoryMap.get(p.category_id ?? '') ?? '',
-                formatPrice(p.sale_price, 'Sin precio'),
+                showPrices ? formatPrice(p.sale_price, 'Sin precio') : '',
               ]
                 .filter(Boolean)
                 .join(' · '),
@@ -105,7 +102,6 @@ function ServiceSearchContent({
           null,
           search.trim() ? 'Sin resultados' : 'Escribe para buscar en el catálogo'
         ),
-
     !queryExistsInCatalog &&
       React.createElement(UI.ComboboxCreate, {
         onCreate: handleCreate,
@@ -121,6 +117,7 @@ export function ServiceLineForm({
   categories,
   catalogLoading = false,
   onProductCreated,
+  showPrices = true,
 }: ServiceLineFormProps) {
   const [createName, setCreateName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -155,7 +152,7 @@ export function ServiceLineForm({
           return true;
         }
       } catch {
-        // El ServiceFormDialog no muestra toast; lo manejamos silenciosamente
+        // Silencioso
       } finally {
         setSaving(false);
       }
@@ -171,16 +168,14 @@ export function ServiceLineForm({
     [services, onChange]
   );
 
-  const handleChange = useCallback(
-    (index: number, field: keyof ServiceLineInput, value: string) => {
+  const handleQuantityChange = useCallback(
+    (index: number, value: string) => {
       const updated = services.map((svc: ServiceLineInput, i: number) => {
         if (i !== index) return svc;
-        const next = { ...svc, [field]: value };
-        if (field === 'quantity' || field === 'unit_price') {
-          const qty = parseFloat(next.quantity) || 0;
-          const price = parseFloat(next.unit_price) || 0;
-          next.subtotal = (qty * price).toFixed(2);
-        }
+        const next = { ...svc, quantity: value };
+        const qty = parseFloat(value) || 0;
+        const price = parseFloat(next.unit_price) || 0;
+        next.subtotal = (qty * price).toFixed(2);
         return next;
       });
       onChange(updated);
@@ -199,9 +194,9 @@ export function ServiceLineForm({
     null,
     React.createElement(
       'div',
-      { className: 'flex flex-col gap-4' },
+      { className: 'flex flex-col gap-3' },
 
-      // Modal de creación via ServiceFormDialog reutilizable
+      // Modal de creación
       React.createElement(ServiceFormDialog, {
         open: createName !== null,
         onClose: () => setCreateName(null),
@@ -212,7 +207,7 @@ export function ServiceLineForm({
         showDescription: false,
       }),
 
-      // Combobox buscador
+      // Buscador
       React.createElement(
         UI.Combobox,
         {
@@ -221,122 +216,121 @@ export function ServiceLineForm({
           debounceMs: 0,
         },
         React.createElement(UI.ComboboxChipTrigger, {
-          placeholder: catalogLoading ? 'Cargando catálogo...' : 'Buscar servicio para agregar...',
+          placeholder: catalogLoading ? 'Cargando catálogo...' : 'Agregar servicio...',
         }),
         React.createElement(ServiceSearchContent, {
           catalog,
           categoryMap,
           onCreateRequest: (name: string) => setCreateName(name),
+          showPrices,
         })
       ),
 
-      // Líneas de servicios
+      // Filas tipo ticket
       services.length > 0 &&
         React.createElement(
           'div',
-          {
-            className: 'rounded-md border border-cg-border overflow-hidden',
-          },
+          { className: 'flex flex-col' },
 
-          // Encabezados
-          React.createElement(
-            'div',
-            {
-              className:
-                'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center px-3 py-2 bg-cg-surface-raised text-xs font-medium text-cg-text-muted border-b border-cg-border',
-            },
-            React.createElement('span', null, 'Servicio'),
-            React.createElement('span', { className: 'text-center' }, 'Cant.'),
-            React.createElement('span', { className: 'text-right' }, 'Precio unit.'),
-            React.createElement('span', { className: 'text-right' }, 'Subtotal'),
-            React.createElement('span', null, '')
-          ),
+          services.map((svc: ServiceLineInput, index: number) => {
+            const qty = parseFloat(svc.quantity) || 0;
+            const unitPrice = parseFloat(svc.unit_price) || 0;
+            const hasMultiple = qty > 1;
+            const isLast = index === services.length - 1;
 
-          // Filas
-          React.createElement(
-            'div',
-            { className: 'divide-y divide-cg-border' },
-            services.map((svc: ServiceLineInput, index: number) =>
-              React.createElement(
-                'div',
-                {
-                  key: index,
-                  className:
-                    'grid grid-cols-[1fr_70px_90px_90px_32px] gap-2 items-center px-3 py-2',
+            return React.createElement(
+              'div',
+              {
+                key: index,
+                className: `grid items-center py-2.5 gap-2 min-w-0 ${
+                  !isLast ? 'border-b border-dashed border-[var(--cg-border)]' : ''
+                }`,
+                style: {
+                  gridTemplateColumns: showPrices ? '1fr 48px 80px 24px' : '1fr 48px 24px',
                 },
+              },
 
-                React.createElement(UI.Input, {
-                  type: 'text',
-                  value: svc.product_name,
-                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleChange(index, 'product_name', e.target.value),
-                  placeholder: 'Nombre del servicio',
-                  readOnly: !!svc.product_id,
-                  size: 'sm',
-                }),
+              // Nombre
+              React.createElement(
+                'span',
+                {
+                  className:
+                    'flex-1 text-[13px] font-medium text-[var(--cg-text)] min-w-0 truncate',
+                },
+                svc.product_name
+              ),
 
-                React.createElement(UI.Input, {
-                  type: 'number',
-                  value: svc.quantity,
-                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleChange(index, 'quantity', e.target.value),
-                  min: '1',
-                  step: '1',
-                  className: 'text-center',
-                  size: 'sm',
-                }),
+              // Cantidad (input editable)
+              React.createElement(UI.Input, {
+                type: 'number',
+                value: svc.quantity,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleQuantityChange(index, e.target.value),
+                min: '1',
+                step: '1',
+                size: 'sm',
+                className: '!w-[48px] text-center',
+              }),
 
-                React.createElement(UI.Input, {
-                  type: 'number',
-                  value: svc.unit_price,
-                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleChange(index, 'unit_price', e.target.value),
-                  min: '0',
-                  step: '0.01',
-                  className: 'text-right',
-                  size: 'sm',
-                }),
-
+              // Precio (Noto Serif, solo si showPrices)
+              showPrices &&
                 React.createElement(
-                  'span',
-                  { className: 'text-sm text-right font-medium text-cg-text' },
-                  formatCurrency(parseFloat(svc.subtotal) || 0)
+                  'div',
+                  { className: 'flex flex-col items-end' },
+                  React.createElement(
+                    'span',
+                    {
+                      className: 'text-[13px] font-medium text-[var(--cg-text-secondary)]',
+                      style: { fontFamily: "'Noto Serif JP', serif" },
+                    },
+                    formatCurrency(parseFloat(svc.subtotal) || 0)
+                  ),
+                  hasMultiple &&
+                    React.createElement(
+                      'span',
+                      { className: 'text-[10px] text-[var(--cg-text-muted)]' },
+                      `${String(qty)} x ${formatCurrency(unitPrice)}`
+                    )
                 ),
 
-                React.createElement(UI.Tooltip, {
-                  content: 'Eliminar',
-                  children: React.createElement(
-                    UI.IconButton,
-                    {
-                      variant: 'danger',
-                      size: 'xs',
-                      onClick: () => handleRemove(index),
-                    },
-                    React.createElement(UI.DynamicIcon, { icon: 'X', size: 16 })
-                  ),
-                })
+              // Eliminar
+              React.createElement(
+                UI.IconButton,
+                {
+                  variant: 'danger',
+                  size: 'xs',
+                  onClick: () => handleRemove(index),
+                },
+                React.createElement(UI.DynamicIcon, { icon: 'X', size: 14 })
               )
-            )
-          ),
+            );
+          }),
 
           // Total
-          React.createElement(
-            'div',
-            {
-              className:
-                'flex items-center justify-end gap-3 px-3 py-2.5 border-t border-cg-border bg-cg-surface-raised',
-            },
+          showPrices &&
             React.createElement(
-              'span',
-              { className: 'text-sm font-medium text-cg-text-muted' },
-              'Total:'
-            ),
-            React.createElement(
-              'span',
-              { className: 'text-base font-bold text-cg-text' },
-              formatCurrency(total)
+              'div',
+              {
+                className:
+                  'flex items-center justify-between mt-2 pt-2.5 border-t border-[var(--cg-border)]',
+              },
+              React.createElement(
+                'span',
+                {
+                  className:
+                    'text-xs font-bold text-[var(--cg-text-muted)] uppercase tracking-wide',
+                },
+                'Total'
+              ),
+              React.createElement(
+                'span',
+                {
+                  className: 'text-[17px] font-black text-[var(--cg-text)]',
+                  style: { fontFamily: "'Noto Serif JP', serif" },
+                },
+                formatCurrency(total)
+              )
             )
-          )
         )
     )
   );

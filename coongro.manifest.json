@@ -1,6 +1,6 @@
 {
   "id": "consultations",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "apiVersion": "2.0",
   "entry": "dist/entry.js",
   "assets": {
@@ -80,23 +80,15 @@
       }
     ],
     "settings": {
-      "groups": [
-        {
-          "id": "consultations",
-          "label": "Consultas",
-          "order": 50
-        }
-      ],
-      "pages": [
-        {
-          "id": "consultations.general",
-          "group": "consultations",
-          "label": "General",
-          "icon": "assets/icons/general.svg",
-          "order": 10
-        }
-      ],
       "sections": [
+        {
+          "id": "consultations.general.vet",
+          "page": "consultations.general",
+          "label": "Veterinario",
+          "order": 5,
+          "component": "./dist/index.js",
+          "export": "DefaultVetSetting"
+        },
         {
           "id": "consultations.general.main",
           "page": "consultations.general",
@@ -117,19 +109,6 @@
               ]
             },
             {
-              "key": "consultations.defaultVet",
-              "type": "string",
-              "label": "Veterinario predeterminado",
-              "description": "Nombre del veterinario que se preselecciona al crear consultas",
-              "default": "",
-              "tags": [
-                "consultations",
-                "defaultvet",
-                "veterinario",
-                "predeterminado"
-              ]
-            },
-            {
               "key": "consultations.showPrices",
               "type": "boolean",
               "label": "Servicios y precios en consultas",
@@ -143,6 +122,58 @@
               ]
             }
           ]
+        },
+        {
+          "id": "consultations.formulario",
+          "page": "consultations.general",
+          "label": "Formulario",
+          "order": 20,
+          "items": [
+            {
+              "key": "consultations.prefillVitals",
+              "type": "boolean",
+              "label": "Prellenar signos vitales",
+              "description": "Al crear una consulta, prellenar peso, temperatura, FC, FR y BCS con los valores de la última consulta del paciente",
+              "default": true,
+              "tags": [
+                "consultations",
+                "prefillvitals",
+                "prellenar",
+                "signos",
+                "vitales"
+              ]
+            },
+            {
+              "key": "consultations.structuredExam",
+              "type": "boolean",
+              "label": "Examen físico estructurado",
+              "description": "Mostrar checklist por sistemas (WNL/ABN) en vez de texto libre para el examen físico",
+              "default": true,
+              "tags": [
+                "consultations",
+                "structuredexam",
+                "examen",
+                "físico",
+                "sistemas"
+              ]
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "id": "consultations",
+          "label": "Consultas",
+          "order": 50
+        }
+      ],
+      "pages": [
+        {
+          "id": "consultations.general",
+          "group": "consultations",
+          "label": "General",
+          "icon": "assets/icons/general.svg",
+          "order": 10
         }
       ]
     }
