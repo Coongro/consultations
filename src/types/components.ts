@@ -20,6 +20,10 @@ export interface SectionDef {
 export interface ActionDef<T = unknown> {
   label: string;
   onClick: (item: T) => void;
+  /** Nombre de ícono Lucide para mostrar antes del label */
+  icon?: string;
+  /** Variante visual del botón. Default: 'default' (acento brand) */
+  variant?: 'default' | 'outline' | 'destructive' | 'ghost' | 'secondary' | 'brand';
 }
 
 export interface ColumnDef<T = unknown> {

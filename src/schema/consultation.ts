@@ -45,7 +45,8 @@ export const consultationTable = pgTable('module_consultations_consultations', {
     .default(sql`now()`),
   updated_at: timestamp('updated_at', { mode: 'date', withTimezone: true })
     .notNull()
-    .default(sql`now()`),
+    .default(sql`now()`)
+    .$onUpdate(() => new Date()),
 });
 
 export type ConsultationRow = typeof consultationTable.$inferSelect;
