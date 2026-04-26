@@ -121,10 +121,10 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
       React.createElement(UI.Skeleton, { className: 'h-24 rounded-2xl' }),
       React.createElement(
         'div',
-        { className: 'flex flex-col lg:flex-row gap-6' },
+        { className: 'flex flex-col md:flex-row gap-6' },
         React.createElement(
           'div',
-          { className: 'w-full lg:w-80 flex flex-col gap-4' },
+          { className: 'w-full md:w-80 flex flex-col gap-4' },
           React.createElement(UI.Skeleton, { className: 'h-20 rounded-2xl' }),
           React.createElement(UI.Skeleton, { className: 'h-28 rounded-2xl' }),
           React.createElement(UI.Skeleton, { className: 'h-16 rounded-2xl' })
@@ -227,7 +227,13 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
         extraActions.map((action, i) =>
           React.createElement(
             UI.Button,
-            { key: i, variant: 'outline', size: 'sm', onClick: () => action.onClick(c) },
+            {
+              key: i,
+              variant: action.variant ?? 'default',
+              size: 'sm',
+              onClick: () => action.onClick(c),
+            },
+            action.icon && React.createElement(UI.DynamicIcon, { icon: action.icon, size: 14 }),
             action.label
           )
         )
@@ -299,14 +305,14 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
     // ── Cuerpo en dos columnas ──
     React.createElement(
       'div',
-      { className: 'flex flex-col lg:flex-row gap-6' },
+      { className: 'flex flex-col md:flex-row gap-6' },
 
       // ── PANEL LATERAL ──
       React.createElement(
         'div',
         {
           className:
-            'w-full lg:w-80 lg:shrink-0 flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start',
+            'w-full md:w-80 md:shrink-0 flex flex-col gap-4 md:sticky md:top-6 md:self-start',
         },
 
         // Veterinario
