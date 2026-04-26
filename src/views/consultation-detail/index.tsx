@@ -19,6 +19,8 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { softDelete } = useConsultationMutations();
 
   const handleBack = useCallback(() => {
@@ -34,15 +36,21 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
     setRefreshKey((k: number) => k + 1);
   }, []);
 
-  const handleDelete = useCallback(
-    (c: Consultation) => {
-      if (!confirm('¿Eliminar esta consulta? Se puede restaurar posteriormente.')) return;
-      void softDelete(c.id).then(() => {
-        views.open('consultations.list.open');
-      });
-    },
-    [softDelete, views]
-  );
+  const handleDelete = useCallback((_c: Consultation) => {
+    setConfirmDelete(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!consultationId) return;
+    setDeleting(true);
+    try {
+      await softDelete(consultationId);
+      setConfirmDelete(false);
+      views.open('consultations.list.open');
+    } finally {
+      setDeleting(false);
+    }
+  }, [consultationId, softDelete, views]);
 
   if (!consultationId) {
     return React.createElement(UI.EmptyState, {
@@ -66,20 +74,36 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
       })
     ),
 
-    // Modal de edicion
+    // Modal de edición con footer sticky
     showEditModal &&
-      React.createElement(UI.FormDialog, {
+      React.createElement(UI.FormDialogSubmit, {
         open: showEditModal,
         onOpenChange: (open: boolean) => {
           if (!open) setShowEditModal(false);
         },
         title: 'Editar consulta',
         size: 'lg',
-        children: React.createElement(ConsultationForm, {
-          consultationId,
-          onSuccess: handleEditSuccess,
-          onCancel: () => setShowEditModal(false),
-        }),
-      })
+        submitLabel: 'Guardar cambios',
+        onCancel: () => setShowEditModal(false),
+        children: ({ formRef }: { formRef: React.RefObject<HTMLFormElement> }) =>
+          React.createElement(ConsultationForm, {
+            consultationId,
+            onSuccess: handleEditSuccess,
+            formRef,
+            hideActions: true,
+          }),
+      }),
+
+    // Confirmar eliminación
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    React.createElement((UI as any).ConfirmDialog, {
+      open: confirmDelete,
+      onOpenChange: setConfirmDelete,
+      title: 'Eliminar consulta',
+      description: '¿Eliminar esta consulta?',
+      confirmLabel: 'Eliminar',
+      loading: deleting,
+      onConfirm: () => void handleConfirmDelete(),
+    })
   );
 }
