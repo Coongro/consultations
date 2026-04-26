@@ -49,6 +49,7 @@ const { useState, useCallback, useEffect, useRef, useMemo } = React;
 const FIELD_GAP = 'flex flex-col gap-1';
 const GRID_2 = 'grid grid-cols-2 gap-3';
 
+// Header inline para subsecciones (dentro de un FormSection)
 function SectionHeader({ icon, title }: { icon: string; title: string }) {
   return React.createElement(
     'h3',
@@ -63,7 +64,17 @@ function buildDefaultExamSystems(): PhysicalExamSystem[] {
 }
 
 export function ConsultationForm(props: ConsultationFormProps) {
-  const { consultationId, petId, defaults, onSuccess, onCancel, className = '' } = props;
+  const {
+    consultationId,
+    petId,
+    defaults,
+    onSuccess,
+    onCancel,
+    className = '',
+    formRef,
+    hideActions,
+    onSavingChange,
+  } = props;
 
   const { toast } = usePlugin();
   const tz = useTenantTimezone();
@@ -77,6 +88,11 @@ export function ConsultationForm(props: ConsultationFormProps) {
 
   const isEditing = !!consultationId;
   const saving = creating || updating;
+
+  // Notificar al caller cuando cambia el estado de guardado (para footer externo)
+  useEffect(() => {
+    onSavingChange?.(saving);
+  }, [saving, onSavingChange]);
 
   // --- Estado del formulario ---
   const [selectedPetId, setSelectedPetId] = useState(petId ?? defaults?.pet_id ?? '');
@@ -222,11 +238,24 @@ export function ConsultationForm(props: ConsultationFormProps) {
     })();
   }, [selectedPetId, defaults?.pet_id, isEditing]);
 
-  // Preseleccionar el ultimo veterinario usado
+  // Preseleccionar el ultimo veterinario usado: aplica staffId + nombre del staff
   useEffect(() => {
-    if (!isEditing && !staffId && consultSettings.defaultStaffId) {
-      setStaffId(consultSettings.defaultStaffId);
-    }
+    if (isEditing || staffId || !consultSettings.defaultStaffId) return;
+    const id = consultSettings.defaultStaffId;
+    let cancelled = false;
+    setStaffId(id);
+    void actions
+      .execute<StaffMember>('staff.members.getById', { id })
+      .then((member) => {
+        if (cancelled || !member) return;
+        setVetName(member.contact_name);
+      })
+      .catch(() => {
+        // Staff no encontrado: el setting puede haber quedado huérfano
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [consultSettings.defaultStaffId, isEditing, staffId]);
 
   // Cargar datos existentes al editar
@@ -307,10 +336,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
         toast.error('Error', 'El motivo de consulta es obligatorio');
         return;
       }
-      if (!staffId && !vetName.trim()) {
-        toast.error('Error', 'Seleccioná un veterinario');
-        return;
-      }
+      // staff_id es obligatorio: validación nativa del browser via input espejo en el form
 
       const validMeds = medications.filter((m: MedicationInput) => m.name.trim());
       const validServices = serviceLines.filter((s: ServiceLineInput) => s.product_name.trim());
@@ -346,6 +372,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       if (isEditing && consultationId) {
         const result = await update(consultationId, {
           ...sharedData,
+          medications: validMeds,
           services: validServices,
         });
         if (result && onSuccess) onSuccess(result);
@@ -408,365 +435,343 @@ export function ConsultationForm(props: ConsultationFormProps) {
 
   return React.createElement(
     'form',
-    { onSubmit: handleSubmit, className: `flex flex-col gap-4 ${className}` },
+    { ref: formRef, onSubmit: handleSubmit, className: `flex flex-col gap-4 ${className}` },
 
     // ── Sección 1: Datos básicos + Paciente ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'ClipboardList', title: 'Datos básicos' }),
+      UI.FormSection,
+      { icon: 'ClipboardList', title: 'Datos básicos' },
 
-        // PetPicker (solo cuando no viene petId por parámetro)
-        needsPetPicker &&
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Paciente *'),
-            React.createElement(PetPicker, {
-              value: selectedPetId || undefined,
-              onChange: handlePetSelect,
-              placeholder: 'Buscar paciente por nombre, raza o microchip...',
-            })
-          ),
-
+      // PetPicker (solo cuando no viene petId por parámetro)
+      needsPetPicker &&
         React.createElement(
           'div',
-          { className: GRID_2 },
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Veterinario *'),
-            React.createElement(StaffPicker, {
-              value: staffId,
-              onChange: handleStaffSelect,
-              placeholder: 'Buscar veterinario...',
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Fecha y hora'),
-            React.createElement(DateTimePicker, {
-              value: date,
-              onChange: setDate,
-              step: 30,
-            })
-          )
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Paciente *'),
+          React.createElement(PetPicker, {
+            value: selectedPetId || undefined,
+            onChange: handlePetSelect,
+            placeholder: 'Buscar paciente por nombre, raza o microchip...',
+          })
+        ),
+
+      React.createElement(
+        'div',
+        { className: GRID_2 },
+        React.createElement(
+          'div',
+          { className: FIELD_GAP, style: { position: 'relative' } },
+          React.createElement(UI.Label, null, 'Veterinario *'),
+          React.createElement(StaffPicker, {
+            value: staffId,
+            onChange: handleStaffSelect,
+            placeholder: 'Buscar veterinario...',
+          }),
+          // Input espejo para validación nativa "required" sobre el StaffPicker
+          React.createElement('input', {
+            type: 'text',
+            tabIndex: -1,
+            required: true,
+            'aria-label': 'Veterinario',
+            value: staffId ?? '',
+            onChange: () => {},
+            style: {
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              width: '100%',
+              height: '1px',
+              opacity: 0,
+              pointerEvents: 'none',
+            },
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Fecha y hora'),
+          React.createElement(DateTimePicker, {
+            value: date,
+            onChange: setDate,
+            step: 30,
+          })
         )
       )
     ),
 
     // ── Sección 2: Signos vitales ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
+      UI.FormSection,
+      { icon: 'HeartPulse', title: 'Signos vitales' },
       React.createElement(
         'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'HeartPulse', title: 'Signos vitales' }),
+        { className: 'grid grid-cols-3 sm:grid-cols-5 gap-3' },
         React.createElement(
           'div',
-          { className: 'grid grid-cols-3 sm:grid-cols-5 gap-3' },
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Peso (kg)'),
-            React.createElement(UI.Input, {
-              type: 'number',
-              step: '0.1',
-              min: '0',
-              max: '200',
-              value: weightKg,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setWeightKg(e.target.value),
-              placeholder: '28.5',
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Temp. (°C)'),
-            React.createElement(UI.Input, {
-              type: 'number',
-              step: '0.1',
-              min: '35',
-              max: '42',
-              value: temperature,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTemperature(e.target.value),
-              placeholder: '38.5',
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'FC (lpm)'),
-            React.createElement(UI.Input, {
-              type: 'number',
-              min: '0',
-              max: '300',
-              value: heartRate,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setHeartRate(e.target.value),
-              placeholder: '120',
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'FR (rpm)'),
-            React.createElement(UI.Input, {
-              type: 'number',
-              min: '0',
-              max: '100',
-              value: respiratoryRate,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                setRespiratoryRate(e.target.value),
-              placeholder: '20',
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'BCS (1-9)'),
-            React.createElement(UI.Input, {
-              type: 'number',
-              min: '1',
-              max: '9',
-              step: '0.5',
-              value: bcs,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setBcs(e.target.value),
-              placeholder: '5',
-            })
-          )
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Peso (kg)'),
+          React.createElement(UI.Input, {
+            type: 'number',
+            step: '0.1',
+            min: '0',
+            max: '200',
+            value: weightKg,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setWeightKg(e.target.value),
+            placeholder: '28.5',
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Temp. (°C)'),
+          React.createElement(UI.Input, {
+            type: 'number',
+            step: '0.1',
+            min: '35',
+            max: '42',
+            value: temperature,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTemperature(e.target.value),
+            placeholder: '38.5',
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'FC (lpm)'),
+          React.createElement(UI.Input, {
+            type: 'number',
+            min: '0',
+            max: '300',
+            value: heartRate,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setHeartRate(e.target.value),
+            placeholder: '120',
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'FR (rpm)'),
+          React.createElement(UI.Input, {
+            type: 'number',
+            min: '0',
+            max: '100',
+            value: respiratoryRate,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              setRespiratoryRate(e.target.value),
+            placeholder: '20',
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'BCS (1-9)'),
+          React.createElement(UI.Input, {
+            type: 'number',
+            min: '1',
+            max: '9',
+            step: '0.5',
+            value: bcs,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setBcs(e.target.value),
+            placeholder: '5',
+          })
         )
       )
     ),
 
     // ── Sección 3 (S): Motivo + Anamnesis ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
+      UI.FormSection,
+      { icon: 'MessageSquare', title: 'S — Motivo y anamnesis' },
       React.createElement(
         'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, {
-          icon: 'MessageSquare',
-          title: 'S — Motivo y anamnesis',
-        }),
-        React.createElement(
-          'div',
-          { className: FIELD_GAP },
-          React.createElement(UI.Label, null, 'Motivo de consulta *'),
-          React.createElement(UI.Input, {
-            type: 'text',
-            value: reason,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
-            placeholder: 'Ej: Control anual, vacunación, vómitos...',
-            required: true,
-          })
-        ),
-        React.createElement(
-          'div',
-          { className: FIELD_GAP },
-          React.createElement(UI.Label, null, 'Anamnesis'),
-          React.createElement(UI.Textarea, {
-            value: anamnesis,
-            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setAnamnesis(e.target.value),
-            placeholder: 'Lo que reporta el dueño: síntomas, duración, cambios de hábitos...',
-            rows: 3,
-          })
-        )
+        { className: FIELD_GAP },
+        React.createElement(UI.Label, null, 'Motivo de consulta *'),
+        React.createElement(UI.Input, {
+          type: 'text',
+          value: reason,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
+          placeholder: 'Ej: Control anual, vacunación, vómitos...',
+          required: true,
+        })
+      ),
+      React.createElement(
+        'div',
+        { className: FIELD_GAP },
+        React.createElement(UI.Label, null, 'Anamnesis'),
+        React.createElement(UI.Textarea, {
+          value: anamnesis,
+          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setAnamnesis(e.target.value),
+          placeholder: 'Lo que reporta el dueño: síntomas, duración, cambios de hábitos...',
+          rows: 3,
+        })
       )
     ),
 
     // ── Sección 4 (O): Examen físico ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, {
-          icon: 'Stethoscope',
-          title: 'O — Examen físico',
+      UI.FormSection,
+      { icon: 'Stethoscope', title: 'O — Examen físico' },
+
+      // Checklist por sistemas (si structuredExam habilitado)
+      consultSettings.structuredExam &&
+        React.createElement(ExamSystemList, {
+          systems: examSystems,
+          onStatusToggle: handleExamStatusToggle,
+          onNotesChange: handleExamNotesChange,
         }),
 
-        // Checklist por sistemas (si structuredExam habilitado)
-        consultSettings.structuredExam &&
-          React.createElement(ExamSystemList, {
-            systems: examSystems,
-            onStatusToggle: handleExamStatusToggle,
-            onNotesChange: handleExamNotesChange,
-          }),
-
-        // Textarea libre (siempre visible como notas adicionales si structured, o como único campo si no)
+      // Textarea libre (siempre visible como notas adicionales si structured, o como único campo si no)
+      React.createElement(
+        'div',
+        { className: FIELD_GAP },
         React.createElement(
-          'div',
-          { className: FIELD_GAP },
-          React.createElement(
-            UI.Label,
-            null,
-            consultSettings.structuredExam ? 'Notas generales del examen' : 'Examen físico'
-          ),
-          React.createElement(UI.Textarea, {
-            value: physicalExamNotes,
-            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setPhysicalExamNotes(e.target.value),
-            placeholder: consultSettings.structuredExam
-              ? 'Observaciones adicionales del examen físico...'
-              : 'Hallazgos del examen físico...',
-            rows: consultSettings.structuredExam ? 2 : 4,
-          })
-        )
+          UI.Label,
+          null,
+          consultSettings.structuredExam ? 'Notas generales del examen' : 'Examen físico'
+        ),
+        React.createElement(UI.Textarea, {
+          value: physicalExamNotes,
+          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setPhysicalExamNotes(e.target.value),
+          placeholder: consultSettings.structuredExam
+            ? 'Observaciones adicionales del examen físico...'
+            : 'Hallazgos del examen físico...',
+          rows: consultSettings.structuredExam ? 2 : 4,
+        })
       )
     ),
 
     // ── Sección 5 (A): Diagnóstico ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'SearchCheck', title: 'A — Diagnóstico' }),
-        React.createElement(UI.Textarea, {
-          value: diagnosis,
-          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDiagnosis(e.target.value),
-          placeholder: 'Diagnóstico presuntivo o definitivo...',
-          rows: 2,
-        })
-      )
+      UI.FormSection,
+      { icon: 'SearchCheck', title: 'A — Diagnóstico' },
+      React.createElement(UI.Textarea, {
+        value: diagnosis,
+        onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDiagnosis(e.target.value),
+        placeholder: 'Diagnóstico presuntivo o definitivo...',
+        rows: 2,
+      })
     ),
 
     // ── Sección 6 (P): Tratamiento + Medicamentos + Seguimiento ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
+      UI.FormSection,
+      { icon: 'Pill', title: 'P — Plan de tratamiento' },
       React.createElement(
         'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'Pill', title: 'P — Plan de tratamiento' }),
+        { className: FIELD_GAP },
+        React.createElement(UI.Label, null, 'Indicaciones generales'),
+        React.createElement(UI.Input, {
+          type: 'text',
+          value: treatment,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTreatment(e.target.value),
+          placeholder: 'Ej: Dieta blanda, reposo, collar isabelino...',
+        })
+      ),
+      React.createElement(UI.Label, null, 'Medicación'),
+      ...(contributedSections.length > 0
+        ? contributedSections.map((s, i) =>
+            React.createElement(
+              React.Fragment,
+              { key: `contrib-${String(i)}` },
+              s.render() as React.ReactNode
+            )
+          )
+        : [
+            React.createElement(MedicationFormList, {
+              key: 'native-meds',
+              medications,
+              onChange: setMedications,
+            }),
+          ]),
+      React.createElement(UI.Separator, { className: 'my-1' }),
+      React.createElement(SectionHeader, { icon: 'CalendarCheck', title: 'Seguimiento' }),
+      React.createElement(
+        'div',
+        { className: 'grid grid-cols-4 gap-3' },
         React.createElement(
           'div',
           { className: FIELD_GAP },
-          React.createElement(UI.Label, null, 'Indicaciones generales'),
-          React.createElement(UI.Input, {
-            type: 'text',
-            value: treatment,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTreatment(e.target.value),
-            placeholder: 'Ej: Dieta blanda, reposo, collar isabelino...',
+          React.createElement(UI.Label, null, 'Próximo control'),
+          React.createElement(DatePicker, {
+            value: followUpDate,
+            onChange: setFollowUpDate,
+            placeholder: 'Seleccionar fecha',
+            minDate: toDateKey(new Date(), tz),
           })
         ),
-        React.createElement(UI.Label, null, 'Medicación'),
-        ...(contributedSections.length > 0
-          ? contributedSections.map((s, i) =>
-              React.createElement(
-                React.Fragment,
-                { key: `contrib-${String(i)}` },
-                s.render() as React.ReactNode
-              )
-            )
-          : [
-              React.createElement(MedicationFormList, {
-                key: 'native-meds',
-                medications,
-                onChange: setMedications,
-              }),
-            ]),
-        React.createElement(UI.Separator, { className: 'my-1' }),
-        React.createElement(SectionHeader, { icon: 'CalendarCheck', title: 'Seguimiento' }),
         React.createElement(
           'div',
-          { className: 'grid grid-cols-4 gap-3' },
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Próximo control'),
-            React.createElement(DatePicker, {
-              value: followUpDate,
-              onChange: setFollowUpDate,
-              placeholder: 'Seleccionar fecha',
-              minDate: toDateKey(new Date(), tz),
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Inicio'),
-            React.createElement(TimePicker, {
-              value: followUpStartTime,
-              onChange: (t: string) => {
-                setFollowUpStartTime(t);
-                const [h, m] = t.split(':').map(Number);
-                const endMin = h * 60 + m + 30;
-                setFollowUpEndTime(
-                  `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`
-                );
-              },
-              step: 30,
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Fin'),
-            React.createElement(TimePicker, {
-              value: followUpEndTime,
-              onChange: setFollowUpEndTime,
-              step: 30,
-            })
-          ),
-          React.createElement(
-            'div',
-            { className: FIELD_GAP },
-            React.createElement(UI.Label, null, 'Notas'),
-            React.createElement(UI.Input, {
-              type: 'text',
-              value: notes,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value),
-              placeholder: 'Observaciones, indicaciones para el próximo control...',
-            })
-          )
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Inicio'),
+          React.createElement(TimePicker, {
+            value: followUpStartTime,
+            onChange: (t: string) => {
+              setFollowUpStartTime(t);
+              const [h, m] = t.split(':').map(Number);
+              const endMin = h * 60 + m + 30;
+              setFollowUpEndTime(
+                `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`
+              );
+            },
+            step: 30,
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Fin'),
+          React.createElement(TimePicker, {
+            value: followUpEndTime,
+            onChange: setFollowUpEndTime,
+            step: 30,
+          })
+        ),
+        React.createElement(
+          'div',
+          { className: FIELD_GAP },
+          React.createElement(UI.Label, null, 'Notas'),
+          React.createElement(UI.Input, {
+            type: 'text',
+            value: notes,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value),
+            placeholder: 'Observaciones, indicaciones para el próximo control...',
+          })
         )
       )
     ),
 
     // ── Sección 7: Servicios prestados ──
     React.createElement(
-      UI.Card,
-      { className: 'p-4' },
-      React.createElement(
-        'div',
-        { className: 'flex flex-col gap-3' },
-        React.createElement(SectionHeader, { icon: 'Receipt', title: 'Servicios prestados' }),
-        React.createElement(ServiceLineForm, {
-          services: serviceLines,
-          onChange: setServiceLines,
-          catalog: serviceCatalog,
-          categories: serviceSubcategories,
-          catalogLoading,
-          onProductCreated: handleProductCreated,
-          showPrices: consultSettings.showPrices,
-        })
-      )
+      UI.FormSection,
+      { icon: 'Receipt', title: 'Servicios prestados' },
+      React.createElement(ServiceLineForm, {
+        services: serviceLines,
+        onChange: setServiceLines,
+        catalog: serviceCatalog,
+        categories: serviceSubcategories,
+        catalogLoading,
+        onProductCreated: handleProductCreated,
+        showPrices: consultSettings.showPrices,
+      })
     ),
 
-    // ── Botones ──
-    React.createElement(
-      'div',
-      { className: 'flex justify-end gap-3' },
-      onCancel &&
+    // ── Botones (solo si el caller no los pone en el footer del dialog) ──
+    !hideActions &&
+      React.createElement(
+        'div',
+        { className: 'flex justify-end gap-3' },
+        onCancel &&
+          React.createElement(
+            UI.Button,
+            { type: 'button', variant: 'outline', onClick: onCancel },
+            'Cancelar'
+          ),
         React.createElement(
           UI.Button,
-          { type: 'button', variant: 'outline', onClick: onCancel },
-          'Cancelar'
-        ),
-      React.createElement(
-        UI.Button,
-        { type: 'submit', disabled: saving },
-        saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Registrar consulta'
+          { type: 'submit', disabled: saving },
+          saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Registrar consulta'
+        )
       )
-    )
   );
 }

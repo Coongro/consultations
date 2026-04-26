@@ -220,19 +220,21 @@ export function MedicationFormList({
             })
           ),
 
-          // Fila 1: Dosis + Via + Duracion
+          // Fila 1: Dosis + Via + Duracion (compound fields get más ancho que Vía)
           React.createElement(
             'div',
-            { className: 'grid grid-cols-2 sm:grid-cols-3 gap-2' },
+            {
+              className: 'grid grid-cols-2 sm:grid-cols-[2fr_1fr_2fr] gap-2',
+            },
 
             // Dosis (compound: numero + select)
             React.createElement(
               'div',
-              { className: 'flex flex-col gap-1' },
+              { className: 'flex flex-col gap-1 min-w-0' },
               React.createElement(UI.Label, null, 'Dosis *'),
               React.createElement(
                 'div',
-                { className: 'flex gap-1' },
+                { className: 'flex gap-1 min-w-0' },
                 React.createElement(UI.Input, {
                   type: 'number',
                   step: '0.01',
@@ -245,13 +247,17 @@ export function MedicationFormList({
                   className: 'w-20',
                 }),
                 React.createElement(
-                  UI.Select,
-                  {
-                    value: med.dosage_unit ?? 'mg/kg',
-                    onValueChange: (v: string) => updateField(index, 'dosage_unit', v),
-                  },
-                  DOSAGE_UNITS.map((unit) =>
-                    React.createElement(UI.SelectItem, { key: unit, value: unit }, unit)
+                  'div',
+                  { className: 'flex-1 min-w-0' },
+                  React.createElement(
+                    UI.Select,
+                    {
+                      value: med.dosage_unit ?? 'mg/kg',
+                      onValueChange: (v: string) => updateField(index, 'dosage_unit', v),
+                    },
+                    DOSAGE_UNITS.map((unit) =>
+                      React.createElement(UI.SelectItem, { key: unit, value: unit }, unit)
+                    )
                   )
                 )
               )
@@ -260,7 +266,7 @@ export function MedicationFormList({
             // Via
             React.createElement(
               'div',
-              { className: 'flex flex-col gap-1' },
+              { className: 'flex flex-col gap-1 min-w-0' },
               React.createElement(UI.Label, null, 'Vía'),
               React.createElement(
                 UI.Select,
@@ -277,11 +283,11 @@ export function MedicationFormList({
             // Duracion (compound: numero + select)
             React.createElement(
               'div',
-              { className: 'flex flex-col gap-1' },
+              { className: 'flex flex-col gap-1 min-w-0' },
               React.createElement(UI.Label, null, 'Duración *'),
               React.createElement(
                 'div',
-                { className: 'flex gap-1' },
+                { className: 'flex gap-1 min-w-0' },
                 React.createElement(UI.Input, {
                   type: 'number',
                   step: '1',
@@ -298,13 +304,17 @@ export function MedicationFormList({
                   className: 'w-16',
                 }),
                 React.createElement(
-                  UI.Select,
-                  {
-                    value: med.duration_unit ?? 'días',
-                    onValueChange: (v: string) => updateField(index, 'duration_unit', v),
-                  },
-                  DURATION_UNITS.map((unit) =>
-                    React.createElement(UI.SelectItem, { key: unit, value: unit }, unit)
+                  'div',
+                  { className: 'flex-1 min-w-0' },
+                  React.createElement(
+                    UI.Select,
+                    {
+                      value: med.duration_unit ?? 'días',
+                      onValueChange: (v: string) => updateField(index, 'duration_unit', v),
+                    },
+                    DURATION_UNITS.map((unit) =>
+                      React.createElement(UI.SelectItem, { key: unit, value: unit }, unit)
+                    )
                   )
                 )
               )

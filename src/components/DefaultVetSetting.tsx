@@ -8,48 +8,13 @@ import type { StaffMember } from '@coongro/staff';
 
 const React = getHostReact();
 const UI = getHostUI();
-const { useState, useEffect, useCallback, useRef } = React;
+const { useState, useEffect, useCallback } = React;
 
 const SETTING_KEY = 'consultations.defaultStaffId';
-
-/**
- * Fuerza el ComboboxChipTrigger a una sola linea.
- * El trigger usa flex-wrap que causa dos lineas cuando hay chip + input.
- */
-function useCompactCombobox(containerRef: React.RefObject<HTMLDivElement>, hasValue: boolean) {
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const trigger = containerRef.current.querySelector<HTMLElement>('[role="combobox"]');
-    if (!trigger) return;
-
-    trigger.style.flexWrap = 'nowrap';
-    trigger.style.overflow = 'hidden';
-
-    const input = trigger.querySelector<HTMLInputElement>('input');
-    if (input) {
-      if (hasValue) {
-        input.style.width = '0';
-        input.style.minWidth = '0';
-        input.style.padding = '0';
-        input.style.opacity = '0';
-        input.style.position = 'absolute';
-      } else {
-        input.style.width = '';
-        input.style.minWidth = '';
-        input.style.padding = '';
-        input.style.opacity = '';
-        input.style.position = '';
-      }
-    }
-  }, [hasValue]);
-}
 
 export function DefaultVetSetting() {
   const [staffId, setStaffId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const pickerRef = useRef<HTMLDivElement>(null);
-
-  useCompactCombobox(pickerRef, !!staffId);
 
   useEffect(() => {
     void (async () => {
@@ -104,7 +69,7 @@ export function DefaultVetSetting() {
     ),
     React.createElement(
       'div',
-      { ref: pickerRef, style: { width: '220px', flexShrink: 0 } },
+      { style: { width: '220px', flexShrink: 0 } },
       React.createElement(StaffPicker, {
         value: staffId,
         onChange: handleChange,

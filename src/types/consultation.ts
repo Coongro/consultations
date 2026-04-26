@@ -136,6 +136,7 @@ export interface ConsultationUpdateData {
   follow_up_end_time?: string | null;
   follow_up_notes?: string | null;
   notes?: string | null;
+  medications?: MedicationInput[];
   services?: ServiceLineInput[];
 }
 
