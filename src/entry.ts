@@ -4,22 +4,13 @@
  * Auto-seed: crea categorías y servicios veterinarios por defecto
  * en @coongro/products la primera vez que se activa el plugin.
  */
-import type { ModuleDatabaseAPI } from '@coongro/plugin-sdk';
+import type { ModuleActivationContext, ModuleDatabaseAPI } from '@coongro/plugin-sdk';
 import { categoryTable, productTable } from '@coongro/products/server';
 import { eq } from 'drizzle-orm';
 
 import { ROOT_SERVICE_CATEGORY_SLUG as ROOT_CATEGORY_SLUG } from './constants/services.js';
 
-interface ActivationAPI {
-  logger: {
-    log: (...args: unknown[]) => void;
-    warn: (...args: unknown[]) => void;
-    error: (...args: unknown[]) => void;
-    debug: (...args: unknown[]) => void;
-  };
-  registerCommand: (id: string, handler: (...args: unknown[]) => unknown) => void;
-  database: ModuleDatabaseAPI;
-}
+type Logger = ModuleActivationContext['api']['logger'];
 
 // -----------------------------------------------------------------------
 // Datos de seed
@@ -97,7 +88,7 @@ const SERVICE_CATEGORIES: CategorySeed[] = [
 // Seed
 // -----------------------------------------------------------------------
 
-async function seedServices(db: ModuleDatabaseAPI, logger: ActivationAPI['logger']): Promise<void> {
+async function seedServices(db: ModuleDatabaseAPI, logger: Logger): Promise<void> {
   // Verificar si ya existe la categoría raíz (idempotencia por slug)
   const existing = await db.ormQuery((tx) =>
     tx
@@ -112,7 +103,7 @@ async function seedServices(db: ModuleDatabaseAPI, logger: ActivationAPI['logger
     return;
   }
 
-  logger.log('Seeding default veterinary service categories and services...');
+  logger.info('Seeding default veterinary service categories and services...');
 
   // Crear categoría raíz
   // Los type assertions son necesarios porque los genéricos de Drizzle
@@ -159,7 +150,7 @@ async function seedServices(db: ModuleDatabaseAPI, logger: ActivationAPI['logger
   }
   /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
 
-  logger.log(
+  logger.info(
     `Seeded ${SERVICE_CATEGORIES.length} categories with ${SERVICE_CATEGORIES.reduce((acc, c) => acc + c.services.length, 0)} services`
   );
 }
@@ -168,8 +159,13 @@ async function seedServices(db: ModuleDatabaseAPI, logger: ActivationAPI['logger
 // Activate
 // -----------------------------------------------------------------------
 
-export async function activate(context: { api: ActivationAPI }): Promise<void> {
+export async function activate(context: ModuleActivationContext): Promise<void> {
   const { api } = context;
+
+  if (!api.database) {
+    api.logger.error('Cannot seed veterinary services: database API not available');
+    return;
+  }
 
   try {
     await seedServices(api.database, api.logger);
