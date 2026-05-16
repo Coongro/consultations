@@ -1,5 +1,32 @@
 # @coongro/consultations
 
+## 0.9.0
+
+### Minor Changes
+
+- 1da65a9: refactor(detail-views): unify detail patterns and fix UX issues (COONG-112)
+  - **`ConsultationDetail`**: action buttons (Editar/Eliminar/extra) ahora honran `action.variant` y `action.icon` con default `default` (brand) y `size: 'sm'`. Botón "Nueva Consulta" desde el detail view de paciente queda amarillo y consistente con el resto.
+  - **Detail view container**: layout `lg:flex-row` (1024px) bajado a `md:flex-row` (768px) para evitar que el sidebar+main se apile cuando el contenedor interno es chico.
+  - **`ConsultationDetailView`**: migra delete a `UI.ConfirmDialog` (antes usaba `confirm()` nativo del browser). Edit dialog migrado a `UI.FormDialogSubmit`.
+  - **`DetailOverrideView`** (override de PetDetail con timeline de consultas): mismo trato — delete con `UI.ConfirmDialog`, edit con `UI.FormDialogSubmit`. Bug fix: el delete antes mostraba un toast sin borrar nada; ahora usa `usePetMutations.softDelete`.
+  - **`DefaultVetSetting`**: removido el workaround de `useCompactCombobox` ya que el fix vive en core (`@coongro/ui-components` 0.29.0).
+  - **`MedicationFormList`**: grid de "Dosis + Vía + Duración" ahora usa proporción 2:1:2 (`grid-cols-[2fr_1fr_2fr]` en sm+) y agrega `min-w-0` a los compound fields para que los selects no se pisen entre sí.
+  - **`consultation` schema**: `updated_at` ahora se actualiza automáticamente en cada update vía `.$onUpdate()` de Drizzle.
+
+- 1da65a9: refactor(ui): adopt FormSection + FormDialogSubmit from `@coongro/ui-components` 0.28.0 (COONG-112)
+  - Cada sección del SOAP en `ConsultationForm` ahora usa `UI.FormSection` (Card + ícono + título) en vez del helper local `SectionHeader` + `UI.Card`.
+  - `CreateConsultationButton` ahora usa `UI.FormDialogSubmit`: footer sticky con botones Cancelar/Registrar consulta siempre visibles, sin importar el scroll del form.
+  - `ConsultationForm` expone props nuevas para integrarse con submit externos: `formRef`, `hideActions`, `onSavingChange`. Compatible hacia atrás (todas opcionales).
+
+### Patch Changes
+
+- c33b44d: fix: usar logger.info y eliminar tipo ActivationAPI local desincronizado (COONG-158)
+
+  El plugin declaraba una interfaz `ActivationAPI` local en `src/entry.ts` cuya forma del logger (`log/warn/error/debug`) no matcheaba la implementación real de `@coongro/core-logging` (`debug/info/warn/error/fatal`). En runtime `logger.log(...)` tiraba `TypeError` y el auto-seed de servicios veterinarios crasheaba en la primera línea, dejando la UI de Servicios vacía sin error visible.
+  - Eliminada la interfaz local; ahora se importan `ModuleActivationContext` y `ModuleDatabaseAPI` desde `@coongro/plugin-sdk` (el `Logger` se deriva de `ModuleActivationContext['api']['logger']` porque el SDK aún no lo re-exporta directo).
+  - `logger.log(...)` → `logger.info(...)` en las dos llamadas del seed.
+  - Check explícito por `api.database` (opcional en `ModuleAPI`).
+
 ## 0.8.0
 
 ### Minor Changes
