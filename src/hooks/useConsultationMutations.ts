@@ -5,6 +5,8 @@
 import { useTenantTimezone } from '@coongro/calendar';
 import { getHostReact, actions, usePlugin } from '@coongro/plugin-sdk';
 
+import { syncConsultationCharges } from '../data/billing.js';
+import type { BillableServiceLine } from '../data/billing.js';
 import type {
   Consultation,
   ConsultationCreateData,
@@ -21,6 +23,33 @@ async function resolvePetName(petId: string): Promise<string> {
     id: petId,
   });
   return pet?.name ?? 'Paciente';
+}
+
+async function resolvePetOwner(petId: string): Promise<string | null> {
+  try {
+    const pet = await actions.execute<{ owner_id: string | null } | undefined>(
+      'patients.pets.getById',
+      { id: petId }
+    );
+    return pet?.owner_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Empuja las líneas de servicio de la consulta hacia el módulo de cobros (@coongro/billing).
+ * Lee las líneas ya persistidas (autoritativas, con id), resuelve el dueño y sincroniza.
+ * Dependencia blanda: si billing falta, no rompe el guardado de la consulta.
+ */
+async function pushConsultationCharges(consultationId: string, petId: string): Promise<void> {
+  const services = await actions
+    .execute<BillableServiceLine[]>('consultations.services.listByConsultation', {
+      consultationId,
+    })
+    .catch((): BillableServiceLine[] => []);
+  const contactId = await resolvePetOwner(petId);
+  await syncConsultationCharges({ consultationId, contactId, petId, services });
 }
 
 export interface UseConsultationMutationsResult {
@@ -85,6 +114,12 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
         }
 
         if (promises.length > 0) await Promise.all(promises);
+
+        // Empujar las líneas de servicio al módulo de cobros (solo si hay servicios,
+        // para no abrir cuentas vacías en consultas sin cargos).
+        if (services && services.length > 0) {
+          await pushConsultationCharges(consultation.id, consultation.pet_id);
+        }
 
         // Sincronizar evento de seguimiento en calendario
         if (consultation.follow_up_date) {
@@ -160,6 +195,10 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
         // Sincronizar o eliminar evento de seguimiento
         const updated = result[0];
         if (updated) {
+          // Re-sincronizar cobros si se tocaron los servicios (reemplaza, no duplica).
+          if (services !== undefined) {
+            await pushConsultationCharges(id, updated.pet_id);
+          }
           if (updated.follow_up_date) {
             const petName = await resolvePetName(updated.pet_id);
             await syncFollowUpEvent(updated, petName, tz);
