@@ -16,6 +16,12 @@ export interface SyncConsultationChargesParams {
   contactId: string | null;
   petId: string;
   services: BillableServiceLine[];
+  /**
+   * Fecha de la consulta (UTCTimestamp ISO). Es la fecha de negocio del cobro: la cuenta
+   * debe quedar fechada según la consulta —no según el momento del guardado— para que los
+   * reportes de ingresos por período sean correctos incluso con consultas retroactivas.
+   */
+  consultationDate?: string | null;
 }
 
 /**
@@ -33,12 +39,13 @@ export async function syncConsultationCharges({
   contactId,
   petId,
   services,
+  consultationDate = null,
 }: SyncConsultationChargesParams): Promise<void> {
   if (!consultationId || !petId) return;
   try {
     const account = await actions.execute<{ id: string } | undefined>(
       'billing.accounts.openForVisit',
-      { contactId: contactId ?? null, petId, consultationId }
+      { contactId: contactId ?? null, petId, consultationId, openedAt: consultationDate }
     );
     if (!account?.id) return;
     await actions.execute('billing.lines.syncSource', {

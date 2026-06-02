@@ -42,14 +42,18 @@ async function resolvePetOwner(petId: string): Promise<string | null> {
  * Lee las líneas ya persistidas (autoritativas, con id), resuelve el dueño y sincroniza.
  * Dependencia blanda: si billing falta, no rompe el guardado de la consulta.
  */
-async function pushConsultationCharges(consultationId: string, petId: string): Promise<void> {
+async function pushConsultationCharges(
+  consultationId: string,
+  petId: string,
+  consultationDate: string | null
+): Promise<void> {
   const services = await actions
     .execute<BillableServiceLine[]>('consultations.services.listByConsultation', {
       consultationId,
     })
     .catch((): BillableServiceLine[] => []);
   const contactId = await resolvePetOwner(petId);
-  await syncConsultationCharges({ consultationId, contactId, petId, services });
+  await syncConsultationCharges({ consultationId, contactId, petId, services, consultationDate });
 }
 
 export interface UseConsultationMutationsResult {
@@ -118,7 +122,7 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
         // Empujar las líneas de servicio al módulo de cobros (solo si hay servicios,
         // para no abrir cuentas vacías en consultas sin cargos).
         if (services && services.length > 0) {
-          await pushConsultationCharges(consultation.id, consultation.pet_id);
+          await pushConsultationCharges(consultation.id, consultation.pet_id, consultation.date);
         }
 
         // Sincronizar evento de seguimiento en calendario
@@ -197,7 +201,7 @@ export function useConsultationMutations(): UseConsultationMutationsResult {
         if (updated) {
           // Re-sincronizar cobros si se tocaron los servicios (reemplaza, no duplica).
           if (services !== undefined) {
-            await pushConsultationCharges(id, updated.pet_id);
+            await pushConsultationCharges(id, updated.pet_id, updated.date);
           }
           if (updated.follow_up_date) {
             const petName = await resolvePetName(updated.pet_id);
