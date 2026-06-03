@@ -96,19 +96,6 @@
           "order": 10,
           "items": [
             {
-              "key": "consultations.reasonCategories",
-              "type": "boolean",
-              "label": "Categorías de motivo",
-              "description": "Habilitar botones de categoría rápida (rutina, vacunación, enfermedad, etc.)",
-              "default": true,
-              "tags": [
-                "consultations",
-                "reasoncategories",
-                "categorías",
-                "motivo"
-              ]
-            },
-            {
               "key": "consultations.showPrices",
               "type": "boolean",
               "label": "Servicios y precios en consultas",

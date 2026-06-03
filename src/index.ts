@@ -46,7 +46,6 @@ export type {
   ServiceLineInput,
   ConsultationService,
   ConsultationWithMedications,
-  ReasonCategory,
   PhysicalExamSystem,
 } from './types/consultation.js';
 export { EXAM_SYSTEMS } from './types/consultation.js';
@@ -79,14 +78,4 @@ export type { DosageUnit, Route, FrequencyHours, DurationUnit } from './constant
 // Utilidades
 export { formatPrice, formatCurrency, sanitizePrice, isValidPrice } from './utils/price.js';
 export { createCategoryMap } from './utils/categories.js';
-export {
-  REASON_CATEGORY_LABELS,
-  REASON_CATEGORY_ICON,
-  REASON_CATEGORY_BADGE_VARIANTS,
-  ALL_REASON_CATEGORIES,
-  formatReasonCategory,
-  getReasonCategoryBadgeVariant,
-  getReasonCategoryIcon,
-  formatConsultationDate,
-  formatConsultationDateTime,
-} from './utils/labels.js';
+export { formatConsultationDate, formatConsultationDateTime } from './utils/labels.js';

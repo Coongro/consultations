@@ -1,7 +1,7 @@
 import { asDateKey, dbNow, toDateKey, toUTCTimestamp } from '@coongro/datetime';
 import type { ModuleDatabaseAPI } from '@coongro/plugin-sdk';
 import type { SQL } from 'drizzle-orm';
-import { eq, and, or, ilike, isNull, sql, asc, desc, gte, lte, count } from 'drizzle-orm';
+import { eq, and, or, ilike, isNull, asc, desc, gte, lte, count } from 'drizzle-orm';
 
 import { consultationTable } from '../schema/consultation.js';
 import type { ConsultationRow, NewConsultationRow } from '../schema/consultation.js';
@@ -25,7 +25,6 @@ function toConsultation(row: ConsultationRow): Consultation {
 export interface ConsultationSearchParams {
   petId?: string;
   vetName?: string;
-  reasonCategory?: string;
   dateFrom?: string;
   dateTo?: string;
   query?: string;
@@ -34,11 +33,6 @@ export interface ConsultationSearchParams {
   offset?: number;
   orderBy?: string;
   orderDir?: 'asc' | 'desc';
-}
-
-export interface CountResult {
-  label: string;
-  count: number;
 }
 
 export class ConsultationRepository {
@@ -138,7 +132,6 @@ export class ConsultationRepository {
   async search({
     petId,
     vetName,
-    reasonCategory,
     dateFrom,
     dateTo,
     query,
@@ -161,10 +154,6 @@ export class ConsultationRepository {
 
       if (vetName) {
         conditions.push(ilike(consultationTable.vet_name, `%${vetName}%`));
-      }
-
-      if (reasonCategory) {
-        conditions.push(eq(consultationTable.reason_category, reasonCategory));
       }
 
       if (dateFrom) {
@@ -199,10 +188,6 @@ export class ConsultationRepository {
           q.orderBy((orderDir === 'asc' ? asc : desc)(consultationTable.date)) as typeof q,
         vet_name: () =>
           q.orderBy((orderDir === 'asc' ? asc : desc)(consultationTable.vet_name)) as typeof q,
-        reason_category: () =>
-          q.orderBy(
-            (orderDir === 'asc' ? asc : desc)(consultationTable.reason_category)
-          ) as typeof q,
         created_at: () =>
           q.orderBy((orderDir === 'asc' ? asc : desc)(consultationTable.created_at)) as typeof q,
       };
@@ -284,19 +269,6 @@ export class ConsultationRepository {
   // ---------------------------------------------------------------------------
   // Stats
   // ---------------------------------------------------------------------------
-
-  async countByReasonCategory(): Promise<CountResult[]> {
-    const rows = await this.db.ormQuery((tx) =>
-      tx.execute(sql`
-        SELECT reason_category AS label, COUNT(*)::int AS count
-        FROM ${consultationTable}
-        WHERE deleted_at IS NULL AND reason_category IS NOT NULL
-        GROUP BY reason_category
-        ORDER BY count DESC
-      `)
-    );
-    return rows as unknown as CountResult[];
-  }
 
   async countTotal(): Promise<number> {
     const rows = await this.db.ormQuery((tx) =>

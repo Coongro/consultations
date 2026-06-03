@@ -7,7 +7,6 @@ const React = getHostReact();
 const { useState, useEffect } = React;
 
 export interface ConsultationsSettings {
-  reasonCategoriesEnabled: boolean;
   defaultStaffId: string;
   showPrices: boolean;
   prefillVitals: boolean;
@@ -15,7 +14,6 @@ export interface ConsultationsSettings {
 }
 
 const DEFAULTS: Record<string, unknown> = {
-  'consultations.reasonCategories': true,
   'consultations.defaultStaffId': '',
   'consultations.showPrices': true,
   'consultations.prefillVitals': true,
@@ -26,7 +24,6 @@ function parseSettings(raw: Record<string, unknown>): ConsultationsSettings {
   const get = (key: string) => raw[key] ?? DEFAULTS[key];
 
   return {
-    reasonCategoriesEnabled: get('consultations.reasonCategories') as boolean,
     defaultStaffId: (get('consultations.defaultStaffId') as string) || '',
     showPrices: get('consultations.showPrices') as boolean,
     prefillVitals: get('consultations.prefillVitals') as boolean,

@@ -9,7 +9,6 @@ const { useState, useEffect, useCallback, useRef } = React;
 
 export interface ConsultationStatsData {
   total: number;
-  byCategory: Array<{ label: string; count: number }>;
   pendingFollowUps: number;
 }
 
@@ -36,17 +35,14 @@ export function useConsultationStats(): {
     setLoading(true);
     setError(null);
     try {
-      const [byCategory, total, pendingFollowUps] = await Promise.all([
-        actions.execute<Array<{ label: string; count: number }>>(
-          'consultations.records.countByReasonCategory'
-        ),
+      const [total, pendingFollowUps] = await Promise.all([
         actions.execute<number>('consultations.records.countTotal'),
         actions.execute<number>('consultations.records.countPendingFollowUps', { tz }),
       ]);
 
       if (!mountedRef.current) return;
 
-      setStats({ total, byCategory, pendingFollowUps });
+      setStats({ total, pendingFollowUps });
     } catch (err) {
       if (!mountedRef.current) return;
       setError(err instanceof Error ? err.message : 'Error al cargar estadísticas');

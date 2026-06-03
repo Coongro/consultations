@@ -3,8 +3,6 @@
  */
 import type { DateKey, UTCTimestamp } from '@coongro/datetime';
 
-export type ReasonCategory = 'routine' | 'vaccination' | 'illness' | 'surgery' | 'emergency';
-
 export interface PhysicalExamSystem {
   system: string;
   status: 'WNL' | 'ABN';
@@ -54,7 +52,6 @@ export interface Consultation {
   respiratory_rate: number | null;
   body_condition_score: string | null;
   reason: string;
-  reason_category: string | null;
   anamnesis: string | null;
   physical_exam: string | null;
   physical_exam_systems: PhysicalExamSystem[] | null;
@@ -98,7 +95,6 @@ export interface ConsultationCreateData {
   respiratory_rate?: number | null;
   body_condition_score?: string | null;
   reason: string;
-  reason_category?: string | null;
   anamnesis?: string | null;
   physical_exam?: string | null;
   physical_exam_systems?: PhysicalExamSystem[] | null;
@@ -124,7 +120,6 @@ export interface ConsultationUpdateData {
   respiratory_rate?: number | null;
   body_condition_score?: string | null;
   reason?: string;
-  reason_category?: string | null;
   anamnesis?: string | null;
   physical_exam?: string | null;
   physical_exam_systems?: PhysicalExamSystem[] | null;
