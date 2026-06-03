@@ -85,7 +85,7 @@
           "id": "consultations.general.vet",
           "page": "consultations.general",
           "label": "Veterinario",
-          "order": 5,
+          "order": 15,
           "component": "./dist/index.js",
           "export": "DefaultVetSetting"
         },

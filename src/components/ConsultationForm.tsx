@@ -190,10 +190,15 @@ export function ConsultationForm(props: ConsultationFormProps) {
     if (petId) setSelectedPetId(petId);
   }, [petId]);
 
-  const handlePetSelect = useCallback((pet: Pet | null) => {
-    setSelectedPetId(pet?.id ?? '');
-    if (pet?.weight_kg) setWeightKg(pet.weight_kg);
-  }, []);
+  const handlePetSelect = useCallback(
+    (pet: Pet | null) => {
+      setSelectedPetId(pet?.id ?? '');
+      // El peso solo se autollena si el prellenado de signos vitales está activo,
+      // igual que temp/FC/FR/BCS — coherencia con el setting prefillVitals.
+      if (pet?.weight_kg && consultSettings.prefillVitals) setWeightKg(pet.weight_kg);
+    },
+    [consultSettings.prefillVitals]
+  );
 
   const handleStaffSelect = useCallback((member: StaffMember | null) => {
     setStaffId(member?.id ?? null);
