@@ -144,6 +144,7 @@ export function MedicationFormList({
               {
                 variant: 'danger',
                 size: 'xs',
+                'aria-label': `Eliminar medicamento ${med.name || 'sin nombre'}`,
                 onClick: (e: React.MouseEvent) => {
                   e.stopPropagation();
                   remove(index);
@@ -190,6 +191,7 @@ export function MedicationFormList({
               {
                 variant: 'danger',
                 size: 'xs',
+                'aria-label': `Eliminar medicamento ${med.name || 'sin nombre'}`,
                 onClick: (e: React.MouseEvent) => {
                   e.stopPropagation();
                   remove(index);
