@@ -5,6 +5,7 @@
  */
 import { useEventsByEntity, EventCard, useTenantTimezone } from '@coongro/calendar';
 import type { CalendarEvent } from '@coongro/calendar';
+import { formatSpecies } from '@coongro/patients';
 import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
 import { StaffBadge } from '@coongro/staff';
 
@@ -179,6 +180,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
   const petName = pet?.name ?? 'Paciente';
   const petDetails = [
+    pet?.species ? formatSpecies(pet.species) : null,
     pet?.breed,
     pet?.birth_date ? calculateAge(pet.birth_date) : null,
     pet?.sex ? (SEX_LABELS[pet.sex] ?? pet.sex) : null,
