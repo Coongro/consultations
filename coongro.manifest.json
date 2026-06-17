@@ -24,6 +24,8 @@
       {
         "path": "Consultas/Servicios y Precios",
         "order": 2,
+        "icon": "assets/icons/tags.svg",
+        "color": "#0EA5E9",
         "viewId": "consultations.services.open"
       }
     ],
@@ -158,8 +160,8 @@
         {
           "id": "consultations.general",
           "group": "consultations",
-          "label": "General",
-          "icon": "assets/icons/general.svg",
+          "label": "Consulta",
+          "icon": "assets/icons/stethoscope.svg",
           "order": 10
         }
       ]
