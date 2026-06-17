@@ -1,5 +1,4 @@
 export type {
-  ReasonCategory,
   Consultation,
   ConsultationMedication,
   ConsultationCreateData,

@@ -124,7 +124,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
   const [followUpEndTime, setFollowUpEndTime] = useState<string>(
     defaults?.follow_up_end_time ?? '09:30'
   );
-  const [notes, setNotes] = useState(defaults?.notes ?? '');
+  const [followUpNotes, setFollowUpNotes] = useState(defaults?.follow_up_notes ?? '');
 
   // Servicios
   const [serviceLines, setServiceLines] = useState<ServiceLineInput[]>(defaults?.services ?? []);
@@ -190,10 +190,15 @@ export function ConsultationForm(props: ConsultationFormProps) {
     if (petId) setSelectedPetId(petId);
   }, [petId]);
 
-  const handlePetSelect = useCallback((pet: Pet | null) => {
-    setSelectedPetId(pet?.id ?? '');
-    if (pet?.weight_kg) setWeightKg(pet.weight_kg);
-  }, []);
+  const handlePetSelect = useCallback(
+    (pet: Pet | null) => {
+      setSelectedPetId(pet?.id ?? '');
+      // El peso solo se autollena si el prellenado de signos vitales está activo,
+      // igual que temp/FC/FR/BCS — coherencia con el setting prefillVitals.
+      if (pet?.weight_kg && consultSettings.prefillVitals) setWeightKg(pet.weight_kg);
+    },
+    [consultSettings.prefillVitals]
+  );
 
   const handleStaffSelect = useCallback((member: StaffMember | null) => {
     setStaffId(member?.id ?? null);
@@ -280,7 +285,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
     setFollowUpDate(existing.follow_up_date ?? '');
     setFollowUpStartTime(existing.follow_up_start_time ?? '09:00');
     setFollowUpEndTime(existing.follow_up_end_time ?? '09:30');
-    setNotes(existing.notes ?? '');
+    setFollowUpNotes(existing.follow_up_notes ?? '');
     setSelectedPetId(existing.pet_id);
   }, [existing]);
 
@@ -356,7 +361,6 @@ export function ConsultationForm(props: ConsultationFormProps) {
         respiratory_rate: respiratoryRate ? parseInt(respiratoryRate, 10) : null,
         body_condition_score: bcs || null,
         reason: reason.trim(),
-        reason_category: null,
         anamnesis: anamnesis.trim() || null,
         physical_exam: physicalExamNotes.trim() || null,
         physical_exam_systems: examData,
@@ -365,8 +369,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
         follow_up_date: followUpDate ? parseDateKey(followUpDate) : null,
         follow_up_start_time: followUpDate ? followUpStartTime : null,
         follow_up_end_time: followUpDate ? followUpEndTime : null,
-        follow_up_notes: null,
-        notes: notes.trim() || null,
+        follow_up_notes: followUpNotes.trim() || null,
+        notes: null,
       };
 
       if (isEditing && consultationId) {
@@ -420,7 +424,7 @@ export function ConsultationForm(props: ConsultationFormProps) {
       followUpDate,
       followUpStartTime,
       followUpEndTime,
-      notes,
+      followUpNotes,
       medications,
       serviceLines,
       create,
@@ -733,8 +737,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
           React.createElement(UI.Label, null, 'Notas'),
           React.createElement(UI.Input, {
             type: 'text',
-            value: notes,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value),
+            value: followUpNotes,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setFollowUpNotes(e.target.value),
             placeholder: 'Observaciones, indicaciones para el próximo control...',
           })
         )
