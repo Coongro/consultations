@@ -6,8 +6,8 @@
  *   3. S — Motivo + Anamnesis
  *   4. O — Examen físico por sistemas
  *   5. A — Diagnóstico
- *   6. P — Tratamiento + Medicamentos + Seguimiento
- *   7. Servicios prestados (facturación)
+ *   6. P — Plan de tratamiento: indicaciones + medicamentos + servicios/vacunas + seguimiento
+ *      (unificado en una sola sección con toggle de precios, ver PlanTratamiento)
  */
 import { DatePicker, DateTimePicker, TimePicker, useTenantTimezone } from '@coongro/calendar';
 import { localToUTC, parseDateKey, toDateKey, utcToLocal } from '@coongro/datetime';
@@ -40,7 +40,7 @@ import {
 
 import { ExamSystemList } from './ExamSystemRow.js';
 import { MedicationFormList } from './MedicationFormList.js';
-import { ServiceLineForm } from './ServiceLineForm.js';
+import { PlanTratamiento } from './PlanTratamiento.js';
 
 const React = getHostReact();
 const UI = getHostUI();
@@ -672,22 +672,28 @@ export function ConsultationForm(props: ConsultationFormProps) {
           placeholder: 'Ej: Dieta blanda, reposo, collar isabelino...',
         })
       ),
-      React.createElement(UI.Label, null, 'Medicación'),
-      ...(contributedSections.length > 0
-        ? contributedSections.map((s, i) =>
-            React.createElement(
-              React.Fragment,
-              { key: `contrib-${String(i)}` },
-              s.render() as React.ReactNode
-            )
-          )
-        : [
-            React.createElement(MedicationFormList, {
-              key: 'native-meds',
-              medications,
-              onChange: setMedications,
-            }),
-          ]),
+      React.createElement(PlanTratamiento, {
+        medicationsNode:
+          contributedSections.length > 0
+            ? contributedSections.map((s, i) =>
+                React.createElement(
+                  React.Fragment,
+                  { key: `contrib-${String(i)}` },
+                  s.render() as React.ReactNode
+                )
+              )
+            : React.createElement(MedicationFormList, {
+                medications,
+                onChange: setMedications,
+              }),
+        services: serviceLines,
+        onServicesChange: setServiceLines,
+        catalog: serviceCatalog,
+        categories: serviceSubcategories,
+        catalogLoading,
+        onProductCreated: handleProductCreated,
+        defaultShowPrices: consultSettings.showPrices,
+      }),
       React.createElement(UI.Separator, { className: 'my-1' }),
       React.createElement(SectionHeader, { icon: 'CalendarCheck', title: 'Seguimiento' }),
       React.createElement(
@@ -743,21 +749,6 @@ export function ConsultationForm(props: ConsultationFormProps) {
           })
         )
       )
-    ),
-
-    // ── Sección 7: Servicios prestados ──
-    React.createElement(
-      UI.FormSection,
-      { icon: 'Receipt', title: 'Servicios prestados' },
-      React.createElement(ServiceLineForm, {
-        services: serviceLines,
-        onChange: setServiceLines,
-        catalog: serviceCatalog,
-        categories: serviceSubcategories,
-        catalogLoading,
-        onProductCreated: handleProductCreated,
-        showPrices: consultSettings.showPrices,
-      })
     ),
 
     // ── Botones (solo si el caller no los pone en el footer del dialog) ──
