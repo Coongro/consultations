@@ -14,15 +14,11 @@
         "path": "Consultas",
         "order": 2,
         "icon": "assets/icons/stethoscope.svg",
-        "color": "#8B5CF6"
-      },
-      {
-        "path": "Consultas/Historial",
-        "order": 1,
+        "color": "#8B5CF6",
         "viewId": "consultations.list.open"
       },
       {
-        "path": "Consultas/Servicios y Precios",
+        "path": "Servicios y Precios",
         "order": 2,
         "icon": "assets/icons/tags.svg",
         "color": "#0EA5E9",
