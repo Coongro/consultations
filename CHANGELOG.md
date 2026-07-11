@@ -1,5 +1,18 @@
 # @coongro/consultations
 
+## 0.10.0
+
+### Minor Changes
+
+- 8f6c440: Las consultas ahora registran sus servicios como cobros en el módulo de cuentas (@coongro/billing). Al guardar o editar una consulta, sus líneas de servicio se sincronizan con la cuenta de la visita; re-guardar reemplaza las líneas en vez de duplicarlas, y las vacunas aplicadas en la misma visita no se tocan. Es una dependencia blanda: si billing no está instalado, la consulta se guarda igual.
+- 48a32f9: Plan de tratamiento unificado en el formulario de consulta (P de SOAP): medicamentos, servicios y seguimiento bajo una sola sección "P — Plan de tratamiento", con un toggle de precios visible/oculto. Reusa los editores existentes (MedicationFormList, ServiceLineForm) y el mecanismo de view-contributions (la sección de medicación/vacunas contribuida sigue funcionando), sin cambios en la lógica de guardado. El interleave pixel-exacto de la lista única y el precio por medicamento quedan diferidos (requieren schema).
+- 10fde43: Rediseño de "Servicios y Precios": el catálogo pasa de tabla a una grilla de tarjetas (encabezado con eyebrow + título serif, búsqueda, orden y chips de categoría con íconos). Cada tarjeta muestra ícono por categoría, descripción y precio destacado; se agregan estados vacíos (onboarding y sin resultados) y un diálogo de confirmación al eliminar. El plugin ahora extiende el preset de Tailwind del core para generar las utilidades cg-* (paleta gold + serif).
+
+### Patch Changes
+
+- e42a38b: La cuenta de cobro de una consulta ahora queda fechada según la fecha de la consulta (su fecha de negocio), no según el momento del guardado. Antes, al sincronizar con @coongro/billing, la cuenta usaba la fecha de creación; eso hacía que una consulta con fecha retroactiva apareciera en el día equivocado en los reportes de ingresos. Se pasa la fecha de la consulta a `billing.accounts.openForVisit`.
+- d37ebfa: Menú: "Consultas" abre el historial directo y "Servicios y Precios" pasa a ítem propio. Botón "Cobrar" en el detalle de consulta que abre el checkout de billing de esa visita.
+
 ## 0.9.0
 
 ### Minor Changes

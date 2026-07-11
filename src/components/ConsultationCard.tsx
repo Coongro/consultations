@@ -5,12 +5,7 @@ import { useTenantTimezone } from '@coongro/calendar';
 import { getHostReact, getHostUI } from '@coongro/plugin-sdk';
 
 import type { ConsultationCardProps } from '../types/components.js';
-import {
-  formatConsultationDate,
-  formatReasonCategory,
-  getReasonCategoryBadgeVariant,
-  getReasonCategoryIcon,
-} from '../utils/labels.js';
+import { formatConsultationDate } from '../utils/labels.js';
 import { formatCurrency } from '../utils/price.js';
 
 const React = getHostReact();
@@ -19,9 +14,6 @@ const UI = getHostUI();
 export function ConsultationCard(props: ConsultationCardProps) {
   const { consultation: c, amount, onClick, actions: cardActions, className = '' } = props;
 
-  const categoryIcon = getReasonCategoryIcon(c.reason_category);
-  const badgeVariant = getReasonCategoryBadgeVariant(c.reason_category);
-  const categoryLabel = formatReasonCategory(c.reason_category);
   const tz = useTenantTimezone();
   const dateStr = formatConsultationDate(c.date, tz);
 
@@ -35,9 +27,9 @@ export function ConsultationCard(props: ConsultationCardProps) {
       'div',
       { className: 'flex items-start gap-3' },
 
-      // Icono de categoría
+      // Icono
       React.createElement(UI.DynamicIcon, {
-        icon: categoryIcon,
+        icon: 'ClipboardList',
         size: 18,
         className: 'flex-shrink-0 mt-0.5 text-cg-text-muted',
       }),
@@ -47,7 +39,7 @@ export function ConsultationCard(props: ConsultationCardProps) {
         'div',
         { className: 'flex-1 min-w-0' },
 
-        // Primera linea: fecha + vet + categoria
+        // Primera linea: fecha + vet
         React.createElement(
           'div',
           { className: 'flex items-center gap-2 flex-wrap' },
@@ -56,13 +48,7 @@ export function ConsultationCard(props: ConsultationCardProps) {
             'span',
             { className: 'text-xs text-cg-text-muted' },
             `— ${c.vet_name}`
-          ),
-          categoryLabel &&
-            React.createElement(
-              UI.Badge,
-              { variant: badgeVariant as 'info', size: 'sm' },
-              categoryLabel
-            )
+          )
         ),
 
         // Motivo

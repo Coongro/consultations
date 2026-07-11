@@ -299,6 +299,7 @@ export function ServiceLineForm({
                 {
                   variant: 'danger',
                   size: 'xs',
+                  'aria-label': `Quitar servicio ${svc.product_name}`,
                   onClick: () => handleRemove(index),
                 },
                 React.createElement(UI.DynamicIcon, { icon: 'X', size: 14 })

@@ -1,6 +1,6 @@
 {
   "id": "consultations",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "apiVersion": "2.0",
   "entry": "dist/entry.js",
   "assets": {
@@ -14,16 +14,14 @@
         "path": "Consultas",
         "order": 2,
         "icon": "assets/icons/stethoscope.svg",
-        "color": "#8B5CF6"
-      },
-      {
-        "path": "Consultas/Historial",
-        "order": 1,
+        "color": "#8B5CF6",
         "viewId": "consultations.list.open"
       },
       {
-        "path": "Consultas/Servicios y Precios",
+        "path": "Servicios y Precios",
         "order": 2,
+        "icon": "assets/icons/tags.svg",
+        "color": "#0EA5E9",
         "viewId": "consultations.services.open"
       }
     ],
@@ -85,7 +83,7 @@
           "id": "consultations.general.vet",
           "page": "consultations.general",
           "label": "Veterinario",
-          "order": 5,
+          "order": 15,
           "component": "./dist/index.js",
           "export": "DefaultVetSetting"
         },
@@ -95,19 +93,6 @@
           "label": "General",
           "order": 10,
           "items": [
-            {
-              "key": "consultations.reasonCategories",
-              "type": "boolean",
-              "label": "Categorías de motivo",
-              "description": "Habilitar botones de categoría rápida (rutina, vacunación, enfermedad, etc.)",
-              "default": true,
-              "tags": [
-                "consultations",
-                "reasoncategories",
-                "categorías",
-                "motivo"
-              ]
-            },
             {
               "key": "consultations.showPrices",
               "type": "boolean",
@@ -171,8 +156,8 @@
         {
           "id": "consultations.general",
           "group": "consultations",
-          "label": "General",
-          "icon": "assets/icons/general.svg",
+          "label": "Consulta",
+          "icon": "assets/icons/stethoscope.svg",
           "order": 10
         }
       ]
