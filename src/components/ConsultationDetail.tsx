@@ -5,6 +5,7 @@
  */
 import { useEventsByEntity, EventCard, useTenantTimezone } from '@coongro/calendar';
 import type { CalendarEvent } from '@coongro/calendar';
+import { formatSpecies } from '@coongro/patients';
 import { getHostReact, getHostUI, useViewContributions, actions } from '@coongro/plugin-sdk';
 import { StaffBadge } from '@coongro/staff';
 
@@ -12,11 +13,7 @@ import { useConsultation } from '../hooks/useConsultation.js';
 import { useConsultationsSettings } from '../hooks/useConsultationsSettings.js';
 import type { ConsultationDetailProps, PetInfo } from '../types/components.js';
 import type { ConsultationService, PhysicalExamSystem } from '../types/consultation.js';
-import {
-  formatConsultationDateTime,
-  formatReasonCategory,
-  getReasonCategoryBadgeVariant,
-} from '../utils/labels.js';
+import { formatConsultationDateTime } from '../utils/labels.js';
 import { formatCurrency } from '../utils/price.js';
 
 import { MedicationList } from './MedicationList.js';
@@ -159,8 +156,6 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   }
 
   const c = consultation;
-  const categoryLabel = formatReasonCategory(c.reason_category);
-  const badgeVariant = getReasonCategoryBadgeVariant(c.reason_category);
   const sortedSections = [...extraSections].sort((a, b) => (a.order ?? 50) - (b.order ?? 50));
 
   // Secciones clínicas (solo si tienen contenido)
@@ -185,6 +180,7 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
   const petIcon = pet ? (SPECIES_ICON[pet.species] ?? 'PawPrint') : 'PawPrint';
   const petName = pet?.name ?? 'Paciente';
   const petDetails = [
+    pet?.species ? formatSpecies(pet.species) : null,
     pet?.breed,
     pet?.birth_date ? calculateAge(pet.birth_date) : null,
     pet?.sex ? (SEX_LABELS[pet.sex] ?? pet.sex) : null,
@@ -280,23 +276,6 @@ export function ConsultationDetail(props: ConsultationDetailProps) {
                 formatConsultationDateTime(c.date, tz)
               )
             )
-          ),
-          // Lado derecho: badge de categoría + tags
-          React.createElement(
-            'div',
-            { className: 'flex flex-col items-end gap-2' },
-            categoryLabel &&
-              React.createElement(UI.Badge, { variant: badgeVariant as 'info' }, categoryLabel),
-            c.diagnosis_tags &&
-              Array.isArray(c.diagnosis_tags) &&
-              c.diagnosis_tags.length > 0 &&
-              React.createElement(
-                'div',
-                { className: 'flex flex-wrap gap-1.5 justify-end' },
-                c.diagnosis_tags.map((tag: string, i: number) =>
-                  React.createElement(UI.Badge, { key: i, variant: 'secondary', size: 'sm' }, tag)
-                )
-              )
           )
         )
       )

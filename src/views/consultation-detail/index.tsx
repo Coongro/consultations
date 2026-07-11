@@ -1,7 +1,7 @@
 /**
  * Vista de detalle de una consulta.
  */
-import { getHostReact, getHostUI, usePlugin } from '@coongro/plugin-sdk';
+import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk';
 
 import { ConsultationDetail } from '../../components/ConsultationDetail.js';
 import { ConsultationForm } from '../../components/ConsultationForm.js';
@@ -13,7 +13,7 @@ const UI = getHostUI();
 const { useState, useCallback } = React;
 
 export function ConsultationDetailView(props: { consultationId?: string }) {
-  const { views } = usePlugin();
+  const { views, toast } = usePlugin();
   const consultationId =
     props.consultationId ?? (views.params as Record<string, string>)?.consultationId;
 
@@ -26,6 +26,22 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
   const handleBack = useCallback(() => {
     views.open('consultations.list.open');
   }, [views]);
+
+  // "Cobrar" — resuelve la cuenta de la visita en billing y abre su checkout.
+  // El cobro vive en un solo lugar (billing); la consulta solo dispara el deep-link.
+  const handleCharge = useCallback(async () => {
+    if (!consultationId) return;
+    try {
+      const acc = await actions.execute<{ id: string } | undefined>(
+        'billing.accounts.openForVisit',
+        { consultationId }
+      );
+      if (acc?.id) views.open('billing.cobros.open', { openAccountId: acc.id });
+      else toast.info('Sin cobro', 'Esta consulta todavía no tiene cuenta de cobro.');
+    } catch {
+      toast.error('No se pudo abrir el cobro', 'Verificá que billing esté instalado.');
+    }
+  }, [consultationId, views, toast]);
 
   const handleEdit = useCallback((_c: Consultation) => {
     setShowEditModal(true);
@@ -71,6 +87,14 @@ export function ConsultationDetailView(props: { consultationId?: string }) {
         onBack: handleBack,
         onEdit: handleEdit,
         onDelete: handleDelete,
+        extraActions: [
+          {
+            label: 'Cobrar',
+            icon: 'Wallet',
+            variant: 'brand',
+            onClick: () => void handleCharge(),
+          },
+        ],
       })
     ),
 

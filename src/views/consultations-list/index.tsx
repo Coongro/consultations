@@ -8,16 +8,9 @@ import { getHostReact, getHostUI, usePlugin, actions } from '@coongro/plugin-sdk
 import { ConsultationStats } from '../../components/ConsultationStats.js';
 import { CreateConsultationButton } from '../../components/CreateConsultationButton.js';
 import { useConsultations } from '../../hooks/useConsultations.js';
-import { useConsultationsSettings } from '../../hooks/useConsultationsSettings.js';
 import type { Consultation } from '../../types/consultation.js';
 import type { SortDirection } from '../../types/filters.js';
-import {
-  ALL_REASON_CATEGORIES,
-  REASON_CATEGORY_LABELS,
-  formatConsultationDate,
-  formatReasonCategory,
-  getReasonCategoryBadgeVariant,
-} from '../../utils/labels.js';
+import { formatConsultationDate } from '../../utils/labels.js';
 
 const React = getHostReact();
 const UI = getHostUI();
@@ -35,12 +28,11 @@ interface PetInfo {
   species: string;
 }
 
-const SORTABLE_KEYS = new Set(['date', 'vet_name', 'reason_category']);
+const SORTABLE_KEYS = new Set(['date', 'vet_name']);
 
 export function ConsultationsListView() {
   const tz = useTenantTimezone();
   const { views } = usePlugin();
-  const { settings: consultSettings } = useConsultationsSettings();
 
   const [searchValue, setSearchValue] = useState('');
   const [sortKey, setSortKey] = useState<string>('date');
@@ -126,16 +118,6 @@ export function ConsultationsListView() {
     [doSearch]
   );
 
-  const handleCategoryFilter = useCallback(
-    (cat: string) => {
-      setFilters({
-        ...filters,
-        reasonCategory: cat || undefined,
-      });
-    },
-    [filters, setFilters]
-  );
-
   const handleDateFrom = useCallback(
     (date: string) => {
       setFilters({ ...filters, dateFrom: date || undefined });
@@ -216,45 +198,9 @@ export function ConsultationsListView() {
               )
           ),
       },
-      {
-        key: 'reason_category',
-        header: 'Categoría',
-        sortable: true,
-        className: 'w-40',
-        render: (c: Consultation) =>
-          c.reason_category
-            ? React.createElement(
-                UI.Badge,
-                {
-                  variant: getReasonCategoryBadgeVariant(c.reason_category),
-                  size: 'sm',
-                },
-                formatReasonCategory(c.reason_category)
-              )
-            : '\u2014',
-      },
     ],
     [petMap]
   );
-
-  // Filtros de categoría para DataTable
-  const filterSections = useMemo(() => {
-    if (!consultSettings.reasonCategoriesEnabled) return [];
-    return [
-      {
-        label: 'Categoría',
-        options: [
-          { value: '', label: 'Todas' },
-          ...ALL_REASON_CATEGORIES.map((cat) => ({
-            value: cat,
-            label: REASON_CATEGORY_LABELS[cat] ?? cat,
-          })),
-        ],
-        value: filters.reasonCategory ?? '',
-        onChange: handleCategoryFilter,
-      },
-    ];
-  }, [consultSettings.reasonCategoriesEnabled, filters.reasonCategory, handleCategoryFilter]);
 
   // Slot derecho: filtros de fecha
   const dateFilterSlot = useMemo(
@@ -311,24 +257,11 @@ export function ConsultationsListView() {
       return React.createElement(
         'div',
         { className: 'flex flex-col gap-1' },
-        // Fecha + categoría
+        // Fecha
         React.createElement(
-          'div',
-          { className: 'flex items-center justify-between' },
-          React.createElement(
-            'span',
-            { className: 'text-xs', style: { color: 'var(--cg-text-muted)' } },
-            formatConsultationDate(c.date, tz)
-          ),
-          c.reason_category &&
-            React.createElement(
-              UI.Badge,
-              {
-                variant: getReasonCategoryBadgeVariant(c.reason_category),
-                size: 'sm',
-              },
-              formatReasonCategory(c.reason_category)
-            )
+          'span',
+          { className: 'text-xs', style: { color: 'var(--cg-text-muted)' } },
+          formatConsultationDate(c.date, tz)
         ),
         // Paciente + icono
         React.createElement(
@@ -389,7 +322,6 @@ export function ConsultationsListView() {
           searchPlaceholder: 'Buscar...',
           searchValue,
           onSearchChange: handleSearch,
-          filterSections,
           filterRightSlot: dateFilterSlot,
           sortKey: sortKey || null,
           sortDirection: sortDir as 'asc' | 'desc' | null,

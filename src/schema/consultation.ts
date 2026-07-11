@@ -25,6 +25,10 @@ export const consultationTable = pgTable('module_consultations_consultations', {
   respiratory_rate: integer('respiratory_rate'),
   body_condition_score: numeric('body_condition_score'),
   reason: text('reason').notNull(),
+  // NOTA: columna muerta (nunca se asigna ni lee — fantasma confirmado en auditoría + por la vet).
+  // No se dropea todavía: el snapshot drizzle de consultations está desincronizado (staff_id no
+  // figura en el snapshot), así que `db:generate` intenta un rename reason_category→staff_id y
+  // generaría una migración rota. Resolver el drift del snapshot primero, después dropear.
   reason_category: text('reason_category'),
   anamnesis: text('anamnesis'),
   physical_exam: text('physical_exam'),
