@@ -337,8 +337,12 @@ export function ConsultationForm(props: ConsultationFormProps) {
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!reason.trim()) {
+      if (consultSettings.requireReason && !reason.trim()) {
         toast.error('Error', 'El motivo de consulta es obligatorio');
+        return;
+      }
+      if (consultSettings.requireDiagnosis && !diagnosis.trim()) {
+        toast.error('Error', 'El diagnóstico es obligatorio');
         return;
       }
       // staff_id es obligatorio: validación nativa del browser via input espejo en el form
@@ -431,6 +435,8 @@ export function ConsultationForm(props: ConsultationFormProps) {
       update,
       onSuccess,
       toast,
+      consultSettings.requireReason,
+      consultSettings.requireDiagnosis,
     ]
   );
 
