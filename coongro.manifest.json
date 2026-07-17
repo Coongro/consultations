@@ -3,11 +3,7 @@
   "version": "0.9.0",
   "apiVersion": "2.0",
   "entry": "dist/entry.js",
-  "assets": {
-    "styles": [
-      "./dist/assets/tailwind.css"
-    ]
-  },
+  "assets": { "styles": ["./dist/assets/tailwind.css"] },
   "contributes": {
     "menus": [
       {
@@ -80,14 +76,6 @@
     "settings": {
       "sections": [
         {
-          "id": "consultations.general.vet",
-          "page": "consultations.general",
-          "label": "Veterinario",
-          "order": 15,
-          "component": "./dist/index.js",
-          "export": "DefaultVetSetting"
-        },
-        {
           "id": "consultations.general.main",
           "page": "consultations.general",
           "label": "General",
@@ -99,14 +87,17 @@
               "label": "Servicios y precios en consultas",
               "description": "Mostrar la sección de servicios prestados y precios en el formulario de consulta",
               "default": true,
-              "tags": [
-                "consultations",
-                "showprices",
-                "servicios",
-                "precios"
-              ]
+              "tags": ["consultations", "showprices", "servicios", "precios"]
             }
           ]
+        },
+        {
+          "id": "consultations.general.vet",
+          "page": "consultations.general",
+          "label": "Veterinario",
+          "order": 15,
+          "component": "./dist/index.js",
+          "export": "DefaultVetSetting"
         },
         {
           "id": "consultations.formulario",
@@ -143,15 +134,38 @@
               ]
             }
           ]
-        }
-      ],
-      "groups": [
+        },
         {
-          "id": "consultations",
-          "label": "Consultas",
-          "order": 50
+          "id": "consultations.general.required",
+          "page": "consultations.general",
+          "label": "Campos obligatorios",
+          "order": 25,
+          "items": [
+            {
+              "key": "consultations.required.reason",
+              "type": "boolean",
+              "label": "Motivo obligatorio",
+              "description": "Requerir el motivo de consulta para poder guardar.",
+              "default": true,
+              "tags": ["consultations", "required", "motivo", "obligatorio"]
+            },
+            {
+              "key": "consultations.required.diagnosis",
+              "type": "boolean",
+              "label": "Diagnóstico obligatorio",
+              "description": "Requerir el diagnóstico para poder guardar la consulta.",
+              "default": false,
+              "tags": [
+                "consultations",
+                "required",
+                "diagnostico",
+                "obligatorio"
+              ]
+            }
+          ]
         }
       ],
+      "groups": [{ "id": "consultations", "label": "Consultas", "order": 50 }],
       "pages": [
         {
           "id": "consultations.general",
