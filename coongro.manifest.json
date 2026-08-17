@@ -51,17 +51,52 @@
       {
         "module": "./dist/repositories/consultation.repository.js",
         "export": "ConsultationRepository",
-        "prefix": "consultations.records"
+        "prefix": "consultations.records",
+        "actions": [
+          "list",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "softDelete",
+          "restore",
+          "search",
+          "listByPet",
+          "countByPet",
+          "getLatestByPet",
+          "countTotal",
+          "countPendingFollowUps"
+        ]
       },
       {
         "module": "./dist/repositories/consultation-medication.repository.js",
         "export": "ConsultationMedicationRepository",
-        "prefix": "consultations.medications"
+        "prefix": "consultations.medications",
+        "actions": [
+          "list",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "listByConsultation",
+          "deleteByConsultation"
+        ]
       },
       {
         "module": "./dist/repositories/consultation-service.repository.js",
         "export": "ConsultationServiceRepository",
-        "prefix": "consultations.services"
+        "prefix": "consultations.services",
+        "actions": [
+          "list",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "listByConsultation",
+          "deleteByConsultation",
+          "totalByConsultation",
+          "totalsByConsultations"
+        ]
       }
     ],
     "viewOverrides": [
